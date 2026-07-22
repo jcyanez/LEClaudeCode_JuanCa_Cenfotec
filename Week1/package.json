@@ -1,0 +1,10 @@
+{
+  "name": "ferreteria-pos",
+  "version": "0.1.0",
+  "description": "Calculadora de totales de venta para Ferretería El Tornillo Feliz",
+  "main": "src/carrito.js",
+  "scripts": {
+    "test": "node test/test-carrito.js"
+  },
+  "license": "UNLICENSED"
+}
