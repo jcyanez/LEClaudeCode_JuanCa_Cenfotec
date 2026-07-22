@@ -362,23 +362,55 @@ Los archivos de pruebas no fueron modificados.
 
 ## 15. Commit y entrega
 
-> Pendiente: aún no se ha realizado commit ni push (a la espera de autorización).
+> Realizado. El repositorio del curso se unificó en un solo repo (una carpeta por semana) y se subió a GitHub.
 
-### Comandos utilizados (propuestos)
+### Reorganización de la estructura del repositorio
+
+El proyecto entregado por el profesor traía su propio `.git` **anidado** dentro de `Week1/`, y además existía un `git init` en la raíz del curso. Para lograr un único repositorio con `Week1/`, `Week2/`… como carpetas:
+
+1. Se eliminó el `.git` anidado de `Week1/` (repo limpio en la raíz; el estado inicial queda documentado en esta bitácora).
+2. Se renombró la rama a `main`.
+3. Se creó un `.gitignore` en la raíz (`node_modules/`, logs, archivos de OS/IDE).
+4. Se configuró la identidad de git (local al repo) con el email `noreply` de GitHub para no exponer el correo personal.
+5. Se enlazó el remoto y se hizo push.
+
+### Comandos utilizados
 
 ```bash
-git add CLAUDE.md NOTAS.md src/carrito.js
-git commit -m "Corrige descuento por mayoreo e implementa IVA"
-git push origin main
+rm -rf Week1/.git                       # des-anidar el repo del profesor
+git branch -M main
+git remote add origin https://github.com/jcyanez/LEClaudeCode_JuanCa_Cenfotec.git
+git config user.name  "Juan Carlos Yanez"
+git config user.email "68209889+jcyanez@users.noreply.github.com"
+git add -A
+git commit -m "Week1: corrige descuento por mayoreo e implementa IVA del 13%"
+git push -u origin main
 ```
 
 ### Identificador del commit
 
-`[Pendiente — completar tras el commit]`
+`e347269` — "Week1: corrige descuento por mayoreo e implementa IVA del 13%"
 
 ### Enlace del repositorio
 
-[Pendiente — completar tras el push]
+https://github.com/jcyanez/LEClaudeCode_JuanCa_Cenfotec
+
+### Incidencias resueltas durante la entrega
+
+* **Identidad de git no configurada:** se configuró de forma local a este repositorio.
+* **Push rechazado (GH007 email privacy):** GitHub bloqueó el primer push por proteger el correo personal. Se cambió el autor al email `noreply` (`68209889+jcyanez@users.noreply.github.com`) y el push se completó.
+
+### Flujo para las próximas semanas
+
+```bash
+# desde la raíz del repo (LEClaudeCode)
+mkdir Week2                     # una carpeta por semana
+git add Week2/
+git commit -m "Week2: <descripción>"
+git push
+```
+
+Nota: cada semana tiene su propio `package.json`; ejecutar las pruebas desde dentro de la carpeta correspondiente (`cd Week1 && npm test`).
 
 ---
 
