@@ -44,7 +44,9 @@ pérdida de dominio, oxidado, rebloqueo, `weakenedPrereqs`, `maintenance` no
 inmune y reingreso a sesión. La regresión se demostró roja antes del arreglo:
 `computeAllNodeStates` devolvía `'mastered'` esperándose `'in_progress'` a 30
 días de atraso (100·0.97³⁰ ≈ 40.1 < 80). El arreglo fue una línea: evaluar
-`currentMastery(state, now)`. Commit `c83bedf`.
+`currentMastery(state, now)`. Commit `c83bedf`. Las 105 pruebas originales no
+lo detectaban porque ningún fixture combinaba «ítem vencido» con «nodo
+dominado»: el decaimiento solo se probaba aislado en `srs.test.ts`.
 
 ## 4. Semántica de nodesAtRisk
 
@@ -78,10 +80,12 @@ en el propio test.
 
 ## 6. Señal de cierre
 
-`npm test`: 125 pruebas aprobadas en 9 archivos (105 originales intactas + 7 de
-regresión/contrato + 13 de `nodesAtRisk`). `npm run build`: `tsc --noEmit` y
-Vite/PWA sin errores. `git diff --check`: limpio. `git diff f332319..HEAD`:
-solo `M src/engine/graph.ts` más los dos archivos de prueba nuevos; el diff
-sobre los 7 archivos de prueba preexistentes es vacío. Historial: `c83bedf`
-(fix + regresión/contrato) y `2cc4eb3` (`nodesAtRisk` + bordes), locales, sin
-push.
+`npm test`: 131 pruebas aprobadas en 10 archivos (105 originales intactas + 7
+de regresión/contrato + 13 de `nodesAtRisk` + 6 de invariantes temporales).
+`npm run build`: `tsc --noEmit` y Vite/PWA sin errores. `git diff --check`:
+limpio. El diff sobre los 7 archivos de prueba preexistentes es vacío; solo
+`src/engine/graph.ts` cambió, más los archivos de prueba nuevos. Historial:
+`c83bedf` (fix + regresión/contrato), `2cc4eb3` (`nodesAtRisk` + bordes),
+`b8f9732` (bitácora) y `108dff3` (reto adicional: suite funcional
+`time-invariants.test.ts` que atrapa la clase de error — con el bug
+reintroducido temporalmente falla por 3 vías independientes).
