@@ -1,0 +1,76 @@
+{
+  "_meta": {
+    "description": "Family (focus-area) assignment for every Metal-path node. Families drive the map's regions and the progress panel; they are presentation + analytics metadata and never affect the engines. Structure: Foundations feed everything; Fretboard & Theory is the shared spine (not a path); Rhythm and Lead are true specializations. INVARIANT (loader-tested): no node in one specialization may directly require a node in the other — shared needs live in the spine. Judgment calls: pinch harmonics in Rhythm (squeals are riff accents), tremolo in Rhythm (black-metal riffing), the arpeggio/sweep chain (incl. dim7) in Lead, fast alternate picking in Lead (Andres 2026-07-19: rhythm alternate is easy on its own; 3nps crossings and skips are the real skill - thrash speed is downpicking's job), octave shapes in Theory (fretboard-mapping tool).",
+    "version": "1.0"
+  },
+  "families": [
+    {
+      "id": "foundations",
+      "name": "Foundations",
+      "tint": "#d6d3d1",
+      "lane": 0.5
+    },
+    {
+      "id": "rhythm",
+      "name": "Rhythm & Riffing",
+      "tint": "#f43f5e",
+      "lane": 0.16
+    },
+    {
+      "id": "theory",
+      "name": "Fretboard & Theory",
+      "tint": "#38bdf8",
+      "lane": 0.5
+    },
+    {
+      "id": "lead",
+      "name": "Lead & Expression",
+      "tint": "#a78bfa",
+      "lane": 0.84
+    }
+  ],
+  "assignments": {
+    "N01": "foundations",
+    "N02": "foundations",
+    "N03": "foundations",
+    "N04": "foundations",
+    "N05": "rhythm",
+    "N06": "rhythm",
+    "N07": "foundations",
+    "N08": "rhythm",
+    "N09": "theory",
+    "N10": "theory",
+    "N11": "rhythm",
+    "N12": "rhythm",
+    "N13": "rhythm",
+    "N14": "rhythm",
+    "N15": "rhythm",
+    "N16": "theory",
+    "N17": "rhythm",
+    "N18": "lead",
+    "N19": "lead",
+    "N20": "lead",
+    "N21": "lead",
+    "N22": "lead",
+    "N23": "lead",
+    "N24": "rhythm",
+    "N25": "theory",
+    "N26": "theory",
+    "N27": "theory",
+    "N28": "lead",
+    "N29": "lead",
+    "N30": "theory",
+    "N31": "lead",
+    "N32": "lead",
+    "N33": "lead",
+    "N34": "lead",
+    "N35": "lead",
+    "N36": "lead",
+    "N37": "lead",
+    "N38": "lead",
+    "N39": "lead",
+    "N40": "rhythm",
+    "N41": "rhythm",
+    "N42": "rhythm"
+  }
+}

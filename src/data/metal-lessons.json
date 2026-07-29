@@ -1,0 +1,117 @@
+{
+  "_meta": {
+    "path": "metal",
+    "description": "Teach-first lessons shown once, before a node's first drill in a session (re-openable from the node panel). Teacher voice per the content spec (§4): what the skill is, why it matters in metal, how to approach it, what clean feels like. Fretting fingers are numbers 1-4. Blocks are short paragraphs; future lessons may add diagram/audio block types. Nodes without an entry simply skip straight to the drill — author the rest incrementally.",
+    "blockModel": "Lesson { nodeId -> { blocks: string[] } }",
+    "version": "1.0"
+  },
+  "lessons": {
+    "N01": {
+      "blocks": [
+        "Everything downstream — speed, tone, endurance — rides on how you sit and how you hold the pick. Get this sloppy and you'll fight your own hands for years.",
+        "Sit with the guitar on your leg, fretting wrist relaxed and low, not cranked up behind the neck. Hold the pick between your thumb and the side of your 1st finger, with just a few millimetres of tip showing — firm enough that it never slips, loose enough that your hand stays relaxed.",
+        "You're not learning a lick here, you're setting the baseline. Aim for notes that ring clearly with a hand that never tenses up."
+      ]
+    },
+    "N02": {
+      "blocks": [
+        "Clean fretting is about where your fingertip lands and how little effort it takes. Press just behind the fret wire — not on top of it, not halfway back — that's where a note rings with the least pressure.",
+        "Use one finger per fret as your default: 1st finger for the lowest fret, 4th for the highest. Keep the fingers you're not using hovering close to the strings instead of flying away — that economy of motion is what makes fast playing possible later.",
+        "Good means every note is buzz-free and even, with your hand relaxed between notes."
+      ]
+    },
+    "N03": {
+      "blocks": [
+        "Tab is the map metal is written in. Six lines are the six strings, with the thinnest (high e) on top and the thickest (low E) on the bottom. A number on a line is the fret to press on that string; 0 means play it open.",
+        "Chord diagrams are the neck stood upright: vertical lines are strings, horizontal lines are frets, and the dots show where your fingers go. Read these two fluently and every drill ahead becomes self-explanatory.",
+        "This one is knowledge, not chops — you either read it correctly or you don't yet. No rush and no metronome."
+      ]
+    },
+    "N04": {
+      "blocks": [
+        "In metal, timing is the whole game — a riff that isn't locked to the beat sounds wrong however clean the notes are. The metronome is how you build that internal clock, and you'll lean on it for almost everything from here on.",
+        "Set it slow. Each click is one beat: play exactly on the click, not rushing ahead and not dragging behind. When that feels easy, fit two even notes between clicks (eighth notes), then four.",
+        "Steady beats sloppy-and-fast every time. The goal is notes that land dead on the click — not the highest number on the dial."
+      ]
+    },
+    "N05": {
+      "blocks": [
+        "The power chord is the backbone of metal rhythm. It's only two notes — a root and the fifth above it — but that bare, fifth-only sound is exactly what lets heavy distortion stay tight instead of turning to mush.",
+        "The E-shape roots on the 6th string, the A-shape on the 5th. Because the shape never changes, you can slide it anywhere on the neck — learn it once and you own every power chord. Mute the strings you're not playing so only those two notes ring.",
+        "Clean means both notes ring together with nothing else bleeding through."
+      ]
+    },
+    "N06": {
+      "blocks": [
+        "Palm muting is the chugging, controlled 'chugga' that defines heavy rhythm playing. Rest the edge of your picking-hand palm lightly on the strings right where they meet the bridge — too far forward and the note dies, too far back and it rings open.",
+        "It's a feel you dial in by ear. A good palm mute is tight and percussive but still has pitch: you can hear which note it is, just choked."
+      ]
+    },
+    "N07": {
+      "blocks": [
+        "Alternate picking — strict down, up, down, up — is how you play fast without your hand seizing up. The upstroke isn't wasted motion; it's already travelling back for the next note.",
+        "Keep the motion small and even, driven from the wrist, and make the upstroke sound exactly as strong as the downstroke. Slow and even first — speed is just even motion repeated faster."
+      ]
+    },
+    "N08": {
+      "blocks": [
+        "All-downstrokes is the sound of thrash rhythm — every note attacked the same way, giving a relentless, aggressive chug an upstroke can't match. It's harder work than alternate picking, and that's the point: it builds the endurance the style demands.",
+        "Keep the strokes even and the palm mute steady. Your picking arm will tire — build the stamina gradually rather than tensing up to force it."
+      ]
+    },
+    "N09": {
+      "blocks": [
+        "Octave shapes let you play a melody with a thick, doubled sound — the same note in two places at once. The 6th-to-4th-string shape and the 5th-to-3rd shape are both movable, just like power chords.",
+        "The trick is muting the string in between with a lightly-touching finger so only the two octave notes sound. Slide the shape around to find any note's octave."
+      ]
+    },
+    "N10": {
+      "blocks": [
+        "The minor pentatonic is the scale most metal and rock lead playing is built from — five notes that sit well over almost any minor riff. Position 1, rooted on the 6th string, is the box every guitarist learns first.",
+        "Play it two notes per string, ascending and descending, until the shape is under your fingers without thinking. Later this box becomes home base for bends, runs, and solos."
+      ]
+    },
+    "N11": {
+      "blocks": [
+        "Drop D lowers your 6th string a whole step, from E down to D. Two things happen at once: everything gets heavier, and power chords on the bottom three strings collapse into a single straight-across shape you can barre with one finger.",
+        "That one-finger shape lets you move heavy riffs around fast — the reason so much modern metal lives in Drop D. Get your low string tuned dead-on to D first; the whole tuning depends on it."
+      ]
+    },
+    "N12": {
+      "blocks": [
+        "This is where the foundations become actual metal: palm-muted single notes on the low string, chugged in time. Nearly every heavy riff you love is some version of this.",
+        "Lock the palm mute and the picking to the metronome so the chugs are even and tight. Rests matter as much as notes — silence in the right place is what gives a riff its groove."
+      ]
+    },
+    "N13": {
+      "blocks": [
+        "The gallop — one longer note followed by two quick ones, over and over — is the rhythmic engine of classic metal. It sits right on top of a palm-muted low string.",
+        "Count it 'one-and-a, one-and-a' and keep the palm mute tight so all three notes stay distinct. Start slow: the gallop only works when the two fast notes are even, not rushed."
+      ]
+    },
+    "N14": {
+      "blocks": [
+        "Now you push downpicking toward real thrash tempos. This is as much an athletic drill as a musical one — the goal is holding clean, even downstrokes at speed without your arm locking up.",
+        "Build tempo in small steps and back off the moment you feel tension creeping in. Even and relaxed at a lower speed beats fast and stiff every time."
+      ]
+    },
+    "N15": {
+      "blocks": [
+        "Tremolo picking is picking a single note as fast and as evenly as you can — the wall of sound behind black and death metal. It's strict alternate picking taken to its limit on one string.",
+        "Keep the motion tiny and relaxed, from the wrist. Evenness matters more than raw speed: a smooth, unbroken stream of notes is the goal, not a burst that stumbles."
+      ]
+    },
+    "N16": {
+      "blocks": [
+        "The natural minor scale adds two notes to the pentatonic box you already know, filling in the gaps and giving you the darker, more complete sound most metal melodies use.",
+        "Play it as the pentatonic shape with the extra notes worked in, so you feel how they relate. Knowing which notes are the 'new' ones is what lets you target them for tension and colour later."
+      ]
+    },
+    "N17": {
+      "blocks": [
+        "Pedal-point riffing keeps one note — usually the palm-muted low string — droning constantly while a second line moves against it. It's how you get a riff that sounds busy and driving out of simple parts.",
+        "The steady pedal note has to stay dead even; it's the anchor. Let the moving notes ring clearly against it so the two lines stay separate."
+      ]
+    }
+  }
+}
