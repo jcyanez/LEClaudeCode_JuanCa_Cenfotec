@@ -44,7 +44,7 @@ pérdida de dominio, oxidado, rebloqueo, `weakenedPrereqs`, `maintenance` no
 inmune y reingreso a sesión. La regresión se demostró roja antes del arreglo:
 `computeAllNodeStates` devolvía `'mastered'` esperándose `'in_progress'` a 30
 días de atraso (100·0.97³⁰ ≈ 40.1 < 80). El arreglo fue una línea: evaluar
-`currentMastery(state, now)`. Commit `c83bedf`. Las 105 pruebas originales no
+`currentMastery(state, now)`. Commit `8d0b3bd`. Las 105 pruebas originales no
 lo detectaban porque ningún fixture combinaba «ítem vencido» con «nodo
 dominado»: el decaimiento solo se probaba aislado en `srs.test.ts`.
 
@@ -67,7 +67,7 @@ cambios; una prueba por fila en `src/engine/nodesAtRisk.test.ts`:
 - Estado faltante: maestría 0, excluido — mismo trato que `isNodeMastered` — «row 10».
 - Resultado en `graph.topoOrder`, único por construcción — determinista, prerrequisitos primero — «row 11», más prueba de pureza (no muta entradas).
 
-Commit `2cc4eb3`.
+Commit `cd891f1`.
 
 ## 5. Desvío
 
@@ -85,7 +85,7 @@ de regresión/contrato + 13 de `nodesAtRisk` + 6 de invariantes temporales).
 `npm run build`: `tsc --noEmit` y Vite/PWA sin errores. `git diff --check`:
 limpio. El diff sobre los 7 archivos de prueba preexistentes es vacío; solo
 `src/engine/graph.ts` cambió, más los archivos de prueba nuevos. Historial:
-`c83bedf` (fix + regresión/contrato), `2cc4eb3` (`nodesAtRisk` + bordes),
-`b8f9732` (bitácora) y `108dff3` (reto adicional: suite funcional
+`8d0b3bd` (fix + regresión/contrato), `cd891f1` (`nodesAtRisk` + bordes),
+`f14655b` (bitácora) y `298a481` (reto adicional: suite funcional
 `time-invariants.test.ts` que atrapa la clase de error — con el bug
 reintroducido temporalmente falla por 3 vías independientes).

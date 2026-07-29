@@ -39,12 +39,12 @@
 
 ## Los commits (sobre la línea base `f332319` del instructor)
 
-- `c83bedf` — fix de 1 línea + 7 pruebas (regresión y contrato de producto:
+- `8d0b3bd` — fix de 1 línea + 7 pruebas (regresión y contrato de producto:
   decaimiento, pérdida de dominio, oxidado, rebloqueo, guía, maintenance no
   inmune, reingreso a sesión).
-- `2cc4eb3` — `nodesAtRisk` + 13 pruebas de bordes (tabla de decisiones).
-- `b8f9732` — `BITACORA.md` final reconstruida desde Git (≤ 900 palabras).
-- `108dff3` — suite funcional de invariantes temporales (6 pruebas), el reto
+- `cd891f1` — `nodesAtRisk` + 13 pruebas de bordes (tabla de decisiones).
+- `f14655b` — `BITACORA.md` final reconstruida desde Git (≤ 900 palabras).
+- `298a481` — suite funcional de invariantes temporales (6 pruebas), el reto
   adicional de la consigna.
 
 ## Tranquilidad para el cliente: por qué no vuelve a suceder

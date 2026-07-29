@@ -92,8 +92,8 @@ rederiva de nuevo al renderizar con su propio `now`.
   se ha hecho push.
 - Identidad local del repo: `Juan Yanez <juanyanez.ine@gmail.com>`.
 - Historial del caso sobre la línea base `f332319`:
-  `c83bedf` (fix + regresión/contrato) → `2cc4eb3` (nodesAtRisk + bordes) →
-  `b8f9732` (bitácora) → `108dff3` (invariantes temporales).
+  `8d0b3bd` (fix + regresión/contrato) → `cd891f1` (nodesAtRisk + bordes) →
+  `f14655b` (bitácora) → `298a481` (invariantes temporales).
 - La entrega del curso exige un enlace a repositorio con los commits:
   pendiente crear un repo propio en GitHub y hacer push del historial.
 

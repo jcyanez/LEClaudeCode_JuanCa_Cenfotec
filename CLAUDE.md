@@ -60,8 +60,8 @@ Línea base recibida (verificada el 28 de julio de 2026):
 - 105 pruebas aprobadas.
 - `npm run build` completa `tsc --noEmit` y el build de Vite.
 
-Estado tras el caso práctico 2 (28 de julio de 2026, commits `c83bedf`,
-`2cc4eb3`, `b8f9732`, `108dff3`):
+Estado tras el caso práctico 2 (28 de julio de 2026, commits `8d0b3bd`,
+`cd891f1`, `f14655b`, `298a481`):
 
 - 10 archivos de prueba, 131 pruebas aprobadas; build limpio.
 - Las 105 pruebas originales están intactas; las 26 nuevas viven en
