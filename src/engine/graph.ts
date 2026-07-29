@@ -20,7 +20,7 @@ import type {
   UserNodeState,
   NodeStatus,
 } from './types'
-import { currentMastery, ITEM_MASTERY_TARGET } from './srs'
+import { currentMastery, DAY_MS, ITEM_MASTERY_TARGET } from './srs'
 
 /** A mastered node whose every item interval is ≥ this many days is in the
  * lighter "maintenance" rotation. */
@@ -248,6 +248,41 @@ export function isNodeWeakened(
     return state !== undefined && state.mastery >= ITEM_MASTERY_TARGET
   })
   return earnedIgnoringDecay && !isNodeMastered(node, itemStates, now)
+}
+
+/**
+ * Nodes mastered at `now` that will LOSE mastery within `horizonDays` under
+ * projected overdue decay — i.e. some item's effective mastery, read at
+ * `now + horizonDays` days with the same on-read decay rule, drops below the
+ * target. Complements isNodeWeakened: "will fall" here, "already fell" there —
+ * a node below target at `now` is never at risk.
+ *
+ * The projection only shifts the instant passed to currentMastery; no state is
+ * copied or mutated. The horizon instant is evaluated inclusively: an item at
+ * exactly the target (or exactly at its dueDate) at that instant is still
+ * mastered. Fractional horizons are valid (decay is continuous); negative or
+ * non-finite horizons throw RangeError. Results follow `graph.topoOrder`
+ * (prerequisites first) and are unique by construction.
+ */
+export function nodesAtRisk(
+  graph: SkillGraph,
+  itemStates: Map<string, UserItemState>,
+  now: number,
+  horizonDays: number,
+): SkillNode[] {
+  if (!Number.isFinite(horizonDays) || horizonDays < 0) {
+    throw new RangeError(
+      `horizonDays must be a finite non-negative number, got ${horizonDays}`,
+    )
+  }
+  const horizon = now + horizonDays * DAY_MS
+  return graph.topoOrder
+    .map((id) => graph.nodesById.get(id)!)
+    .filter(
+      (node) =>
+        isNodeMastered(node, itemStates, now) &&
+        !isNodeMastered(node, itemStates, horizon),
+    )
 }
 
 /** The prerequisites of `nodeId` that are currently weakened (rotted). */
