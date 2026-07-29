@@ -77,10 +77,12 @@
 | `BITACORA.md` generada con el encargo, 6 secciones, ≤ 900 palabras, fiel | ✅ | Committeada; datos tomados de Git, desvío real registrado |
 | Reto adicional: conjunto mínimo de pruebas que habría atrapado el bug + explicación del hueco | ✅ | `time-invariants.test.ts` (eficacia demostrada reintroduciendo el bug); hueco explicado en `BITACORA.md` §3 |
 | Restricciones: pruebas existentes intactas, sin tocar producción, motor puro sin reloj del sistema | ✅ | Verificado por diff, y ninguna función nueva llama `Date.now()` |
-| Entrega: enlace al repositorio Git con sus commits (4 ago 2026) | ⚠️ Pendiente | Commits locales listos y auto-explicativos; falta crear el repo en GitHub y hacer push |
+| Entrega: enlace al repositorio Git con sus commits (4 ago 2026) | ✅ | Rama `week2-fretpath-caso2` en el repo de evidencias `jcyanez/LEClaudeCode_JuanCa_Cenfotec`, con el historial completo (línea base del instructor + commits del caso) |
+
+## Enlace de entrega
+
+- https://github.com/jcyanez/LEClaudeCode_JuanCa_Cenfotec/tree/week2-fretpath-caso2
 
 ## Acción pendiente
 
-- Crear el repositorio en GitHub (cuenta `jcyanez`) y publicar el historial
-  completo antes del martes 4 de agosto de 2026; enlazarlo desde el repo
-  general `LEClaudeCode_JuanCa_Cenfotec` y subir el enlace a Moodle.
+- Subir el enlace de entrega a Moodle antes del martes 4 de agosto de 2026.

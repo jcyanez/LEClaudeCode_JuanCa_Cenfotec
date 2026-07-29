@@ -87,15 +87,19 @@ rederiva de nuevo al renderizar con su propio `now`.
 - Este directorio es un repo git **anidado** dentro del repo general del
   curso (`LEClaudeCode/` → `LEClaudeCode_JuanCa_Cenfotec` en GitHub); el repo
   general no rastrea estos archivos.
-- `origin` apunta al repo del instructor
-  (`andrescn20/fretPath-estudiantes`); los commits del caso son locales y no
-  se ha hecho push.
-- Identidad local del repo: `Juan Yanez <juanyanez.ine@gmail.com>`.
+- Remotos: `origin` apunta al repo del instructor
+  (`andrescn20/fretPath-estudiantes`, solo lectura) y `entrega` al repo de
+  evidencias del curso (`jcyanez/LEClaudeCode_JuanCa_Cenfotec`).
+- Identidad local del repo: `Juan Yanez
+  <68209889+jcyanez@users.noreply.github.com>` (dirección noreply de GitHub;
+  la protección GH007 de la cuenta bloquea publicar el correo personal).
 - Historial del caso sobre la línea base `f332319`:
   `8d0b3bd` (fix + regresión/contrato) → `cd891f1` (nodesAtRisk + bordes) →
-  `f14655b` (bitácora) → `298a481` (invariantes temporales).
-- La entrega del curso exige un enlace a repositorio con los commits:
-  pendiente crear un repo propio en GitHub y hacer push del historial.
+  `f14655b` (bitácora) → `298a481` (invariantes temporales) → `d0a5b43`
+  (entregables) → `a136a06` (hashes tras reescritura de email).
+- Entrega: el historial completo está publicado en la rama
+  `week2-fretpath-caso2` del repo de evidencias —
+  https://github.com/jcyanez/LEClaudeCode_JuanCa_Cenfotec/tree/week2-fretpath-caso2
 
 ## CI/CD
 
