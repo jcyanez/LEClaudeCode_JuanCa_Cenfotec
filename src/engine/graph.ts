@@ -169,7 +169,7 @@ export function isNodeMastered(
   if (node.items.length === 0) return false
   return node.items.every((itemId) => {
     const state = itemStates.get(itemId)
-    return state !== undefined && currentMastery(state, state.dueDate ?? now) >= ITEM_MASTERY_TARGET
+    return state !== undefined && currentMastery(state, now) >= ITEM_MASTERY_TARGET
   })
 }
 
