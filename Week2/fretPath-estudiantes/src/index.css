@@ -1,0 +1,43 @@
+@import '@fontsource/pirata-one';
+@import 'tailwindcss';
+
+/* Pulsing halo for available (unlocked, unstarted) skill nodes. */
+.pulse-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fp-pulse 1.8s ease-out infinite;
+}
+
+@keyframes fp-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Slow-orbiting dashed ring for the NEXT UP node. */
+.spin-slow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fp-spin 14s linear infinite;
+}
+
+@keyframes fp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Glow for mastered / maintenance nodes. */
+.glow-amber {
+  filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.8));
+}
+
+.glow-emerald {
+  filter: drop-shadow(0 0 7px rgba(52, 211, 153, 0.8));
+}

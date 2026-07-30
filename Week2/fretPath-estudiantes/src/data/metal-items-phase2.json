@@ -1,0 +1,2250 @@
+{
+  "_meta": {
+    "path": "metal",
+    "description": "Phase 2 drill items for FretPath (N13 onward). Merged with the frozen metal-seed-items.json at load time. Authored per the content spec: musical by default, original material only ('in the style of', never transcriptions). Standard tuning unless metadata says otherwise; strings 6=low E ... 1=high e.",
+    "itemModel": "Item { id, nodeId, type, prompt, answer, difficulty(1-10), metadata }",
+    "version": "0.1"
+  },
+  "items": [
+    {
+      "id": "N13-1",
+      "nodeId": "N13",
+      "type": "technique_rep",
+      "prompt": "Palm-mute the open low E and play the gallop — an eighth note plus two sixteenths, counted ‘1 &-a’ — once per click at 70 bpm for 8 clicks. Keep the palm planted; all three notes must be even and equally muted.",
+      "answer": "8 clean, even muted gallops, one per beat.",
+      "difficulty": 5,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 70,
+        "subdivision": "sixteenth",
+        "musicalContext": "the defining rhythm of classic heavy metal",
+        "selfAssess": "5 = every gallop is crisp and identical, no smearing, palm never lifts."
+      }
+    },
+    {
+      "id": "N13-2",
+      "nodeId": "N13",
+      "type": "riff",
+      "prompt": "Maiden-style gallop riff: gallop on the muted open low E, and on beat 1 of each bar land a ringing power-chord accent cycling E5 (open) → D5 (5th string fret 5) → C5 (5th string fret 3) → D5. 90 bpm, 4 bars.",
+      "answer": "Continuous gallop with clean chord accents on the bar lines, cycling E5-D5-C5-D5.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 90,
+        "subdivision": "sixteenth",
+        "chords": [
+          "E5",
+          "D5",
+          "C5"
+        ],
+        "musicalContext": "NWOBHM-style gallop verse riff",
+        "selfAssess": "5 = the gallop never stumbles at the chord changes and the accents ring while the gallop stays muted."
+      }
+    },
+    {
+      "id": "N13-3",
+      "nodeId": "N13",
+      "type": "technique_rep",
+      "prompt": "Gallop endurance: keep the muted low-E gallop going at 100 bpm for 4 straight bars (16 gallops) with zero pattern smear. If the third note of the gallop starts disappearing, slow down.",
+      "answer": "16 consecutive clean gallops at 100 bpm.",
+      "difficulty": 7,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 100,
+        "subdivision": "sixteenth",
+        "selfAssess": "5 = bar 4 sounds identical to bar 1 — same attack, same spacing, no fatigue creeping in."
+      }
+    },
+    {
+      "id": "N14-1",
+      "nodeId": "N14",
+      "type": "technique_rep",
+      "prompt": "All downstrokes on the palm-muted low E: eighth notes at 100 bpm for 2 bars (16 notes). Small strokes from the wrist, forearm loose — power comes from the mute, not from hitting harder.",
+      "answer": "16 even, tight downpicked eighths at 100 bpm.",
+      "difficulty": 6,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 100,
+        "subdivision": "eighth",
+        "selfAssess": "5 = machine-even spacing and attack, wrist stays relaxed the whole way."
+      }
+    },
+    {
+      "id": "N14-2",
+      "nodeId": "N14",
+      "type": "riff",
+      "prompt": "Thrash chug, all downstrokes, at 110 bpm: one bar of palm-muted open-E eighths, then slam F5 (6th string fret 1 + 5th string fret 3) on beat 1 of the next bar and chug muted E for the rest of it. The E-to-F semitone shove is the classic thrash menace. 4 bars.",
+      "answer": "Alternating bars of E chugs and F5-accented chugs, all downpicked, in time.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 110,
+        "subdivision": "eighth",
+        "chords": [
+          "F5"
+        ],
+        "frets": {
+          "6": 1,
+          "5": 3
+        },
+        "musicalContext": "Bay-Area-thrash-style rhythm figure",
+        "selfAssess": "5 = the F5 lands exactly on the downbeat with no gap before or after, downstrokes never turn into sneaky up-strokes."
+      }
+    },
+    {
+      "id": "N14-3",
+      "nodeId": "N14",
+      "type": "technique_rep",
+      "prompt": "Downpicking endurance: palm-muted downpicked eighths on the low E at 120 bpm for 4 bars (32 notes). If the forearm burns, stop and shake out — tension is the enemy, not slowness.",
+      "answer": "32 consecutive even downstrokes at 120 bpm.",
+      "difficulty": 8,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 120,
+        "subdivision": "eighth",
+        "selfAssess": "5 = full 4 bars with even volume and no slowing, forearm still loose at the end."
+      }
+    },
+    {
+      "id": "N15-1",
+      "nodeId": "N15",
+      "type": "technique_rep",
+      "prompt": "Tremolo-pick the open high e string: strict alternate 16th notes at 100 bpm for 2 bars. Tiny pick motion from the wrist, pick barely clearing the string in each direction.",
+      "answer": "Even, continuous 16th-note tremolo at 100 bpm.",
+      "difficulty": 5,
+      "metadata": {
+        "strings": [
+          1
+        ],
+        "targetBpm": 100,
+        "subdivision": "sixteenth",
+        "selfAssess": "5 = a smooth even buzz — no galloping accents, no volume dips, both stroke directions equal."
+      }
+    },
+    {
+      "id": "N15-2",
+      "nodeId": "N15",
+      "type": "riff",
+      "prompt": "Black-metal tremolo melody: keep the 16th-note tremolo running while the fretting hand moves — one bar on the B string fret 5 (E), one bar on fret 7 (F#), one bar on the high e fret 5 (A), then back down. 100 bpm.",
+      "answer": "A continuous tremolo carrying the 3-note melody E - F# - A - F#.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 100,
+        "subdivision": "sixteenth",
+        "frets": {
+          "2": [
+            5,
+            7
+          ],
+          "1": [
+            5
+          ]
+        },
+        "musicalContext": "second-wave black metal tremolo line",
+        "selfAssess": "5 = the picking never hiccups at the note changes; the melody sings above the blur."
+      }
+    },
+    {
+      "id": "N15-3",
+      "nodeId": "N15",
+      "type": "technique_rep",
+      "prompt": "Tremolo with a string change: one bar of 16th-note tremolo on the open low E, jump cleanly to the open A for a bar, and repeat, at 120 bpm. The jump must not leave a hole or clip a note.",
+      "answer": "Seamless tremolo alternating between the two lowest strings.",
+      "difficulty": 7,
+      "metadata": {
+        "strings": [
+          6,
+          5
+        ],
+        "targetBpm": 120,
+        "subdivision": "sixteenth",
+        "selfAssess": "5 = the string crossing is inaudible except for the pitch change — no gap, no extra string noise."
+      }
+    },
+    {
+      "id": "N16-1",
+      "nodeId": "N16",
+      "type": "note_id",
+      "prompt": "Name the seven notes of the A natural minor scale, in order.",
+      "answer": "A, B, C, D, E, F, G.",
+      "difficulty": 3,
+      "metadata": { "gate": true,
+        "scale": "A natural minor",
+        "notes": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G"
+        ],
+        "selfAssess": "5 = recited from memory without counting on the fretboard."
+      }
+    },
+    {
+      "id": "N16-2",
+      "nodeId": "N16",
+      "type": "scale_run",
+      "prompt": "A natural minor, position 1 (around the 5th fret): 6th(5,7,8) 5th(5,7,8) 4th(5,7) 3rd(4,5,7) 2nd(5,6,8) 1st(5,7,8). Ascend and descend slowly, every note clean.",
+      "answer": "The full 7-note scale through the box: A B C D E F G A ... and back.",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth",
+        "scale": "A natural minor",
+        "position": 1,
+        "frets": {
+          "6": [
+            5,
+            7,
+            8
+          ],
+          "5": [
+            5,
+            7,
+            8
+          ],
+          "4": [
+            5,
+            7
+          ],
+          "3": [
+            4,
+            5,
+            7
+          ],
+          "2": [
+            5,
+            6,
+            8
+          ],
+          "1": [
+            5,
+            7,
+            8
+          ]
+        },
+        "selfAssess": "5 = even timing and volume in both directions, no buzzes, no pauses at string crossings."
+      }
+    },
+    {
+      "id": "N16-3",
+      "nodeId": "N16",
+      "type": "scale_run",
+      "prompt": "From pentatonic to natural minor: play A minor pentatonic position 1, then add the two missing notes and play the full scale — B (6th string fret 7, 3rd string fret 4) and F (5th string fret 8, 2nd string fret 6). Listen to the tension those two notes add.",
+      "answer": "Pentatonic box first, then the 7-note scale with B and F woven in.",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth",
+        "scale": "A natural minor",
+        "notes": [
+          "B",
+          "F"
+        ],
+        "frets": {
+          "6": [
+            7
+          ],
+          "5": [
+            8
+          ],
+          "3": [
+            4
+          ],
+          "2": [
+            6
+          ]
+        },
+        "musicalContext": "the 2nd and b6 are where minor-key drama lives",
+        "selfAssess": "5 = you can land on B and F deliberately and hear how they differ from the pentatonic notes."
+      }
+    },
+    {
+      "id": "N16-4",
+      "nodeId": "N16",
+      "type": "riff",
+      "prompt": "Riff and answer: two bars of palm-muted open-A chugs (eighths), answered by a two-bar melody built only from A natural minor position 1. 80 bpm. Any melody you like — it must resolve back to A.",
+      "answer": "2 bars of chug, 2 bars of in-scale melody ending on A, looped in time.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "scale": "A natural minor",
+        "musicalContext": "verse riff with a lead answer — the basic building block of a metal arrangement",
+        "selfAssess": "5 = the melody stays in scale, lands on A, and re-enters the chug without dropping a beat."
+      }
+    },
+    {
+      "id": "N17-1",
+      "nodeId": "N17",
+      "type": "riff",
+      "prompt": "Pedal-point riff: the palm-muted open low E is your pedal. Play eighths alternating pedal and chord stabs: E-E-G5-G5-E-E-A5-A5 (G5 = 6th string fret 3, A5 = fret 5, both with the 5th-string 5th two frets up). 80 bpm, 4 bars.",
+      "answer": "A steady E pedal with G5 and A5 stabs woven in, all in time.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "chords": [
+          "G5",
+          "A5"
+        ],
+        "musicalContext": "the engine of countless metal verse riffs",
+        "selfAssess": "5 = pedal notes stay tight and muted while the chords punch out clean — two distinct sounds, one steady pulse."
+      }
+    },
+    {
+      "id": "N17-2",
+      "nodeId": "N17",
+      "type": "riff",
+      "prompt": "16th-note pedal: palm-muted low-E 16ths at 90 bpm, with one ringing chord stab on beat 3 of each bar, cycling G5 → A5 → C5 (6th string fret 8) → A5. 4 bars. The 16ths must not flinch at the stabs.",
+      "answer": "Relentless 16th pedal with the stab cycle landing exactly on beat 3.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 90,
+        "subdivision": "sixteenth",
+        "chords": [
+          "G5",
+          "A5",
+          "C5"
+        ],
+        "selfAssess": "5 = the pedal is a flat, even wall and each stab lands on the click without disturbing it."
+      }
+    },
+    {
+      "id": "N17-3",
+      "nodeId": "N17",
+      "type": "riff",
+      "prompt": "Walk chords over the pedal: alternate every eighth note between the muted open E and a ringing chord, climbing G5 (fret 3) → A5 (fret 5) → B5 (fret 7) → C5 (fret 8), roots on the 6th string: E-G5-E-A5-E-B5-E-C5. 90 bpm, repeat 4 times.",
+      "answer": "E pedal alternating with the ascending G5-A5-B5-C5 walk, in time.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 90,
+        "subdivision": "eighth",
+        "chords": [
+          "G5",
+          "A5",
+          "B5",
+          "C5"
+        ],
+        "musicalContext": "ascending pedal walk — instant 'epic' tension builder",
+        "selfAssess": "5 = chords change without gaps, pedal stays muted, the climb builds evenly to C5."
+      }
+    },
+    {
+      "id": "N18-1",
+      "nodeId": "N18",
+      "type": "technique_rep",
+      "prompt": "Hammer-on pairs: on each string, pick fret 5 with the 1st finger and hammer fret 7 with the 3rd — no re-pick. Two full passes across all six strings at 60 bpm (one pair per beat). The hammered note must match the picked note's volume.",
+      "answer": "Twelve clean 5-to-7 hammer-on pairs, hammered notes as loud as picked ones.",
+      "difficulty": 4,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "eighth",
+        "frets": {
+          "6": [
+            5,
+            7
+          ],
+          "5": [
+            5,
+            7
+          ],
+          "4": [
+            5,
+            7
+          ],
+          "3": [
+            5,
+            7
+          ],
+          "2": [
+            5,
+            7
+          ],
+          "1": [
+            5,
+            7
+          ]
+        },
+        "selfAssess": "5 = you can't tell picked from hammered notes with your eyes closed."
+      }
+    },
+    {
+      "id": "N18-2",
+      "nodeId": "N18",
+      "type": "technique_rep",
+      "prompt": "Pull-off pairs: plant both fingers first (1st finger on 5, 3rd on 7), pick fret 7 and pull off to 5 — the pull is a small sideways flick that plucks the string, not a lift. Two passes across all strings at 60 bpm.",
+      "answer": "Twelve clean 7-to-5 pull-off pairs with a real attack on the second note.",
+      "difficulty": 4,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "eighth",
+        "frets": {
+          "6": [
+            7,
+            5
+          ],
+          "5": [
+            7,
+            5
+          ],
+          "4": [
+            7,
+            5
+          ],
+          "3": [
+            7,
+            5
+          ],
+          "2": [
+            7,
+            5
+          ],
+          "1": [
+            7,
+            5
+          ]
+        },
+        "selfAssess": "5 = pulled notes speak clearly at equal volume, no dead flicks, both fingers planted before each pair."
+      }
+    },
+    {
+      "id": "N18-3",
+      "nodeId": "N18",
+      "type": "riff",
+      "prompt": "Trill fill: on the 3rd string, pick fret 5 (C) once, then hammer/pull 5-7-5-7 continuously for a full bar, and resolve onto the 5th string fret 7 (E) with weight. A one-bar lead fill you can drop over any A-minor riff.",
+      "answer": "A sustained C-D trill resolving to E.",
+      "difficulty": 6,
+      "metadata": { "targetBpm": 70, "subdivision": "eighth",
+        "frets": {
+          "3": [
+            5,
+            7
+          ],
+          "5": [
+            7
+          ]
+        },
+        "notes": [
+          "C",
+          "D",
+          "E"
+        ],
+        "musicalContext": "lead fill over an Am riff",
+        "selfAssess": "5 = the trill stays even and strong for the whole bar and the resolution lands in time."
+      }
+    },
+    {
+      "id": "N19-1",
+      "nodeId": "N19",
+      "type": "technique_rep",
+      "prompt": "Same-finger slides on the G string: pick fret 5 (C) and slide up to fret 7 (D) keeping full pressure through the movement, then slide back down. 4 slow round trips. The arriving note must still be ringing.",
+      "answer": "C-to-D-and-back slides with the note singing through the whole trip.",
+      "difficulty": 3,
+      "metadata": { "targetBpm": 60, "subdivision": "quarter",
+        "strings": [
+          3
+        ],
+        "frets": [
+          5,
+          7
+        ],
+        "notes": [
+          "C",
+          "D"
+        ],
+        "selfAssess": "5 = no volume drop mid-slide, lands exactly on the target fret every time."
+      }
+    },
+    {
+      "id": "N19-2",
+      "nodeId": "N19",
+      "type": "technique_rep",
+      "prompt": "Octave-shape slides: fret the A octave (6th string fret 5 + 4th string fret 7), pluck both, and slide the whole shape up two frets to B, then back — middle string staying muted through the slide. 4 round trips.",
+      "answer": "Clean two-fret octave slides A to B, no middle-string noise.",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "quarter",
+        "frets": {
+          "6": [
+            5,
+            7
+          ],
+          "4": [
+            7,
+            9
+          ]
+        },
+        "notes": [
+          "A",
+          "B"
+        ],
+        "musicalContext": "sliding octave melody (thrash chorus staple)",
+        "selfAssess": "5 = both notes arrive together and in tune, the muted string never chirps."
+      }
+    },
+    {
+      "id": "N19-3",
+      "nodeId": "N19",
+      "type": "riff",
+      "prompt": "Slide-into-the-root riff: two palm-muted open-E chugs, then slide into G5 from one fret below (start the shape at fret 2, land at fret 3) and let it ring for two beats. 80 bpm, 4 bars — the slide IS the hook.",
+      "answer": "Chug-chug-slide-into-G5, looped in time.",
+      "difficulty": 5,
+      "metadata": {
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "chords": [
+          "G5"
+        ],
+        "musicalContext": "sliding into chords for swagger",
+        "selfAssess": "5 = the slide arrives exactly on the beat and the chord rings clean — no overshoot, no undershoot."
+      }
+    },
+    {
+      "id": "N20-1",
+      "nodeId": "N20",
+      "type": "technique_rep",
+      "prompt": "Full-step bend with a target: on the 3rd string, first play fret 9 (E) to hear the target pitch, then bend fret 7 (D) up until it matches. Bend with the 3rd finger, 1st and 2nd stacked behind it for support. 4 bends, checking the target between each.",
+      "answer": "Four D-to-E bends landing exactly at pitch.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "strings": [
+          3
+        ],
+        "frets": [
+          7,
+          9
+        ],
+        "notes": [
+          "D",
+          "E"
+        ],
+        "selfAssess": "5 = every bend hits E dead-on — not sharp, not flat — verified against the fretted target."
+      }
+    },
+    {
+      "id": "N20-2",
+      "nodeId": "N20",
+      "type": "technique_rep",
+      "prompt": "Half-step bend: on the B string, reference fret 9 (G#), then bend fret 8 (G) up a half step to match. Half-steps need restraint — most players overshoot. 4 checked bends.",
+      "answer": "Four G-to-G# half-step bends at pitch.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "strings": [
+          2
+        ],
+        "frets": [
+          8,
+          9
+        ],
+        "notes": [
+          "G",
+          "G#"
+        ],
+        "selfAssess": "5 = stops exactly at G# every time — overshooting a half-step bend is the tell of an untrained ear."
+      }
+    },
+    {
+      "id": "N20-3",
+      "nodeId": "N20",
+      "type": "riff",
+      "prompt": "The pentatonic cry: 3rd string fret 7 — bend full to E, release back to D, pull off to fret 5 (C), then land on the 4th string fret 7 (A) and let it sit. Slow, vocal, no metronome — phrasing over precision.",
+      "answer": "Bend-release-pull-resolve: E (bent) - D - C - A.",
+      "difficulty": 6,
+      "metadata": { "targetBpm": 70, "subdivision": "eighth",
+        "frets": {
+          "3": [
+            5,
+            7
+          ],
+          "4": [
+            7
+          ]
+        },
+        "notes": [
+          "D",
+          "E",
+          "C",
+          "A"
+        ],
+        "musicalContext": "the classic minor-pentatonic solo phrase — every great solo owns it",
+        "selfAssess": "5 = the bend is in tune, the release is controlled (not a collapse), and the last note lands like a sentence ending."
+      }
+    },
+    {
+      "id": "N21-1",
+      "nodeId": "N21",
+      "type": "technique_rep",
+      "prompt": "Slow, wide vibrato: fret the 3rd string at 7 (D) and rock the pitch up and back in even waves from the wrist — about two waves per beat at 60 bpm, for 4 beats. Width and evenness matter; speed does not.",
+      "answer": "Four beats of even, singing vibrato on D.",
+      "difficulty": 5,
+      "metadata": {
+        "strings": [
+          3
+        ],
+        "frets": [
+          7
+        ],
+        "notes": [
+          "D"
+        ],
+        "targetBpm": 60,
+        "subdivision": "quarter",
+        "selfAssess": "5 = the waves are even in width and rhythm — it sounds like a voice, not a nervous wobble."
+      }
+    },
+    {
+      "id": "N21-2",
+      "nodeId": "N21",
+      "type": "technique_rep",
+      "prompt": "Ending vibrato: play a quick run on the high e — frets 5, 7, 8 — and land on 8 (C) with confident, immediate vibrato. The vibrato starts the instant the note lands, not after a hesitation.",
+      "answer": "A three-note run ending on C with instant vibrato.",
+      "difficulty": 6,
+      "metadata": { "targetBpm": 70, "subdivision": "eighth",
+        "strings": [
+          1
+        ],
+        "frets": [
+          5,
+          7,
+          8
+        ],
+        "notes": [
+          "A",
+          "B",
+          "C"
+        ],
+        "musicalContext": "how every lead phrase should end",
+        "selfAssess": "5 = no dead gap between landing and vibrato — the note blooms immediately."
+      }
+    },
+    {
+      "id": "N21-3",
+      "nodeId": "N21",
+      "type": "technique_rep",
+      "prompt": "Vibrato on a bent note: bend the 3rd string fret 7 up to pitch (E), hold it there, and add vibrato by relaxing slightly below and re-bending to pitch in waves. The hardest everyday lead skill — grade yourself honestly.",
+      "answer": "A held full bend with controlled vibrato at the top.",
+      "difficulty": 7,
+      "metadata": { "gate": true,
+        "strings": [
+          3
+        ],
+        "frets": [
+          7
+        ],
+        "notes": [
+          "E"
+        ],
+        "musicalContext": "the sustained scream note of every great solo climax",
+        "selfAssess": "5 = the bend stays centered on E while the vibrato waves around it — it never sags flat."
+      }
+    },
+    {
+      "id": "N22-1",
+      "nodeId": "N22",
+      "type": "technique_rep",
+      "prompt": "12th-fret chimes: touch the string directly over the 12th fret wire (don't press), pick, and lift the finger right after — let each harmonic bloom. All six strings, one clean chime each.",
+      "answer": "Six bell-like harmonics, one per string, at the 12th fret.",
+      "difficulty": 4,
+      "metadata": { "gate": true,
+        "frets": {
+          "6": [
+            12
+          ],
+          "5": [
+            12
+          ],
+          "4": [
+            12
+          ],
+          "3": [
+            12
+          ],
+          "2": [
+            12
+          ],
+          "1": [
+            12
+          ]
+        },
+        "selfAssess": "5 = every string chimes clearly and sustains — no dead thuds, finger off the string as it rings."
+      }
+    },
+    {
+      "id": "N22-2",
+      "nodeId": "N22",
+      "type": "technique_rep",
+      "prompt": "7th- and 5th-fret harmonics on the G and B strings: same touch, but these are dimmer — pick closer to the bridge and with more attack. Two clean chimes at each spot.",
+      "answer": "Clear harmonics at frets 7 and 5 on both strings.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "frets": {
+          "3": [
+            5,
+            7
+          ],
+          "2": [
+            5,
+            7
+          ]
+        },
+        "selfAssess": "5 = the 5th-fret harmonics (the hard ones) ring as clearly as the 7th."
+      }
+    },
+    {
+      "id": "N22-3",
+      "nodeId": "N22",
+      "type": "riff",
+      "prompt": "Harmonic accent riff: one bar of palm-muted open-E chugs (eighths at 80 bpm), then hit the 12th-fret harmonic on the G string and let it sail over the next bar of chugs. Repeat 4 times.",
+      "answer": "Chug bar, then a sustained harmonic 'ping' floating over the next bar.",
+      "difficulty": 5,
+      "metadata": {
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "frets": {
+          "3": [
+            12
+          ]
+        },
+        "musicalContext": "the harmonic ping over chugs — a classic metal intro texture",
+        "selfAssess": "5 = the harmonic rings out full length above the chugs without you breaking the rhythm to grab it."
+      }
+    },
+    {
+      "id": "N23-1",
+      "nodeId": "N23",
+      "type": "technique_rep",
+      "prompt": "Alternate-picked string skip: open 6th string, then open 4th (skipping the A string entirely), strict down-up, eighth notes at 70 bpm for 2 bars. Rest the fretting hand lightly across the strings to mute the skipped one.",
+      "answer": "Clean E-to-D skips, strict alternate picking, silent A string.",
+      "difficulty": 6,
+      "metadata": {
+        "strings": [
+          6,
+          4
+        ],
+        "targetBpm": 70,
+        "subdivision": "eighth",
+        "selfAssess": "5 = the skipped string never sounds and the pick lands its target every time in both stroke directions."
+      }
+    },
+    {
+      "id": "N23-2",
+      "nodeId": "N23",
+      "type": "riff",
+      "prompt": "Skipped octave riff: play the A octave shape as separate picked notes — 6th string fret 5, 4th string fret 7, alternating root-octave-root-octave — then slide the shape to C (frets 8 and 10) and repeat. 80 bpm, eighths.",
+      "answer": "Root/octave alternation on A, then on C, in time.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "frets": {
+          "6": [
+            5,
+            8
+          ],
+          "4": [
+            7,
+            10
+          ]
+        },
+        "musicalContext": "picked octave bounce — modern metal verse texture",
+        "selfAssess": "5 = both positions bounce evenly, the muted middle string stays dead, the shift lands on the beat."
+      }
+    },
+    {
+      "id": "N23-3",
+      "nodeId": "N23",
+      "type": "riff",
+      "prompt": "Pentatonic skip lick: 6th string frets 5-8, skip to the 3rd string frets 5-7, and loop — four notes spanning two octaves. Alternate picked, eighths at 70 bpm. Wide jumps make a simple box sound modern.",
+      "answer": "The four-note loop A-C ... C-D across the skip, even and clean.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 70,
+        "subdivision": "eighth",
+        "frets": {
+          "6": [
+            5,
+            8
+          ],
+          "3": [
+            5,
+            7
+          ]
+        },
+        "notes": [
+          "A",
+          "C",
+          "C",
+          "D"
+        ],
+        "musicalContext": "interval-skipping lead line",
+        "selfAssess": "5 = the big jump is silent and accurate both ways — no brushed middle strings, no timing hiccup at the turnaround."
+      }
+    },
+    {
+      "id": "N24-1",
+      "nodeId": "N24",
+      "type": "technique_rep",
+      "prompt": "Hunt the squeal: fret the 3rd string at 5 (C). Choke up on the pick so the edge of your thumb grazes the string a split-second after the pick does, and dig in slightly over the neck-pickup area. Move the picking spot an inch at a time until the note jumps up into a harmonic scream. 4 deliberate attempts.",
+      "answer": "At least one clear pinch-harmonic squeal out of 4 attempts, and you know where on the string it lives.",
+      "difficulty": 7,
+      "metadata": { "gate": true,
+        "strings": [
+          3
+        ],
+        "frets": [
+          5
+        ],
+        "notes": [
+          "C"
+        ],
+        "musicalContext": "the metal lead scream",
+        "selfAssess": "5 = you can name the picking spot that produces the squeal and hit it on demand more often than not."
+      }
+    },
+    {
+      "id": "N24-2",
+      "nodeId": "N24",
+      "type": "riff",
+      "prompt": "Zakk-style accent riff: palm-muted open-E eighths at 80 bpm, and on beat 3 of every bar, pinch the 3rd string fret 7 (D) and let it scream with a little vibrato before diving back into the chugs. 4 bars.",
+      "answer": "Steady chugs with a screaming pinched D on beat 3 of each bar.",
+      "difficulty": 8,
+      "metadata": {
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "frets": {
+          "3": [
+            7
+          ]
+        },
+        "musicalContext": "pinch accents inside a rhythm part",
+        "selfAssess": "5 = the pinch lands on the beat, actually squeals (not just a dead note), and the chug never stumbles around it."
+      }
+    },
+    {
+      "id": "N24-3",
+      "nodeId": "N24",
+      "type": "technique_rep",
+      "prompt": "Pinches on demand: quarter-note pinch harmonics on the 3rd string fret 7 (D) at 80 bpm — four in a row, every single one screaming. No duds allowed.",
+      "answer": "4 consecutive clean pinch harmonics in time.",
+      "difficulty": 8,
+      "metadata": {
+        "strings": [
+          3
+        ],
+        "frets": [
+          7
+        ],
+        "targetBpm": 80,
+        "subdivision": "quarter",
+        "selfAssess": "5 = 4 out of 4 squeal — consistency is the whole skill here."
+      }
+    },
+    {
+      "id": "N25-1",
+      "nodeId": "N25",
+      "type": "note_id",
+      "prompt": "What makes Phrygian instantly 'dark'? Name the interval that defines it, and the specific note in E Phrygian.",
+      "answer": "The flat 2nd (b2) — in E Phrygian it's F natural, one semitone above the root.",
+      "difficulty": 4,
+      "metadata": { "gate": true,
+        "scale": "E Phrygian",
+        "notes": [
+          "F"
+        ],
+        "selfAssess": "5 = named both the interval and the note without touching the guitar."
+      }
+    },
+    {
+      "id": "N25-2",
+      "nodeId": "N25",
+      "type": "scale_run",
+      "prompt": "E Phrygian, one octave in open position: 6th string 0-1-3 (E F G), 5th string 0-2-3 (A B C), 4th string 0-2 (D E). Ascend and descend, letting the low open E growl.",
+      "answer": "E F G A B C D E and back, clean.",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth",
+        "scale": "E Phrygian",
+        "frets": {
+          "6": [
+            0,
+            1,
+            3
+          ],
+          "5": [
+            0,
+            2,
+            3
+          ],
+          "4": [
+            0,
+            2
+          ]
+        },
+        "selfAssess": "5 = even, buzz-free, and you can hear the E-to-F darkness at the very first step."
+      }
+    },
+    {
+      "id": "N25-3",
+      "nodeId": "N25",
+      "type": "riff",
+      "prompt": "The b2 riff: palm-muted open-E eighths at 90 bpm, with ringing F5 stabs (6th string fret 1 + 5th string fret 3) on beats 2 and 4. Two notes, instant menace — this E-to-F move IS the Phrygian sound.",
+      "answer": "E chugs with F5 stabs on the backbeats, looped in time.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 90,
+        "subdivision": "eighth",
+        "chords": [
+          "F5"
+        ],
+        "musicalContext": "Phrygian b2 riffing — the core dark-metal move",
+        "selfAssess": "5 = stabs land exactly on 2 and 4, ring clean over the muted pedal, and the loop grooves."
+      }
+    },
+    {
+      "id": "N26-1",
+      "nodeId": "N26",
+      "type": "note_id",
+      "prompt": "Harmonic minor is natural minor with one note changed. For A harmonic minor: which scale degree is raised, and what note does it become?",
+      "answer": "The 7th is raised a half step: G becomes G#.",
+      "difficulty": 3,
+      "metadata": { "gate": true,
+        "scale": "A harmonic minor",
+        "notes": [
+          "G#"
+        ],
+        "selfAssess": "5 = answered instantly, and you know why (the G# pulls hard back to A)."
+      }
+    },
+    {
+      "id": "N26-2",
+      "nodeId": "N26",
+      "type": "scale_run",
+      "prompt": "A harmonic minor, position 1: like natural minor around the 5th fret but every G becomes G# — 6th(5,7,8) 5th(5,7,8) 4th(6,7) 3rd(4,5,7) 2nd(5,6,9) 1st(5,7,8). The fret-9 stretch on the B string is the famous 'exotic gap'. Slow and even.",
+      "answer": "A B C D E F G# A through the box and back.",
+      "difficulty": 6,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth",
+        "scale": "A harmonic minor",
+        "position": 1,
+        "frets": {
+          "6": [
+            5,
+            7,
+            8
+          ],
+          "5": [
+            5,
+            7,
+            8
+          ],
+          "4": [
+            6,
+            7
+          ],
+          "3": [
+            4,
+            5,
+            7
+          ],
+          "2": [
+            5,
+            6,
+            9
+          ],
+          "1": [
+            5,
+            7,
+            8
+          ]
+        },
+        "selfAssess": "5 = the wide F-to-G# gap sounds intentional and in time, not like a stumble."
+      }
+    },
+    {
+      "id": "N26-3",
+      "nodeId": "N26",
+      "type": "riff",
+      "prompt": "Resolution lick: over a palm-muted open-A chug, play G# (4th string fret 6) - A (4th string fret 7) - C (3rd string fret 5) - B (3rd string fret 4) - A (4th string fret 7), slow, letting the G#-to-A pull resolve. 70 bpm.",
+      "answer": "A five-note harmonic-minor phrase resolving home to A.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 70,
+        "subdivision": "eighth",
+        "frets": {
+          "4": [
+            6,
+            7
+          ],
+          "3": [
+            4,
+            5
+          ]
+        },
+        "notes": [
+          "G#",
+          "A",
+          "C",
+          "B",
+          "A"
+        ],
+        "musicalContext": "neoclassical cadence in miniature",
+        "selfAssess": "5 = you can hear the G# 'lean into' A — the phrase lands with a sense of arrival."
+      }
+    },
+    {
+      "id": "N27-1",
+      "nodeId": "N27",
+      "type": "note_id",
+      "prompt": "Phrygian dominant is Phrygian with one note changed. For E Phrygian dominant: which degree changes, and to what note?",
+      "answer": "The minor 3rd becomes a major 3rd: G becomes G#.",
+      "difficulty": 4,
+      "metadata": { "gate": true,
+        "scale": "E Phrygian dominant",
+        "notes": [
+          "G#"
+        ],
+        "selfAssess": "5 = named it cold — b2 plus major 3rd is the whole recipe."
+      }
+    },
+    {
+      "id": "N27-2",
+      "nodeId": "N27",
+      "type": "scale_run",
+      "prompt": "E Phrygian dominant, one octave in open position: 6th string 0-1-4 (E F G#), 5th string 0-2-3 (A B C), 4th string 0-2 (D E). That fret 1-to-4 stretch is the sound of the desert. Ascend and descend slowly.",
+      "answer": "E F G# A B C D E and back, clean.",
+      "difficulty": 6,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth",
+        "scale": "E Phrygian dominant",
+        "frets": {
+          "6": [
+            0,
+            1,
+            4
+          ],
+          "5": [
+            0,
+            2,
+            3
+          ],
+          "4": [
+            0,
+            2
+          ]
+        },
+        "selfAssess": "5 = the F-to-G# leap is clean and in time, and the scale sounds unmistakably 'snake-charmer'."
+      }
+    },
+    {
+      "id": "N27-3",
+      "nodeId": "N27",
+      "type": "riff",
+      "prompt": "Snake-charmer riff: palm-muted open-E eighths at 90 bpm; each bar, walk up F (fret 1) - G# (fret 4) on the 6th string and fall back to the open E. Let the G# ring slightly before the drop.",
+      "answer": "A chugging riff walking E-F-G#-E, in time.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 90,
+        "subdivision": "eighth",
+        "frets": {
+          "6": [
+            0,
+            1,
+            4
+          ]
+        },
+        "notes": [
+          "E",
+          "F",
+          "G#"
+        ],
+        "musicalContext": "Phrygian-dominant riffing (exotic thrash flavor)",
+        "selfAssess": "5 = the walk-up is even, the G# gets its moment, and the return to the chug is seamless."
+      }
+    },
+    {
+      "id": "N28-1",
+      "nodeId": "N28",
+      "type": "technique_rep",
+      "prompt": "Three-notes-per-string legato, ascending: on the 6th string pick fret 5 once, hammer 7, hammer 8 (fingers 1-3-4). Repeat the chain on every string at 60 bpm (one 3-note group per beat). Only the first note of each string is picked.",
+      "answer": "Six 3-note hammer chains, one per string, even volume throughout.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "frets": {
+          "6": [
+            5,
+            7,
+            8
+          ],
+          "5": [
+            5,
+            7,
+            8
+          ],
+          "4": [
+            5,
+            7,
+            8
+          ],
+          "3": [
+            5,
+            7,
+            8
+          ],
+          "2": [
+            5,
+            7,
+            8
+          ],
+          "1": [
+            5,
+            7,
+            8
+          ]
+        },
+        "selfAssess": "5 = the two hammered notes match the picked note's volume on every string, including the pinky's."
+      }
+    },
+    {
+      "id": "N28-2",
+      "nodeId": "N28",
+      "type": "technique_rep",
+      "prompt": "Rolling legato loop: pick once, then cycle hammer/pull continuously between frets 5-7-9 on the 3rd string (C-D-E) for two bars at 70 bpm, triplet feel. The loop should sound like water, not typing.",
+      "answer": "A continuous, even C-D-E legato roll.",
+      "difficulty": 7,
+      "metadata": {
+        "strings": [
+          3
+        ],
+        "frets": [
+          5,
+          7,
+          9
+        ],
+        "notes": [
+          "C",
+          "D",
+          "E"
+        ],
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "selfAssess": "5 = volume stays constant for the full two bars — no fading, no re-picking to rescue it."
+      }
+    },
+    {
+      "id": "N28-3",
+      "nodeId": "N28",
+      "type": "scale_run",
+      "prompt": "Descending legato run: come down A natural minor position 1 using pull-off chains — pick the top note of each string, pull through the lower ones (8-7-5 shapes), at 70 bpm triplets. Descending legato is harder than ascending; the pulls must snap.",
+      "answer": "The scale descending in smooth pulled triplets.",
+      "difficulty": 8,
+      "metadata": {
+        "scale": "A natural minor",
+        "position": 1,
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "selfAssess": "5 = pulled notes have real attack all the way down; it flows as one line, not six separate strings."
+      }
+    },
+    {
+      "id": "N29-1",
+      "nodeId": "N29",
+      "type": "technique_rep",
+      "prompt": "Broken power chord: play G5 one note at a time and let them stack — root (6th string fret 3), fifth (5th string fret 5), octave (4th string fret 5) — up and back down, all ringing together. 4 slow passes.",
+      "answer": "G-D-G arpeggiated with all three notes sustaining into each other.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "frets": {
+          "6": [
+            3
+          ],
+          "5": [
+            5
+          ],
+          "4": [
+            5
+          ]
+        },
+        "notes": [
+          "G",
+          "D",
+          "G"
+        ],
+        "musicalContext": "broken chords = instant intro/outro material",
+        "selfAssess": "5 = every note keeps ringing under the next — nothing choked, nothing buzzing."
+      }
+    },
+    {
+      "id": "N29-2",
+      "nodeId": "N29",
+      "type": "scale_run",
+      "prompt": "A minor arpeggio, position 1 (just the chord tones A-C-E from the scale box): 6th fret 5 (A), 5th fret 7 (E), 4th fret 7 (A), 3rd fret 5 (C), 2nd fret 5 (E), 1st fret 5 (A). Picked cleanly, ascending and descending, at 60 bpm.",
+      "answer": "The six-note Am arpeggio up and down, every note clean.",
+      "difficulty": 6,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "eighth",
+        "frets": {
+          "6": [
+            5
+          ],
+          "5": [
+            7
+          ],
+          "4": [
+            7
+          ],
+          "3": [
+            5
+          ],
+          "2": [
+            5
+          ],
+          "1": [
+            5
+          ]
+        },
+        "notes": [
+          "A",
+          "E",
+          "A",
+          "C",
+          "E",
+          "A"
+        ],
+        "selfAssess": "5 = it sounds like a chord unfolding, not a scattered scale — even timing, no dead notes."
+      }
+    },
+    {
+      "id": "N29-3",
+      "nodeId": "N29",
+      "type": "riff",
+      "prompt": "Arpeggio progression: arpeggiate Am (root 6th fret 5), F (root 6th fret 1), G (root 6th fret 3) — two beats each at 70 bpm, root-fifth-octave shapes, letting notes ring into each other. The Am-F-G loop is half of all epic metal.",
+      "answer": "A ringing Am-F-G arpeggio cycle in time.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 70,
+        "subdivision": "eighth",
+        "chords": [
+          "Am",
+          "F",
+          "G"
+        ],
+        "musicalContext": "epic minor progression — intro/bridge material",
+        "selfAssess": "5 = chord changes land on the beat with no gap, and the harmony flows as one phrase."
+      }
+    },
+    {
+      "id": "N30-1",
+      "nodeId": "N30",
+      "type": "note_id",
+      "prompt": "Find every A below the 12th fret on the three lowest strings (6th, 5th, 4th). Name string and fret for each.",
+      "answer": "6th string fret 5, 5th string open (0), 4th string fret 7.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "frets": {
+          "6": [
+            5
+          ],
+          "5": [
+            0
+          ],
+          "4": [
+            7
+          ]
+        },
+        "notes": [
+          "A",
+          "A",
+          "A"
+        ],
+        "selfAssess": "5 = found all three from knowledge (octave shapes / string relationships), not by searching note-by-note."
+      }
+    },
+    {
+      "id": "N30-2",
+      "nodeId": "N30",
+      "type": "note_id",
+      "prompt": "Octave navigation: C sits on the 6th string at fret 8. Using the two-strings-up-two-frets-up octave shape, which fret is C on the 4th string?",
+      "answer": "Fret 10.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "frets": {
+          "6": [
+            8
+          ],
+          "4": [
+            10
+          ]
+        },
+        "notes": [
+          "C",
+          "C"
+        ],
+        "selfAssess": "5 = answered from the shape rule instantly — this is how you map the whole neck."
+      }
+    },
+    {
+      "id": "N30-3",
+      "nodeId": "N30",
+      "type": "scale_run",
+      "prompt": "A minor pentatonic, position 2 (the next box up): 6th(8,10) 5th(7,10) 4th(7,10) 3rd(7,9) 2nd(8,10) 1st(8,10). Ascend and descend at 60 bpm. Same five notes as position 1 — new geography.",
+      "answer": "The position-2 box, clean in both directions.",
+      "difficulty": 6,
+      "metadata": {
+        "scale": "A minor pentatonic",
+        "position": 2,
+        "targetBpm": 60,
+        "subdivision": "eighth",
+        "frets": {
+          "6": [
+            8,
+            10
+          ],
+          "5": [
+            7,
+            10
+          ],
+          "4": [
+            7,
+            10
+          ],
+          "3": [
+            7,
+            9
+          ],
+          "2": [
+            8,
+            10
+          ],
+          "1": [
+            8,
+            10
+          ]
+        },
+        "selfAssess": "5 = as comfortable as position 1 — no hesitation at the 3rd-string fingering change."
+      }
+    },
+    {
+      "id": "N30-4",
+      "nodeId": "N30",
+      "type": "scale_run",
+      "prompt": "Connect the boxes: ascend position 1 to the 4th string, slide up to position 2 on the 3rd string (7), and finish the ascent in position 2 — then come back down the same road. 60 bpm. Shifting mid-run is what turns boxes into a fretboard.",
+      "answer": "One continuous run that starts in position 1 and ends in position 2.",
+      "difficulty": 6,
+      "metadata": {
+        "scale": "A minor pentatonic",
+        "targetBpm": 60,
+        "subdivision": "eighth",
+        "musicalContext": "position shifting — the door out of box-prison",
+        "selfAssess": "5 = the shift is inaudible: no pause, no volume dip, timing unbroken through the slide."
+      }
+    },
+    {
+      "id": "N31-1",
+      "nodeId": "N31",
+      "type": "scale_run",
+      "prompt": "Three notes per string, strict alternate picking: ascend A natural minor 3nps — 6th string 5-7-8, 5th 5-7-8, 4th 5-7-9, 3rd 5-7-9, 2nd 5-6-8, 1st 5-7-8 — in 16ths at 90 bpm. Odd notes per string flips every crossing between outside and inside picking; keep the wrist small and the crossings silent.",
+      "answer": "The 3nps scale climbed with strict down-up throughout.",
+      "difficulty": 7,
+      "metadata": {
+        "scale": "A natural minor",
+        "targetBpm": 90,
+        "subdivision": "sixteenth",
+        "frets": {
+          "6": [
+            5,
+            7,
+            8
+          ],
+          "5": [
+            5,
+            7,
+            8
+          ],
+          "4": [
+            5,
+            7,
+            9
+          ],
+          "3": [
+            5,
+            7,
+            9
+          ],
+          "2": [
+            5,
+            6,
+            8
+          ],
+          "1": [
+            5,
+            7,
+            8
+          ]
+        },
+        "musicalContext": "the crossing drill that builds real lead speed",
+        "selfAssess": "5 = no flams at any crossing — inside and outside crossings sound identical."
+      }
+    },
+    {
+      "id": "N31-2",
+      "nodeId": "N31",
+      "type": "riff",
+      "prompt": "Skipped alternate lick: 6th string frets 5-8, skip to the 3rd string 5-7, and loop — strict alternate 16ths at 100 bpm for 2 bars. The skip is where alternate picking earns its keep: small motion, nothing brushed on the jump.",
+      "answer": "The four-note skip loop, alternate-picked at tempo, clean in both directions of the jump.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 100,
+        "subdivision": "sixteenth",
+        "frets": {
+          "6": [
+            5,
+            8
+          ],
+          "3": [
+            5,
+            7
+          ]
+        },
+        "notes": [
+          "A",
+          "C",
+          "C",
+          "D"
+        ],
+        "musicalContext": "interval-skipping lead line at speed",
+        "selfAssess": "5 = the jump lands both ways with zero extra string noise and the 16ths never hiccup."
+      }
+    },
+    {
+      "id": "N31-3",
+      "nodeId": "N31",
+      "type": "scale_run",
+      "prompt": "Musical speed: descend A natural minor position 1 in strict alternate-picked 16ths at 110 bpm, top to bottom, ending heavy on the low A (6th string fret 5). A real run you'd play over an Am riff.",
+      "answer": "The full descending scale at tempo, landing on A.",
+      "difficulty": 8,
+      "metadata": {
+        "scale": "A natural minor",
+        "position": 1,
+        "targetBpm": 110,
+        "subdivision": "sixteenth",
+        "musicalContext": "descending run into a riff downbeat — the workhorse metal solo exit",
+        "selfAssess": "5 = clean at 110 with the final A landing on a beat like a full stop."
+      }
+    },
+    {
+      "id": "N32-1",
+      "nodeId": "N32",
+      "type": "technique_rep",
+      "prompt": "The classic tap triplet: on the high e string, tap fret 12 with your picking-hand index (or middle), pull off to fret 5, hammer fret 8 — E, A, C: an A-minor triad. Loop it as slow triplets at 60 bpm for 2 bars, every note singing.",
+      "answer": "A continuous E-A-C tapped triplet loop.",
+      "difficulty": 6,
+      "metadata": {
+        "strings": [
+          1
+        ],
+        "frets": [
+          12,
+          5,
+          8
+        ],
+        "notes": [
+          "E",
+          "A",
+          "C"
+        ],
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "musicalContext": "the tapped-arpeggio sound that defined 80s lead guitar",
+        "selfAssess": "5 = all three notes equal volume — the tap rings, the pull-off snaps, the hammer lands full."
+      }
+    },
+    {
+      "id": "N32-2",
+      "nodeId": "N32",
+      "type": "riff",
+      "prompt": "Van Halen-style tap loop: keep frets 5 and 8 held on the high e; tap fret 12 for one bar of triplets (A minor: E-A-C), then move only the tap to fret 15 for a bar (A-C-G colour). Alternate for 4 bars at 70 bpm.",
+      "answer": "The tapped loop with the tap note alternating 12 ↔ 15 each bar.",
+      "difficulty": 7,
+      "metadata": {
+        "strings": [
+          1
+        ],
+        "frets": [
+          12,
+          15,
+          5,
+          8
+        ],
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "musicalContext": "moving the tapped note = instant harmonic movement with one finger",
+        "selfAssess": "5 = the tap relocation between bars is seamless — no dropped triplet, no volume dip at the switch."
+      }
+    },
+    {
+      "id": "N32-3",
+      "nodeId": "N32",
+      "type": "technique_rep",
+      "prompt": "Tapping across strings: play the 12-8-5 triplet on the high e (E-C-A), then the same frets on the B string (B-G-E — an E-minor colour), and alternate one bar each at 70 bpm. Mute the idle string with the tapping hand's palm.",
+      "answer": "Clean tapped triplets alternating between the top two strings.",
+      "difficulty": 8,
+      "metadata": {
+        "frets": {
+          "1": [
+            12,
+            8,
+            5
+          ],
+          "2": [
+            12,
+            8,
+            5
+          ]
+        },
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "selfAssess": "5 = the string change is silent (no open-string ring, no double hits) and both strings speak equally."
+      }
+    },
+    {
+      "id": "N33-1",
+      "nodeId": "N33",
+      "type": "technique_rep",
+      "prompt": "3-string sweep, A minor shape at the 12th position: G string fret 14 (A), B string fret 13 (C), high e fret 12 (E). One slow, continuous downward pick-drag through all three — one motion, not three picks — then reverse with one up-drag. Each note must stop ringing before the next (release finger pressure as the pick passes).",
+      "answer": "A clean down-and-up sweep through A-C-E, one note at a time.",
+      "difficulty": 7,
+      "metadata": { "targetBpm": 50, "subdivision": "triplet",
+        "frets": {
+          "3": [
+            14
+          ],
+          "2": [
+            13
+          ],
+          "1": [
+            12
+          ]
+        },
+        "notes": [
+          "A",
+          "C",
+          "E"
+        ],
+        "musicalContext": "the entry door to sweep picking",
+        "selfAssess": "5 = notes are separate (never a strummed chord), and the pick motion is one smooth drag each way."
+      }
+    },
+    {
+      "id": "N33-2",
+      "nodeId": "N33",
+      "type": "technique_rep",
+      "prompt": "Continuous sweep loop: the same Am shape, ascending and descending without pause — down-drag A-C-E, up-drag E-C-A — as even sextuplet-feel triplets at 60 bpm for 2 bars. The turnaround at the top is where sweeps die; keep it in time.",
+      "answer": "An unbroken up-down sweep cycle, all notes even.",
+      "difficulty": 8,
+      "metadata": {
+        "frets": {
+          "3": [
+            14
+          ],
+          "2": [
+            13
+          ],
+          "1": [
+            12
+          ]
+        },
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "selfAssess": "5 = the loop breathes like one gesture; the top-note turnaround doesn't hiccup or double-hit."
+      }
+    },
+    {
+      "id": "N33-3",
+      "nodeId": "N33",
+      "type": "riff",
+      "prompt": "Sweep progression: sweep the 3-string shapes Am (14-13-12), G major (12-12-10), F major (10-10-8) — one full up-down sweep per chord, two beats each at 60 bpm. Am-G-F descending is pure neoclassical drama.",
+      "answer": "Three swept triads walking down Am-G-F in time.",
+      "difficulty": 8,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "chords": [
+          "Am",
+          "G",
+          "F"
+        ],
+        "frets": {
+          "3": [
+            14,
+            12,
+            10
+          ],
+          "2": [
+            13,
+            12,
+            10
+          ],
+          "1": [
+            12,
+            10,
+            8
+          ]
+        },
+        "musicalContext": "descending swept triads — the neoclassical cliché worth owning",
+        "selfAssess": "5 = shape shifts land in time, every chord's three notes are distinct, no ringing bleed between chords."
+      }
+    },
+    {
+      "id": "N34-1",
+      "nodeId": "N34",
+      "type": "technique_rep",
+      "prompt": "Dive bomb: hit the 12th-fret natural harmonic on the G string, then push the bar down slowly until the pitch growls out into slack, and release. The harmonic keeps the note alive all the way down. 3 controlled dives.",
+      "answer": "A screaming harmonic diving smoothly to nothing and returning to pitch.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "gear": "floating trem",
+        "frets": {
+          "3": [
+            12
+          ]
+        },
+        "musicalContext": "the dive bomb — metal's most theatrical punctuation",
+        "selfAssess": "5 = the dive is smooth (no steps), the harmonic survives the whole trip, and the guitar returns in tune."
+      }
+    },
+    {
+      "id": "N34-2",
+      "nodeId": "N34",
+      "type": "technique_rep",
+      "prompt": "Controlled scoop: fret the 3rd string at 7 (D), and use the bar to dip the pitch a half step down and back — landing exactly back at D — 4 times at 60 bpm. Precision, not drama: the bar is an intonation tool here.",
+      "answer": "Four half-step dips returning exactly to pitch.",
+      "difficulty": 6,
+      "metadata": {
+        "gear": "floating trem",
+        "strings": [
+          3
+        ],
+        "frets": [
+          7
+        ],
+        "targetBpm": 60,
+        "subdivision": "quarter",
+        "selfAssess": "5 = every dip is the same depth and the return lands dead on D — verified against a re-picked reference."
+      }
+    },
+    {
+      "id": "N34-3",
+      "nodeId": "N34",
+      "type": "technique_rep",
+      "prompt": "The flutter (gargle): pick the open G string and immediately snap the bar with a quick flick so it oscillates freely — that stuttering warble. 4 attempts; the flutter should be violent but the string keeps ringing.",
+      "answer": "A clear fluttering warble on the ringing open string.",
+      "difficulty": 7,
+      "metadata": { "gate": true,
+        "gear": "floating trem",
+        "strings": [
+          3
+        ],
+        "musicalContext": "the Dimebag-style flutter accent",
+        "selfAssess": "5 = the flutter is fast and even, triggered by one flick, and the note survives it."
+      }
+    },
+    {
+      "id": "N35-1",
+      "nodeId": "N35",
+      "type": "note_id",
+      "prompt": "Diminished-7 symmetry: name the four notes of Bdim7, and explain what happens when you slide any dim7 shape three frets in either direction.",
+      "answer": "B, D, F, G# (Ab). Moving 3 frets gives the same four notes — every note of a dim7 can be its root, so one shape repeats up the whole neck.",
+      "difficulty": 5,
+      "metadata": { "gate": true,
+        "notes": [
+          "B",
+          "D",
+          "F",
+          "G#"
+        ],
+        "selfAssess": "5 = named all four notes and the every-3-frets rule without checking."
+      }
+    },
+    {
+      "id": "N35-2",
+      "nodeId": "N35",
+      "type": "technique_rep",
+      "prompt": "3-string dim7 sweep fragment: G string fret 13 (G#), B string fret 12 (B), high e fret 10 (D) — sweep down and up slowly, notes separate, at 60 bpm. That crooked little shape is the horror-movie chord.",
+      "answer": "A clean swept G#-B-D dim7 fragment both directions.",
+      "difficulty": 8,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "frets": {
+          "3": [
+            13
+          ],
+          "2": [
+            12
+          ],
+          "1": [
+            10
+          ]
+        },
+        "notes": [
+          "G#",
+          "B",
+          "D"
+        ],
+        "selfAssess": "5 = the asymmetric fingering doesn't break the sweep — three distinct notes each way, in time."
+      }
+    },
+    {
+      "id": "N35-3",
+      "nodeId": "N35",
+      "type": "riff",
+      "prompt": "Descending dim7 cascade: sweep the dim7 fragment at 13-12-10, then slide the whole shape down three frets (10-9-7) and sweep again, then once more (7-6-4) — over a chugged open low E pedal if you can manage it. 60 bpm, one sweep per bar. Pure neoclassical villainy.",
+      "answer": "Three dim7 sweeps marching down in minor thirds.",
+      "difficulty": 9,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "frets": {
+          "3": [
+            13,
+            10,
+            7
+          ],
+          "2": [
+            12,
+            9,
+            6
+          ],
+          "1": [
+            10,
+            7,
+            4
+          ]
+        },
+        "musicalContext": "dim7 shapes stacking down the neck over a pedal — instant Yngwie/horror flavor",
+        "selfAssess": "5 = each shift lands in time and in tune; the three sweeps sound like one descending phrase."
+      }
+    },
+    {
+      "id": "N36-1",
+      "nodeId": "N36",
+      "type": "technique_rep",
+      "prompt": "The economy crossing: on the G string play frets 5-7 (down-up), then let the next downstroke fall THROUGH onto the B string fret 5 in one continuous motion — down-up-down-glide. Loop the three notes (C, D, E) at 60 bpm until the crossing feels like one gesture.",
+      "answer": "C-D-E with the string change absorbed into a single downward motion.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "frets": {
+          "3": [
+            5,
+            7
+          ],
+          "2": [
+            5
+          ]
+        },
+        "notes": [
+          "C",
+          "D",
+          "E"
+        ],
+        "selfAssess": "5 = the crossing stroke is genuinely one motion (no separate re-pick), and all three notes are even."
+      }
+    },
+    {
+      "id": "N36-2",
+      "nodeId": "N36",
+      "type": "scale_run",
+      "prompt": "Economy scale ascent: A natural minor, three notes per string (start 6th string 5-7-8), with every string change taken as a continued downstroke (down-up-down, glide, down-up-down...). Ascend the full six strings at 70 bpm.",
+      "answer": "The 3-notes-per-string scale climbed with down-down crossings throughout.",
+      "difficulty": 8,
+      "metadata": {
+        "scale": "A natural minor",
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "frets": {
+          "6": [
+            5,
+            7,
+            8
+          ],
+          "5": [
+            5,
+            7,
+            8
+          ],
+          "4": [
+            5,
+            7,
+            9
+          ],
+          "3": [
+            5,
+            7,
+            9
+          ],
+          "2": [
+            5,
+            6,
+            8
+          ],
+          "1": [
+            5,
+            7,
+            8
+          ]
+        },
+        "selfAssess": "5 = crossings are inaudible — the run flows in one direction with no rhythmic stutter at string changes."
+      }
+    },
+    {
+      "id": "N36-3",
+      "nodeId": "N36",
+      "type": "riff",
+      "prompt": "Economy lick: ascend the top three strings economy-style (G:5-7, B:5-6, e:5-8 — C D E F A C), then close with one fast mini-sweep back down at the 5th fret: e:5 (A), B:5 (E), G:5 (C) — an Am triad. Loop at 70 bpm: run up, sweep home.",
+      "answer": "An ascending economy run capped by a swept descent back to C.",
+      "difficulty": 8,
+      "metadata": {
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "frets": {
+          "3": [
+            5,
+            7
+          ],
+          "2": [
+            5,
+            6
+          ],
+          "1": [
+            5,
+            8
+          ]
+        },
+        "musicalContext": "how economy picking and sweeping are secretly the same skill",
+        "selfAssess": "5 = the up-run and the sweep-down connect without a seam; the loop breathes in time."
+      }
+    },
+    {
+      "id": "N37-1",
+      "nodeId": "N37",
+      "type": "riff",
+      "prompt": "Baroque pedal lick: alternate every note with the open high e as a pedal while the B string climbs A harmonic minor: e0-B5(E)-e0-B6(F)-e0-B9(G#)-e0-B10(A), eighths at 80 bpm, then walk it back down. The open-string pedal against a climbing line is the neoclassical signature.",
+      "answer": "The climbing E-F-G#-A line woven with the open-e pedal, both directions.",
+      "difficulty": 8,
+      "metadata": {
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "frets": {
+          "2": [
+            5,
+            6,
+            9,
+            10
+          ],
+          "1": [
+            0
+          ]
+        },
+        "musicalContext": "Bach-via-Blackmore pedal-point lick",
+        "selfAssess": "5 = pedal notes are even and unaccented, the climbing line sings above them, the G# stretch lands clean."
+      }
+    },
+    {
+      "id": "N37-2",
+      "nodeId": "N37",
+      "type": "scale_run",
+      "prompt": "The descending run: A harmonic minor position 1, top to bottom in strict alternate-picked 16ths at 90 bpm, ending with weight on the low A. Mind the fret-9 stretch on the way down — it likes to buzz under speed.",
+      "answer": "The full harmonic-minor descent at tempo, landing on A.",
+      "difficulty": 9,
+      "metadata": {
+        "scale": "A harmonic minor",
+        "position": 1,
+        "targetBpm": 90,
+        "subdivision": "sixteenth",
+        "selfAssess": "5 = clean and even at 90 including the G# gap, with the final A landing like a verdict."
+      }
+    },
+    {
+      "id": "N37-3",
+      "nodeId": "N37",
+      "type": "riff",
+      "prompt": "The full cadence: one bar of legato A-harmonic-minor descent on the top strings, one swept Am (G:14, B:13, e:12), then resolve to a held E5 (6th string fret 12 + 5th string fret 14) with vibrato. Three Tier-5 skills in one 3-bar phrase at 70 bpm. Compose your own notes — the structure is what's graded: run, sweep, land.",
+      "answer": "A 3-bar phrase: harmonic-minor run → swept Am → held, vibrato'd resolution.",
+      "difficulty": 10,
+      "metadata": {
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "musicalContext": "a complete neoclassical statement — this is the N37 goal-node payoff",
+        "selfAssess": "5 = the three elements connect as one musical sentence, in time, with a convincing landing."
+      }
+    },
+    {
+      "id": "N38-1",
+      "nodeId": "N38",
+      "type": "technique_rep",
+      "prompt": "5-string A minor sweep, 12th position: 5th string fret 12 (A), 4th fret 14 (E), 3rd fret 14 (A), 2nd fret 13 (C), high e fret 12 (E). One slow continuous down-drag, then one up-drag — rolling the fretting fingers so no two notes ring together. 4 passes at 60 bpm.",
+      "answer": "The five-string Am shape swept cleanly both directions.",
+      "difficulty": 9,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "frets": {
+          "5": [
+            12
+          ],
+          "4": [
+            14
+          ],
+          "3": [
+            14
+          ],
+          "2": [
+            13
+          ],
+          "1": [
+            12
+          ]
+        },
+        "notes": [
+          "A",
+          "E",
+          "A",
+          "C",
+          "E"
+        ],
+        "selfAssess": "5 = five separate singing notes each way — the finger-roll never lets two ring at once."
+      }
+    },
+    {
+      "id": "N38-2",
+      "nodeId": "N38",
+      "type": "technique_rep",
+      "prompt": "Sweep + tap extension: the same 5-string Am sweep up, but at the top, tap fret 15 on the high e (G) before the descent — turning the triad into Am7 and adding a peak to the arc. 4 passes at 60 bpm.",
+      "answer": "The full sweep with a clean tapped G crowning each pass.",
+      "difficulty": 10,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "frets": {
+          "5": [
+            12
+          ],
+          "4": [
+            14
+          ],
+          "3": [
+            14
+          ],
+          "2": [
+            13
+          ],
+          "1": [
+            12,
+            15
+          ]
+        },
+        "musicalContext": "the swept-and-tapped arpeggio — modern shred's signature arc",
+        "selfAssess": "5 = the tap doesn't interrupt the sweep's momentum, and the descent right after it stays even."
+      }
+    },
+    {
+      "id": "N38-3",
+      "nodeId": "N38",
+      "type": "riff",
+      "prompt": "Cascade: alternate full 5-string sweeps of Am (12-14-14-13-12) and E major (11-14-13-12-12: G#-E-G#-B-E), one sweep per bar at 60 bpm, 4 bars. Am to E is the harmonic-minor V-i drama in arpeggio form.",
+      "answer": "Am and E sweeps alternating in time, both shapes clean.",
+      "difficulty": 10,
+      "metadata": {
+        "targetBpm": 60,
+        "subdivision": "triplet",
+        "chords": [
+          "Am",
+          "E"
+        ],
+        "frets": {
+          "5": [
+            12,
+            11
+          ],
+          "4": [
+            14
+          ],
+          "3": [
+            14,
+            13
+          ],
+          "2": [
+            13,
+            12
+          ],
+          "1": [
+            12
+          ]
+        },
+        "musicalContext": "the Am/E cascade — neoclassical shred's home progression",
+        "selfAssess": "5 = the shape change between bars is invisible; both arpeggios speak note-for-note at the same volume."
+      }
+    },
+    {
+      "id": "N39-1",
+      "nodeId": "N39",
+      "type": "technique_rep",
+      "prompt": "Two-finger tapping: hold frets 5 and 8 on the high e; tap fret 12 with your index AND fret 15 with your ring/middle in sequence — A, C, E, G loop (fretted-fretted-tap-tap) as even 16ths at 60 bpm.",
+      "answer": "A four-note Am7 loop using two independent tapping fingers.",
+      "difficulty": 9,
+      "metadata": {
+        "strings": [
+          1
+        ],
+        "frets": [
+          5,
+          8,
+          12,
+          15
+        ],
+        "notes": [
+          "A",
+          "C",
+          "E",
+          "G"
+        ],
+        "targetBpm": 60,
+        "subdivision": "sixteenth",
+        "selfAssess": "5 = both tapped notes match the fretted notes' volume, and the second tapping finger doesn't rush."
+      }
+    },
+    {
+      "id": "N39-2",
+      "nodeId": "N39",
+      "type": "scale_run",
+      "prompt": "Tapped scale on one string: A minor on the high e using fretted 5-7-8 (A-B-C) plus taps at 10 and 12 (D-E) — ascend and descend the five notes as continuous legato+tap at 70 bpm. One string, two octaves of reach.",
+      "answer": "A-B-C-D-E up and down on a single string, seamless.",
+      "difficulty": 9,
+      "metadata": {
+        "strings": [
+          1
+        ],
+        "frets": [
+          5,
+          7,
+          8,
+          10,
+          12
+        ],
+        "notes": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+        ],
+        "targetBpm": 70,
+        "subdivision": "triplet",
+        "musicalContext": "single-string scale tapping — how modern players sprint along one string",
+        "selfAssess": "5 = the handoff between fretting-hand legato and taps is inaudible in both directions."
+      }
+    },
+    {
+      "id": "N39-3",
+      "nodeId": "N39",
+      "type": "technique_rep",
+      "prompt": "8-finger burst: fretting hand plays frets 5-6-7-8 (all four fingers) on the B string, then the tapping hand continues 9-10-11-12 (all four fingers) — one 8-note chromatic wave up and back. 2 slow passes; evenness beats speed by a mile here.",
+      "answer": "An 8-note two-handed chromatic wave, every note speaking.",
+      "difficulty": 10,
+      "metadata": { "targetBpm": 60, "subdivision": "sixteenth",
+        "strings": [
+          2
+        ],
+        "frets": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "selfAssess": "5 = all 8 notes at equal volume — especially the tapping hand's pinky, which is everyone's weakest link."
+      }
+    },
+    {
+      "id": "N40-1",
+      "nodeId": "N40",
+      "type": "technique_rep",
+      "prompt": "7/8 chug: count '1-2, 1-2, 1-2-3' out loud and palm-mute the open low E in straight eighths through it — seven notes per bar, accenting the 1, 3 and 5 (the group starts). 90 bpm, 8 bars. The missing eighth note is the hook.",
+      "answer": "A steady 7/8 chug with the 2+2+3 grouping audible in the accents.",
+      "difficulty": 7,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 90,
+        "subdivision": "eighth",
+        "musicalContext": "odd meter as groove, not math — count until it dances",
+        "selfAssess": "5 = you can keep the 7 going without counting aloud, and the turnaround never adds or drops a note."
+      }
+    },
+    {
+      "id": "N40-2",
+      "nodeId": "N40",
+      "type": "riff",
+      "prompt": "5/4 groove riff: four beats of palm-muted open-E eighths, then a ringing G5 stab held through beat 5 — the extra beat IS the riff. 90 bpm, 8 bars, no rushing the stab.",
+      "answer": "A five-beat loop: four of chug, one of ringing G5.",
+      "difficulty": 7,
+      "metadata": {
+        "targetBpm": 90,
+        "subdivision": "eighth",
+        "chords": [
+          "G5"
+        ],
+        "musicalContext": "prog-metal verse groove — odd meter you can nod to",
+        "selfAssess": "5 = the bar feels natural (not counted), and bar 8 lands exactly where bar 1 did."
+      }
+    },
+    {
+      "id": "N40-3",
+      "nodeId": "N40",
+      "type": "riff",
+      "prompt": "Djent displacement: in straight 4/4 at 80 bpm, chug 16ths on the muted low E but accent in groups of 3+3+3+3+4 — the accents drift across the beat and snap back together at the bar line. 4 bars. Keep the 16ths robotic; only the accents move.",
+      "answer": "A 4/4 16th-note chug with the 3-3-3-3-4 accent pattern locking every bar.",
+      "difficulty": 8,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 80,
+        "subdivision": "sixteenth",
+        "pattern": [
+          3,
+          3,
+          3,
+          3,
+          4
+        ],
+        "musicalContext": "the djent rhythmic illusion — polymetric accents over a straight grid",
+        "selfAssess": "5 = accents are clearly louder than the grid, drift convincingly, and the bar-line snap is exact."
+      }
+    },
+    {
+      "id": "N41-1",
+      "nodeId": "N41",
+      "type": "technique_rep",
+      "prompt": "Accent shift: straight 16ths on the muted low E at 80 bpm, but accent every 3rd note. The accent walks around the beat and realigns every 3 beats. 4 bars — keep the click sacred while the accent wanders.",
+      "answer": "Even 16ths with a clean every-3rd-note accent cycle.",
+      "difficulty": 8,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 80,
+        "subdivision": "sixteenth",
+        "selfAssess": "5 = the underlying 16ths never flinch; only the accent moves, and you always know where beat 1 is."
+      }
+    },
+    {
+      "id": "N41-2",
+      "nodeId": "N41",
+      "type": "technique_rep",
+      "prompt": "3 over 4: with the metronome on quarters at 60 bpm, chug palm-muted dotted-eighth notes — three evenly-spaced hits for every four clicks... precisely: a hit every 1.5 clicks, realigning with the click every 3 beats. Feel the two grids pull against each other for 4 bars.",
+      "answer": "A steady dotted-eighth pulse floating over the quarter click, realigning on schedule.",
+      "difficulty": 8,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 60,
+        "subdivision": "sixteenth",
+        "musicalContext": "the fundamental metal polyrhythm (Meshuggah's engine, at learner speed)",
+        "selfAssess": "5 = the dotted pulse is perfectly even (not lumpy), and the realignment lands without adjustment."
+      }
+    },
+    {
+      "id": "N41-3",
+      "nodeId": "N41",
+      "type": "riff",
+      "prompt": "Displacement riff: write a 3-beat chug-pattern (e.g. chug-chug-REST in eighths) and loop it relentlessly inside 4/4 at 80 bpm — it lands somewhere new each bar and realigns every 3 bars. Play the full 3-bar cycle twice without losing beat 1.",
+      "answer": "A 3-beat figure cycling against 4/4, realigning after 3 bars, twice through.",
+      "difficulty": 9,
+      "metadata": {
+        "strings": [
+          6
+        ],
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "musicalContext": "pattern-vs-meter displacement — writing riffs that feel like machinery",
+        "selfAssess": "5 = you can feel both the pattern and the bar simultaneously; the double realignment is dead-on."
+      }
+    },
+    {
+      "id": "N42-1",
+      "nodeId": "N42",
+      "type": "riff",
+      "prompt": "Low-register groove — on a 7-string's low B, or tune your 6th string down to Drop A/B territory if your strings allow (Drop D works as a lighter substitute): a sparse chug groove with real rests — CHUG-CHUG-rest-CHUG-rest — at 80 bpm. On strings this low, the silence needs as much control as the notes.",
+      "answer": "A sparse, tight low-string groove where the rests are truly silent.",
+      "difficulty": 7,
+      "metadata": {
+        "gear": "7-string or Drop A (Drop D acceptable)",
+        "strings": [
+          6
+        ],
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "pattern": [
+          "chug",
+          "chug",
+          "rest",
+          "chug",
+          "rest"
+        ],
+        "selfAssess": "5 = zero string noise in the rests — the palm fully kills the low string between hits."
+      }
+    },
+    {
+      "id": "N42-2",
+      "nodeId": "N42",
+      "type": "riff",
+      "prompt": "Wide-register riff: alternate a low chugged root (lowest string, open) with a high ringing dyad stab — e.g. the G+B strings at fret 12 — two worlds in one riff, 80 bpm, 4 bars. The register jump is the modern-metal sound.",
+      "answer": "Low chugs answered by clean high dyad stabs, in time.",
+      "difficulty": 8,
+      "metadata": {
+        "gear": "7-string or Drop A (Drop D acceptable)",
+        "targetBpm": 80,
+        "subdivision": "eighth",
+        "frets": {
+          "3": [
+            12
+          ],
+          "2": [
+            12
+          ]
+        },
+        "musicalContext": "djent's signature low-riff/high-shimmer contrast",
+        "selfAssess": "5 = the jump between registers is instant and clean — no fumble, no bleed between the two textures."
+      }
+    },
+    {
+      "id": "N42-3",
+      "nodeId": "N42",
+      "type": "technique_rep",
+      "prompt": "Low-string articulation: fast palm-muted 16th bursts (4 notes) on your lowest string with full rests between — burst-rest-burst-rest at 90 bpm for 4 bars. Very low strings smear easily; every note in the burst must have its own attack.",
+      "answer": "Tight 4-note bursts, each note articulate, each rest silent.",
+      "difficulty": 8,
+      "metadata": {
+        "gear": "7-string or Drop A (Drop D acceptable)",
+        "strings": [
+          6
+        ],
+        "targetBpm": 90,
+        "subdivision": "sixteenth",
+        "selfAssess": "5 = the four notes of every burst are countable by ear — no blur — and the bursts never drift off the click."
+      }
+    }
+  ]
+}

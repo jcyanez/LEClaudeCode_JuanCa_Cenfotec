@@ -1,0 +1,269 @@
+{
+  "_meta": {
+    "path": "metal",
+    "description": "Drill items for FretPath Tier 0-2 foundation nodes (N01-N12). Drop-in seed matching the Item model in the build spec. Standard tuning unless metadata says otherwise: strings 6=low E, 5=A, 4=D, 3=G, 2=B, 1=high e. Grades are self-rated 0-5; each item's metadata.selfAssess tells the user what a 5 feels like.",
+    "itemModel": "Item { id, nodeId, type, prompt, answer, difficulty(1-10), metadata }",
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "id": "N01-1", "nodeId": "N01", "type": "technique_rep",
+      "prompt": "Sit with the guitar on your leg, fretting wrist relaxed and low. Hold the pick between your thumb and the side of your index finger. Play 8 slow downstrokes on the open low E (6th) string.",
+      "answer": "8 even, ringing downstrokes with a relaxed hand.",
+      "difficulty": 1,
+      "metadata": { "gate": true, "strings": [6], "targetReps": 8, "selfAssess": "5 = every note rings clearly, hand stays loose, no gripping tension." }
+    },
+    {
+      "id": "N01-2", "nodeId": "N01", "type": "technique_rep",
+      "prompt": "Pick-angle drill: play the open A (5th) string 8 times, angling the pick roughly 20 degrees so it glides across the string instead of catching flat.",
+      "answer": "8 smooth strokes, no snagging.",
+      "difficulty": 1,
+      "metadata": { "gate": true, "strings": [5], "targetReps": 8, "selfAssess": "5 = pick glides smoothly, consistent volume, no scratchy catches." }
+    },
+    {
+      "id": "N02-1", "nodeId": "N02", "type": "riff",
+      "prompt": "Chromatic climb on the low E: frets 1-2-3-4, one finger per fret (fingers 1-2-3-4), tight and even. This is the riff engine behind half of thrash, Slayer to early Metallica.",
+      "answer": "A four-note chromatic run F-F#-G-G#, one finger per fret.",
+      "difficulty": 2,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth", "strings": [6], "frets": [1, 2, 3, 4], "notes": ["F", "F#", "G", "G#"], "musicalContext": "chromatic thrash riff", "selfAssess": "5 = each note clean and buzz-free, evenly spaced, fingertips landing just behind the fret." }
+    },
+    {
+      "id": "N02-2", "nodeId": "N02", "type": "riff",
+      "prompt": "Descending chromatic lick on the high e string: frets 4-3-2-1 (fingers 4-3-2-1), even and controlled. Play it like a lead fill, not a warm-up.",
+      "answer": "A four-note descending chromatic lick G#-G-F#-F.",
+      "difficulty": 2,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth", "strings": [1], "frets": [4, 3, 2, 1], "notes": ["G#", "G", "F#", "F"], "musicalContext": "descending chromatic lead fill", "selfAssess": "5 = clean tone on the thin string, no muting from neighbouring fingers, evenly timed." }
+    },
+    {
+      "id": "N02-3", "nodeId": "N02", "type": "technique_rep",
+      "prompt": "Finger independence: fret the 3rd string at fret 5 with your 3rd finger only, other fingers hovering close, and pluck it 4 times cleanly.",
+      "answer": "Note C, played cleanly with the 3rd finger.",
+      "difficulty": 2,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth", "strings": [3], "frets": [5], "notes": ["C"], "selfAssess": "5 = clean C each time with the other fingers relaxed and off the strings." }
+    },
+    {
+      "id": "N03-1", "nodeId": "N03", "type": "note_id",
+      "prompt": "In guitar tab, the number '3' written on the TOP line (thinnest string) means which string and which fret?",
+      "answer": "1st string (high e), 3rd fret = the note G.",
+      "difficulty": 1,
+      "metadata": { "gate": true, "selfAssess": "5 = answered from memory without checking." }
+    },
+    {
+      "id": "N03-2", "nodeId": "N03", "type": "note_id",
+      "prompt": "Read this tab fragment on the high e string:  e|--0--3--|  Name the two notes in order.",
+      "answer": "Open string (E), then 3rd fret (G).",
+      "difficulty": 2,
+      "metadata": { "gate": true, "strings": [1], "frets": [0, 3], "notes": ["E", "G"], "selfAssess": "5 = named both correctly." }
+    },
+    {
+      "id": "N03-3", "nodeId": "N03", "type": "note_id",
+      "prompt": "In a chord diagram, what does a number printed just below a string (at the bottom) usually tell you?",
+      "answer": "Which fretting finger to use for that note (1=index, 2=middle, 3=ring, 4=pinky).",
+      "difficulty": 1,
+      "metadata": { "gate": true, "selfAssess": "5 = knew it without hesitation." }
+    },
+    {
+      "id": "N04-1", "nodeId": "N04", "type": "technique_rep",
+      "prompt": "Set a metronome to 60 bpm. Play ONE downstroke on the open low E exactly on each click, for 16 clicks. Lock every note to the beat.",
+      "answer": "16 quarter notes perfectly on the click.",
+      "difficulty": 2,
+      "metadata": { "strings": [6], "targetBpm": 60, "subdivision": "quarter", "selfAssess": "5 = you can't hear the click because your note lands right on top of it." }
+    },
+    {
+      "id": "N04-2", "nodeId": "N04", "type": "technique_rep",
+      "prompt": "At 60 bpm, play TWO evenly spaced notes per click (eighth notes) on the open A string for 16 clicks.",
+      "answer": "32 even eighth notes, 2 per click.",
+      "difficulty": 3,
+      "metadata": { "strings": [5], "targetBpm": 60, "subdivision": "eighth", "selfAssess": "5 = both notes evenly spaced, second note landing exactly halfway between clicks." }
+    },
+    {
+      "id": "N04-3", "nodeId": "N04", "type": "technique_rep",
+      "prompt": "At 80 bpm, play steady quarter notes on the open D string for 16 clicks without drifting ahead of or behind the beat.",
+      "answer": "16 quarter notes locked to 80 bpm.",
+      "difficulty": 3,
+      "metadata": { "strings": [4], "targetBpm": 80, "subdivision": "quarter", "selfAssess": "5 = rock-steady, no rushing or dragging." }
+    },
+    {
+      "id": "N05-1", "nodeId": "N05", "type": "chord_change",
+      "prompt": "Play a G5 power chord: root on the 6th string fret 3 (G) plus the 5th string fret 5. Strum ONLY those two strings, cleanly, muting the rest.",
+      "answer": "G5 = 6th string fret 3 + 5th string fret 5.",
+      "difficulty": 3,
+      "metadata": { "gate": true, "chord": "G5", "strings": [6, 5], "frets": { "6": 3, "5": 5 }, "selfAssess": "5 = both notes ring, no other strings sounding." }
+    },
+    {
+      "id": "N05-2", "nodeId": "N05", "type": "chord_change",
+      "prompt": "Play an A5 power chord: 5th string open (A) plus 4th string fret 2. Mute everything else.",
+      "answer": "A5 = 5th string open + 4th string fret 2.",
+      "difficulty": 3,
+      "metadata": { "gate": true, "chord": "A5", "strings": [5, 4], "frets": { "5": 0, "4": 2 }, "selfAssess": "5 = clean two-note chord, no ringing 6th string." }
+    },
+    {
+      "id": "N05-3", "nodeId": "N05", "type": "note_id",
+      "prompt": "Power chords are movable. For a C5 with its root on the 6th string, which fret is the root on?",
+      "answer": "6th string fret 8 (C), with the 5th string fret 10 as the fifth.",
+      "difficulty": 4,
+      "metadata": { "gate": true, "chord": "C5", "strings": [6, 5], "frets": { "6": 8, "5": 10 }, "selfAssess": "5 = located it from knowing the 6th-string note names." }
+    },
+    {
+      "id": "N05-4", "nodeId": "N05", "type": "chord_change",
+      "prompt": "Change cleanly between G5 (6th fret 3) and C5 (6th fret 8), keeping the same shape and sliding, 4 times back and forth.",
+      "answer": "Smooth G5 <-> C5 changes.",
+      "difficulty": 4,
+      "metadata": { "targetBpm": 60, "subdivision": "quarter", "chords": ["G5", "C5"], "targetReps": 4, "selfAssess": "5 = no gap or buzz during the shift, both chords land clean." }
+    },
+    {
+      "id": "N06-1", "nodeId": "N06", "type": "technique_rep",
+      "prompt": "Rest the side of your picking-hand palm lightly on the strings right where they meet the bridge. Play the open low E with the palm mute engaged: aim for a tight, thudding 'chug', not a ringing note. 8 downstrokes.",
+      "answer": "8 tight, muted chugs.",
+      "difficulty": 3,
+      "metadata": { "gate": true, "strings": [6], "targetReps": 8, "selfAssess": "5 = short, punchy thud with pitch still audible; not fully dead, not ringing open." }
+    },
+    {
+      "id": "N06-2", "nodeId": "N06", "type": "technique_rep",
+      "prompt": "Palm-mute a G5 power chord and play 8 even downstrokes, keeping the mute consistent.",
+      "answer": "8 tight muted G5 chugs.",
+      "difficulty": 4,
+      "metadata": { "targetBpm": 70, "subdivision": "eighth", "chord": "G5", "targetReps": 8, "selfAssess": "5 = every chug equally tight, palm pressure steady." }
+    },
+    {
+      "id": "N06-3", "nodeId": "N06", "type": "technique_rep",
+      "prompt": "Contrast drill on the low E: play 2 palm-muted notes, then 2 open (unmuted) notes, and repeat for 4 groups. Feel your palm lift and settle.",
+      "answer": "Alternating muted/open groups, clear contrast.",
+      "difficulty": 4,
+      "metadata": { "targetBpm": 70, "subdivision": "eighth", "strings": [6], "selfAssess": "5 = obvious difference between the tight muted notes and the ringing open ones, timing even." }
+    },
+    {
+      "id": "N07-1", "nodeId": "N07", "type": "technique_rep",
+      "prompt": "At 60 bpm, play the open low E using STRICT alternate picking (down-up-down-up). Start one note per click, then move to two per click (eighth notes).",
+      "answer": "Even down-up eighth notes at 60 bpm.",
+      "difficulty": 4,
+      "metadata": { "strings": [6], "targetBpm": 60, "selfAssess": "5 = up-strokes as strong and even as down-strokes." }
+    },
+    {
+      "id": "N07-2", "nodeId": "N07", "type": "technique_rep",
+      "prompt": "Alternate-pick the notes at frets 5-6-7-8 on the 6th string (one finger per fret), down-up-down-up, as eighth notes at 60 bpm.",
+      "answer": "A, A#, B, C alternate-picked evenly.",
+      "difficulty": 5,
+      "metadata": { "strings": [6], "frets": [5, 6, 7, 8], "notes": ["A", "A#", "B", "C"], "targetBpm": 60, "selfAssess": "5 = fretting and picking hands perfectly in sync, no flams." }
+    },
+    {
+      "id": "N07-3", "nodeId": "N07", "type": "technique_rep",
+      "prompt": "Alternate pick ACROSS two strings: open 6th string then open 5th string, down-up, at 70 bpm eighth notes.",
+      "answer": "Clean string crossing with strict alternate picking.",
+      "difficulty": 5,
+      "metadata": { "strings": [6, 5], "targetBpm": 70, "selfAssess": "5 = smooth crossing, no accidental extra string noise." }
+    },
+    {
+      "id": "N08-1", "nodeId": "N08", "type": "technique_rep",
+      "prompt": "All DOWNSTROKES (no up-strokes) on a palm-muted low E: 8 eighth notes at 80 bpm. This is the core metal rhythm-picking motion.",
+      "answer": "8 even palm-muted downstrokes.",
+      "difficulty": 5,
+      "metadata": { "strings": [6], "targetBpm": 80, "subdivision": "eighth", "selfAssess": "5 = consistent attack and spacing despite using only downstrokes; forearm stays relaxed." }
+    },
+    {
+      "id": "N08-2", "nodeId": "N08", "type": "technique_rep",
+      "prompt": "Downpicked G5 chugs: all downstrokes, quarter notes at 80 bpm, for 16 beats.",
+      "answer": "16 tight downpicked G5 chugs.",
+      "difficulty": 5,
+      "metadata": { "chord": "G5", "targetBpm": 80, "subdivision": "quarter", "selfAssess": "5 = even, punchy, no fatigue creeping in." }
+    },
+    {
+      "id": "N08-3", "nodeId": "N08", "type": "riff",
+      "prompt": "Downpicked riff: alternate 3x palm-muted open low E, then 1x G5, all downstrokes, at 80 bpm. Repeat for 4 bars.",
+      "answer": "E-E-E-G5 pattern, all downpicked.",
+      "difficulty": 6,
+      "metadata": { "targetBpm": 80, "pattern": ["E", "E", "E", "G5"], "selfAssess": "5 = the chord accents stay in time and the whole thing grooves." }
+    },
+    {
+      "id": "N09-1", "nodeId": "N09", "type": "technique_rep",
+      "prompt": "Octave shape (6th-4th strings): root on 6th string fret 5 (A), octave on 4th string fret 7 (A). Fret both with the 5th string muted in between, and pluck so both A's ring together.",
+      "answer": "A octave, 6th fret 5 + 4th fret 7.",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "quarter", "strings": [6, 4], "frets": { "6": 5, "4": 7 }, "notes": ["A", "A"], "selfAssess": "5 = both notes ring, the muted middle string stays silent." }
+    },
+    {
+      "id": "N09-2", "nodeId": "N09", "type": "note_id",
+      "prompt": "Slide that same 6th-4th octave shape up so the root sits on the 6th string fret 8. What note are you now playing (in both octaves)?",
+      "answer": "C.",
+      "difficulty": 5,
+      "metadata": { "gate": true, "strings": [6, 4], "frets": { "6": 8, "4": 10 }, "notes": ["C", "C"], "selfAssess": "5 = named it from the 6th-string note map." }
+    },
+    {
+      "id": "N09-3", "nodeId": "N09", "type": "technique_rep",
+      "prompt": "Octave shape on the 5th-3rd strings: root on 5th string fret 3 (C), octave on 3rd string fret 5 (C). Mute the 4th string between them and play cleanly.",
+      "answer": "C octave, 5th fret 3 + 3rd fret 5.",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "quarter", "strings": [5, 3], "frets": { "5": 3, "3": 5 }, "notes": ["C", "C"], "selfAssess": "5 = clean two-note octave, middle string silent." }
+    },
+    {
+      "id": "N10-1", "nodeId": "N10", "type": "scale_run",
+      "prompt": "A minor pentatonic, position 1 (root = 6th string fret 5). Play it ASCENDING, two notes per string:  6th(5,8)  5th(5,7)  4th(5,7)  3rd(5,7)  2nd(5,8)  1st(5,8).",
+      "answer": "A C D E G A C D E G A C (ascending through the box).",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth", "scale": "A minor pentatonic", "position": 1, "frets": { "6": [5, 8], "5": [5, 7], "4": [5, 7], "3": [5, 7], "2": [5, 8], "1": [5, 8] }, "selfAssess": "5 = every note even in volume and timing, no buzzes." }
+    },
+    {
+      "id": "N10-2", "nodeId": "N10", "type": "scale_run",
+      "prompt": "Play the same A minor pentatonic position 1 box DESCENDING, from the high e string back down to the low E.",
+      "answer": "Same box in reverse.",
+      "difficulty": 5,
+      "metadata": { "targetBpm": 60, "subdivision": "eighth", "scale": "A minor pentatonic", "position": 1, "selfAssess": "5 = as smooth descending as ascending." }
+    },
+    {
+      "id": "N10-3", "nodeId": "N10", "type": "note_id",
+      "prompt": "Name the five notes of the A minor pentatonic scale, in order.",
+      "answer": "A, C, D, E, G.",
+      "difficulty": 3,
+      "metadata": { "gate": true, "scale": "A minor pentatonic", "notes": ["A", "C", "D", "E", "G"], "selfAssess": "5 = recalled all five from memory." }
+    },
+    {
+      "id": "N10-4", "nodeId": "N10", "type": "scale_run",
+      "prompt": "Play A minor pentatonic position 1 ascending at 70 bpm, strict alternate picking, two notes per click.",
+      "answer": "The box, alternate-picked at 70 bpm eighth notes.",
+      "difficulty": 6,
+      "metadata": { "scale": "A minor pentatonic", "position": 1, "targetBpm": 70, "selfAssess": "5 = locked to the click with clean down-up picking throughout." }
+    },
+    {
+      "id": "N11-1", "nodeId": "N11", "type": "note_id",
+      "prompt": "Tune your 6th string DOWN a whole step (from E). Play the open 6th string now — what note is it?",
+      "answer": "D (this is Drop D tuning).",
+      "difficulty": 2,
+      "metadata": { "gate": true, "tuning": "Drop D", "strings": [6], "selfAssess": "5 = tuned accurately to D and knew the answer." }
+    },
+    {
+      "id": "N11-2", "nodeId": "N11", "type": "chord_change",
+      "prompt": "In Drop D, power chords on the 6th-5th-4th strings can be barred with ONE finger. Barre the open strings (D5), then barre fret 3 (F5). Play both.",
+      "answer": "One-finger D5 (open) and F5 (fret 3) across strings 6-5-4.",
+      "difficulty": 4,
+      "metadata": { "gate": true, "tuning": "Drop D", "strings": [6, 5, 4], "chords": ["D5", "F5"], "selfAssess": "5 = all three strings ring under the single barred finger." }
+    },
+    {
+      "id": "N11-3", "nodeId": "N11", "type": "riff",
+      "prompt": "In Drop D, play a one-finger palm-muted riff: D5 (open) -> G5 (fret 5) -> F5 (fret 3), palm-muted, at 90 bpm. Repeat 4 times.",
+      "answer": "Open-5-3 one-finger power-chord riff, palm-muted.",
+      "difficulty": 6,
+      "metadata": { "tuning": "Drop D", "chords": ["D5", "G5", "F5"], "targetBpm": 90, "selfAssess": "5 = tight mute, clean shifts, steady groove." }
+    },
+    {
+      "id": "N12-1", "nodeId": "N12", "type": "technique_rep",
+      "prompt": "Core chug: palm-muted open low E, ALL downstrokes, straight eighth notes at 90 bpm, held for 2 bars (16 notes). Keep it tight and machine-even.",
+      "answer": "16 even palm-muted downpicked eighth notes at 90 bpm.",
+      "difficulty": 6,
+      "metadata": { "strings": [6], "targetBpm": 90, "subdivision": "eighth", "selfAssess": "5 = perfectly even, tight mute, no tempo drift across the 2 bars." }
+    },
+    {
+      "id": "N12-2", "nodeId": "N12", "type": "riff",
+      "prompt": "Single-note riff: 8x palm-muted open low E, then 1 open G5 accent (let it ring), then repeat. 90 bpm.",
+      "answer": "8 chugs + 1 accent, looped.",
+      "difficulty": 6,
+      "metadata": { "targetBpm": 90, "selfAssess": "5 = chugs stay tight and the accent pops out clearly in time." }
+    },
+    {
+      "id": "N12-3", "nodeId": "N12", "type": "riff",
+      "prompt": "Chugging with rests: play mute - mute - REST - mute on the low E (a syncopated pattern), 4 bars at 90 bpm. Practise clean starts and dead stops.",
+      "answer": "Syncopated chug pattern with clean rests.",
+      "difficulty": 7,
+      "metadata": { "strings": [6], "targetBpm": 90, "pattern": ["chug", "chug", "rest", "chug"], "selfAssess": "5 = the rests are truly silent (palm kills the string) and the pattern stays locked to the beat." }
+    }
+  ]
+}

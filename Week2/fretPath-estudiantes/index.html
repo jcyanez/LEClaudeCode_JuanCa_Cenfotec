@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#05060a" />
+    <title>FretPath — always know what to practice next</title>
+    <meta
+      name="description"
+      content="FretPath maps guitar as a skill tree and schedules your reviews with spaced repetition. Pick a goal, follow the lit path — starting with Metal."
+    />
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://calandur.com" />
+    <meta property="og:title" content="FretPath — always know what to practice next" />
+    <meta
+      property="og:description"
+      content="A skill tree + spaced repetition for guitar. Pick a goal, follow the lit path — starting with Metal."
+    />
+    <meta property="og:image" content="https://calandur.com/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+  </head>
+  <body class="bg-[#05060a] text-zinc-100 antialiased">
+    <!-- Nav -->
+    <header class="sticky top-0 z-40 border-b border-zinc-900 bg-[#05060a]/80 backdrop-blur">
+      <nav class="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
+        <span class="flex items-baseline gap-2.5">
+          <span class="text-2xl text-[#e9e4d6]" style="font-family:'Pirata One',Georgia,serif">FretPath</span>
+          <span class="hidden text-xs font-semibold uppercase tracking-widest text-zinc-500 sm:inline">by Calandur</span>
+        </span>
+        <a
+          href="/app.html"
+          class="rounded-lg bg-[#e9e4d6] px-4 py-2 text-sm font-semibold text-zinc-950 transition-colors hover:bg-white"
+          data-cta-label
+        >Start practicing</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="mx-auto max-w-3xl px-5 pb-14 pt-20 text-center sm:pt-28">
+        <p class="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-[#edc453]">
+          Guitar practice, structured
+        </p>
+        <h1 class="text-4xl font-black leading-tight tracking-tight sm:text-6xl">
+          Always know what to<br class="hidden sm:block" />
+          practice next.
+        </h1>
+        <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-zinc-400">
+          Guitar isn't hard because material is scarce — it's hard because nobody tells you
+          <em class="text-zinc-200">what to learn next</em>. FretPath maps guitar as a skill tree
+          and schedules your reviews with spaced repetition. Pick a goal, follow the lit path.
+        </p>
+        <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <a
+            href="/app.html"
+            class="w-full rounded-xl bg-[#e9e4d6] px-8 py-4 text-lg font-bold text-zinc-950 shadow-lg shadow-black/60 transition-colors hover:bg-white sm:w-auto"
+            data-cta-label
+          >Start the Metal path</a>
+          <a
+            href="#map"
+            class="w-full rounded-xl border border-zinc-800 px-8 py-4 text-lg font-semibold text-zinc-300 transition-colors hover:bg-zinc-900 sm:w-auto"
+          >See the map</a>
+        </div>
+        <p class="mt-5 text-sm text-zinc-600">
+          Free · no account · works offline · your data never leaves your device
+        </p>
+      </section>
+
+      <!-- The map -->
+      <section id="map" class="mx-auto max-w-5xl px-5 py-14">
+        <h2 class="text-center text-3xl sm:text-4xl" style="font-family:'Pirata One',Georgia,serif">
+          One path. <span class="text-[#edc453]">42 skills.</span> No guesswork.
+        </h2>
+        <p class="mx-auto mt-3 max-w-2xl text-center text-zinc-400">
+          The Metal path sails from posture and power chords to sweep cascades and polyrhythms.
+          Mastered skills are <span class="text-[#edc453]">struck gold</span>, open skills shine
+          <span class="text-zinc-100">bone-white</span>, and everything beyond stays dark until its
+          foundations hold. Skills you neglect <em class="text-[#e0455c]">owe blood</em> — and the
+          chart tells you.
+        </p>
+        <div
+          id="map-embed"
+          class="pointer-events-none mt-10 select-none overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl"
+        ></div>
+        <p class="mt-3 text-center text-xs text-zinc-600">
+          The Metal path, a few weeks in.
+        </p>
+      </section>
+
+      <!-- Value props -->
+      <section class="mx-auto max-w-5xl px-5 py-14">
+        <div class="grid gap-6 sm:grid-cols-3">
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6">
+            <div class="mb-3 text-2xl">🗺️</div>
+            <h3 class="mb-2 font-bold text-zinc-100">A skill tree, not a course</h3>
+            <p class="text-sm leading-relaxed text-zinc-400">
+              Every skill unlocks when its prerequisites are truly mastered — so you're always
+              working on something you're ready for, never drowning in an infinite menu.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6">
+            <div class="mb-3 text-2xl">🧠</div>
+            <h3 class="mb-2 font-bold text-zinc-100">Reviews timed by science</h3>
+            <p class="text-sm leading-relaxed text-zinc-400">
+              Spaced repetition schedules each drill right before you'd forget it. Skills you've
+              mastered cost less and less to keep — minutes a day, not hours.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6">
+            <div class="mb-3 text-2xl">⏱️</div>
+            <h3 class="mb-2 font-bold text-zinc-100">Sessions that fit your life</h3>
+            <p class="text-sm leading-relaxed text-zinc-400">
+              Pick 10, 25, or 45 minutes. Built-in metronome, tuning tones, and honest
+              self-grading. Finishable sessions are the ones that become habits.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="mx-auto max-w-3xl px-5 py-14">
+        <h2 class="text-center text-3xl sm:text-4xl" style="font-family:'Pirata One',Georgia,serif">How it works</h2>
+        <ol class="mt-8 space-y-6">
+          <li class="flex gap-4">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 font-black text-[#edc453]">1</span>
+            <div>
+              <h3 class="font-bold">Pick a goal</h3>
+              <p class="text-sm text-zinc-400">Become a metal player. (Blues and more paths are coming — the tree is built for it.)</p>
+            </div>
+          </li>
+          <li class="flex gap-4">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 font-black text-[#edc453]">2</span>
+            <div>
+              <h3 class="font-bold">Play today's session</h3>
+              <p class="text-sm text-zinc-400">A ~25-minute mix of reviews that are due, one stretch challenge, and something new — assembled for you, every day.</p>
+            </div>
+          </li>
+          <li class="flex gap-4">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-900 font-black text-[#edc453]">3</span>
+            <div>
+              <h3 class="font-bold">Watch the chart turn gold</h3>
+              <p class="text-sm text-zinc-400">Mastery unlocks new skills down the chart. Keep your streak, keep your foundations strong, keep sailing.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Final CTA -->
+      <section class="mx-auto max-w-3xl px-5 pb-24 pt-10 text-center">
+        <h2 class="text-3xl sm:text-4xl" style="font-family:'Pirata One',Georgia,serif">Your next practice session is ready.</h2>
+        <a
+          href="/app.html"
+          class="mt-7 inline-block rounded-xl bg-[#e9e4d6] px-10 py-4 text-lg font-bold text-zinc-950 shadow-lg shadow-black/60 transition-colors hover:bg-white"
+          data-cta-label
+        >Start the Metal path</a>
+        <p class="mt-4 text-sm text-zinc-600">Grab your guitar first. 🤘</p>
+      </section>
+    </main>
+
+    <footer class="border-t border-zinc-900 py-8">
+      <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 px-5 text-xs text-zinc-600 sm:flex-row">
+        <span>© 2026 Calandur · FretPath</span>
+        <span>Local-first: your practice data lives in your browser, not on our servers.</span>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/landing.ts"></script>
+  </body>
+</html>
