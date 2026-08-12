@@ -12,7 +12,15 @@ import {
   sembrarSalas,
 } from '../cartelera/cartelera.js'
 import { tomadas, tomar } from '../ocupacion/ocupacion.js'
-import { ButacasYaTomadas, buscarCompra, jornadaDe, venderEnTaquilla } from './venta.js'
+import {
+  bloquear,
+  ButacasYaTomadas,
+  buscarCompra,
+  jornadaDe,
+  pagar,
+  venderEnTaquilla,
+  type Avisos,
+} from './venta.js'
 
 const HOY = '2026-08-12'
 const AHORA = '2026-08-14T18:00:00'
@@ -222,3 +230,157 @@ describe('venta: compra en taquilla (T8)', () => {
     )
   })
 })
+
+/** Cola de avisos simulada: T14 trae la real; el contrato ya está fijo (PLAN, Fase 3). */
+function avisosSimulados(): Avisos & { encolados: { destinatario: string; asunto: string; cuerpo: string }[] } {
+  const encolados: { destinatario: string; asunto: string; cuerpo: string }[] = []
+  return {
+    encolados,
+    encolar(destinatario, asunto, cuerpo) {
+      encolados.push({ destinatario, asunto, cuerpo })
+    },
+  }
+}
+
+const CONTACTO = { nombre: 'Ana Solano', correo: 'ana@correo.com', telefono: '8812 4455' }
+
+describe('venta: compra por internet (T9)', () => {
+  it('bloquear toma las butacas por 5 minutos a favor de la sesión (RN-19, RF-10)', () => {
+    const { bd, viernes } = bdListaParaVender()
+
+    const bloqueo = bloquear(bd, viernes, [1, 2], 'sesion-a', AHORA)
+
+    expect(bloqueo).toMatchObject({
+      sesion: 'sesion-a',
+      funcionId: viernes,
+      butacaIds: [1, 2],
+      categoria: 'general',
+      vence: '2026-08-14T18:05:00',
+    })
+    expect(tomadas(bd, viernes, AHORA)).toEqual([
+      { butacaId: 1, motivo: 'bloqueo', referencia: 'sesion-a' },
+      { butacaId: 2, motivo: 'bloqueo', referencia: 'sesion-a' },
+    ])
+    // Al vencer, las butacas se comportan como libres desde el instante exacto.
+    expect(tomadas(bd, viernes, '2026-08-14T18:05:00')).toEqual([])
+  })
+
+  it('bloquear respeta el choque y la función en venta (RNF-4, RF-13)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    tomar(bd, viernes, [1], 'venta', 'compra-x', AHORA)
+
+    expect(() => bloquear(bd, viernes, [1, 2], 'sesion-a', AHORA)).toThrow(ButacasYaTomadas)
+    expect(() => bloquear(bd, viernes, [3], 'sesion-b', '2026-08-14T19:00:00')).toThrow(
+      'La función no está en venta',
+    )
+  })
+
+  it('pagar convierte el bloqueo en venta sin ventana, con contacto y canal internet (RN-26, RN-23, RN-27)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const avisos = avisosSimulados()
+    const bloqueo = bloquear(bd, viernes, [1, 2], 'sesion-a', AHORA)
+
+    const compra = pagar(bd, avisos, bloqueo, CONTACTO, '2026-08-14T18:02:00')
+
+    expect(compra).toMatchObject({
+      canal: 'internet',
+      jornada: '2026-08-14',
+      estado: 'pagada',
+      montoTotal: 16000,
+      operadorId: null,
+    })
+    expect(compra.entradas).toHaveLength(2)
+    const guardada = bd
+      .prepare(
+        `SELECT contacto_nombre AS nombre, contacto_correo AS correo, contacto_telefono AS telefono
+         FROM compra WHERE numero = ?`,
+      )
+      .get(compra.numero)
+    expect(guardada).toEqual({ nombre: 'Ana Solano', correo: 'ana@correo.com', telefono: '8812 4455' })
+    // La venta no vence: mucho después del bloqueo, las butacas siguen del comprador.
+    expect(tomadas(bd, viernes, '2026-08-14T23:00:00')).toEqual([
+      { butacaId: 1, motivo: 'venta', referencia: compra.numero },
+      { butacaId: 2, motivo: 'venta', referencia: compra.numero },
+    ])
+  })
+
+  it('el correo del número se encola por Avisos, y su falla no revierte nada (RNF-5)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const avisos = avisosSimulados()
+    const bloqueo = bloquear(bd, viernes, [1], 'sesion-a', AHORA)
+    const compra = pagar(bd, avisos, bloqueo, CONTACTO, '2026-08-14T18:02:00')
+
+    expect(avisos.encolados).toHaveLength(1)
+    expect(avisos.encolados[0]?.destinatario).toBe('ana@correo.com')
+    expect(avisos.encolados[0]?.cuerpo).toContain(compra.numero)
+
+    // Un Avisos roto no puede impedir la venta: la compra igual queda registrada.
+    const avisosRotos: Avisos = {
+      encolar() {
+        throw new Error('proveedor caído')
+      },
+    }
+    const bloqueo2 = bloquear(bd, viernes, [2], 'sesion-b', AHORA)
+    const compra2 = pagar(bd, avisosRotos, bloqueo2, CONTACTO, '2026-08-14T18:02:00')
+    expect(buscarCompra(bd, compra2.numero)).toBeDefined()
+  })
+
+  it('el pago fallido no deja rastro y el bloqueo sigue vivo (tabla de errores)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const avisos = avisosSimulados()
+    const bloqueo = bloquear(bd, viernes, [1], 'sesion-a', AHORA)
+
+    expect(() =>
+      pagar(bd, avisos, bloqueo, CONTACTO, '2026-08-14T18:02:00', () => false),
+    ).toThrow('El pago no se completó. Las butacas siguen tuyas por lo que queda del bloqueo')
+
+    expect(contar(bd, 'compra')).toBe(0)
+    expect(avisos.encolados).toEqual([])
+    expect(tomadas(bd, viernes, '2026-08-14T18:02:00')).toEqual([
+      { butacaId: 1, motivo: 'bloqueo', referencia: 'sesion-a' },
+    ])
+  })
+
+  it('un bloqueo vencido o una función ya empezada rechazan el pago sin rastro (RN-19, RN-21, REG-8)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const avisos = avisosSimulados()
+    const bloqueo = bloquear(bd, viernes, [1], 'sesion-a', AHORA)
+
+    expect(() => pagar(bd, avisos, bloqueo, CONTACTO, '2026-08-14T18:05:00')).toThrow(
+      'Se venció el tiempo. Las butacas volvieron a estar libres',
+    )
+
+    const tardio = bloquear(bd, viernes, [2], 'sesion-b', '2026-08-14T18:58:00')
+    expect(() => pagar(bd, avisos, tardio, CONTACTO, '2026-08-14T19:00:00')).toThrow(
+      'La función no está en venta',
+    )
+    expect(contar(bd, 'compra')).toBe(0)
+  })
+
+  it('exige nombre, correo y teléfono de quien compra (RN-23)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const bloqueo = bloquear(bd, viernes, [1], 'sesion-a', AHORA)
+
+    expect(() =>
+      pagar(bd, avisosSimulados(), bloqueo, { nombre: 'Ana', correo: '  ', telefono: '8812' }, '2026-08-14T18:02:00'),
+    ).toThrow('La compra por internet necesita nombre, correo y teléfono')
+  })
+
+  it('CA-3: por internet en miércoles se compra a mitad del general, categoría miércoles (RN-13)', () => {
+    const { bd, semanaId } = bdListaParaVender()
+    const miercoles = programarFuncion(bd, {
+      peliculaId: 1,
+      salaId: 2,
+      semanaId,
+      fecha: '2026-08-19',
+      horaInicio: '19:00',
+    })
+    const bloqueo = bloquear(bd, miercoles, [121], 'sesion-a', '2026-08-19T18:00:00')
+    expect(bloqueo.categoria).toBe('miercoles')
+
+    const compra = pagar(bd, avisosSimulados(), bloqueo, CONTACTO, '2026-08-19T18:02:00')
+    expect(compra.montoTotal).toBe(4000)
+    expect(compra.entradas[0]).toMatchObject({ categoria: 'miercoles', monto: 4000 })
+  })
+})
+

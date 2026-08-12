@@ -334,6 +334,16 @@ export function precio(bd: Bd, funcionId: number, categoria: CategoriaPrecio): n
 }
 
 /**
+ * La categoría que paga quien no presenta carné de estudiante: «miércoles» en
+ * las funciones de miércoles —donde no existe otra—, «general» en el resto
+ * (RN-13, RN-14). La usa Venta para la compra por internet (RN-28).
+ */
+export function categoriaBase(bd: Bd, funcionId: number): CategoriaPrecio {
+  const funcion = funcionProgramada(bd, funcionId)
+  return diaDeLaSemana(funcion.fecha) === MIERCOLES ? 'miercoles' : 'general'
+}
+
+/**
  * Si la función está en venta: su semana abierta (RN-9), no cancelada (RN-43)
  * y su hora de inicio todavía no llegó — la venta se cierra a la hora exacta
  * de inicio (RN-21, CA-2).

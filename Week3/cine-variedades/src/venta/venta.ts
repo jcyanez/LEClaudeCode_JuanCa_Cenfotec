@@ -1,7 +1,7 @@
 import { randomInt } from 'node:crypto'
 import type { Bd } from '../base/bd.js'
-import { enVenta, precio, type CategoriaPrecio } from '../cartelera/cartelera.js'
-import { tomar } from '../ocupacion/ocupacion.js'
+import { categoriaBase, enVenta, precio, type CategoriaPrecio } from '../cartelera/cartelera.js'
+import { cambiarMotivo, tomar } from '../ocupacion/ocupacion.js'
 
 export interface ButacaElegida {
   butacaId: number
@@ -130,6 +130,145 @@ export function venderEnTaquilla(
 
   const compra = buscarCompra(bd, numero)
   if (compra === undefined) throw new Error(`La compra ${numero} no quedó registrada`)
+  return compra
+}
+
+/**
+ * Contrato fijo de Avisos (PLAN, Fase 3): encolar acepta siempre, nunca falla
+ * ni bloquea (RNF-5). La implementación real llega en T14; hasta entonces las
+ * pruebas usan una simulada.
+ */
+export interface Avisos {
+  encolar(destinatario: string, asunto: string, cuerpo: string, adjunto?: unknown): void
+}
+
+export interface Contacto {
+  nombre: string
+  correo: string
+  telefono: string
+}
+
+export interface Bloqueo {
+  sesion: string
+  funcionId: number
+  butacaIds: number[]
+  /** Sin carné no hay estudiante por internet: general, o miércoles (RN-28, RN-13). */
+  categoria: CategoriaPrecio
+  vence: string
+}
+
+/** El bloqueo dura 5 minutos desde que se eligen las butacas (RN-19). */
+const MINUTOS_BLOQUEO = 5
+
+function sumarMinutos(instante: string, minutos: number): string {
+  const fecha = new Date(`${instante}Z`)
+  fecha.setUTCMinutes(fecha.getUTCMinutes() + minutos)
+  return fecha.toISOString().slice(0, 19)
+}
+
+/**
+ * Bloquea butacas a favor de la sesión anónima que las eligió primero
+ * (RN-19, RF-10). Al vencer sin compra, vuelven a estar libres solas: el
+ * vencimiento vive en la fila y Ocupación lo ignora al leer.
+ */
+export function bloquear(
+  bd: Bd,
+  funcionId: number,
+  butacaIds: number[],
+  sesionAnonima: string,
+  ahora: string,
+): Bloqueo {
+  if (butacaIds.length === 0) {
+    throw new Error('Un bloqueo necesita al menos una butaca')
+  }
+  if (!enVenta(bd, funcionId, ahora)) {
+    throw new Error('La función no está en venta')
+  }
+  const vence = sumarMinutos(ahora, MINUTOS_BLOQUEO)
+  const resultado = tomar(bd, funcionId, butacaIds, 'bloqueo', sesionAnonima, ahora, vence)
+  if (!resultado.tomadas) {
+    throw new ButacasYaTomadas(resultado.seAdelantaron)
+  }
+  return {
+    sesion: sesionAnonima,
+    funcionId,
+    butacaIds,
+    categoria: categoriaBase(bd, funcionId),
+    vence,
+  }
+}
+
+/**
+ * El punto único del pago simulado (DISENO.md): decide el pago y, si resulta
+ * exitoso, convierte el bloqueo en venta sin ventana —un solo UPDATE vía
+ * cambiarMotivo (RN-26)— y registra la compra con contacto y canal internet
+ * (RN-23, RN-27, REG-1) en una sola transacción. El correo del número se
+ * encola después y jamás revierte nada (RNF-5).
+ */
+export function pagar(
+  bd: Bd,
+  avisos: Avisos,
+  bloqueo: Bloqueo,
+  contacto: Contacto,
+  ahora: string,
+  pagoSimulado: () => boolean = () => true,
+): Compra {
+  const contactoCompleto = [contacto.nombre, contacto.correo, contacto.telefono].every(
+    (dato) => dato.trim() !== '',
+  )
+  if (!contactoCompleto) {
+    throw new Error('La compra por internet necesita nombre, correo y teléfono')
+  }
+  if (ahora >= bloqueo.vence) {
+    throw new Error('Se venció el tiempo. Las butacas volvieron a estar libres')
+  }
+  if (!enVenta(bd, bloqueo.funcionId, ahora)) {
+    throw new Error('La función no está en venta')
+  }
+  if (!pagoSimulado()) {
+    throw new Error('El pago no se completó. Las butacas siguen tuyas por lo que queda del bloqueo')
+  }
+
+  const monto = precio(bd, bloqueo.funcionId, bloqueo.categoria)
+  const numero = generarNumero(bd)
+  const insertarCompra = bd.prepare(
+    `INSERT INTO compra (numero, canal, instante, jornada, funcion_id, monto_total,
+                         contacto_nombre, contacto_correo, contacto_telefono)
+     VALUES (?, 'internet', ?, ?, ?, ?, ?, ?, ?)`,
+  )
+  const insertarEntrada = bd.prepare(
+    `INSERT INTO entrada (compra_id, butaca_id, categoria, monto) VALUES (?, ?, ?, ?)`,
+  )
+  bd.transaction(() => {
+    cambiarMotivo(bd, bloqueo.sesion, 'venta', numero)
+    const compraId = Number(
+      insertarCompra.run(
+        numero,
+        ahora,
+        jornadaDe(ahora),
+        bloqueo.funcionId,
+        monto * bloqueo.butacaIds.length,
+        contacto.nombre,
+        contacto.correo,
+        contacto.telefono,
+      ).lastInsertRowid,
+    )
+    for (const butacaId of bloqueo.butacaIds) {
+      insertarEntrada.run(compraId, butacaId, bloqueo.categoria, monto)
+    }
+  })()
+
+  const compra = buscarCompra(bd, numero)
+  if (compra === undefined) throw new Error(`La compra ${numero} no quedó registrada`)
+  try {
+    avisos.encolar(
+      contacto.correo,
+      `Tu compra ${numero} — Cine Variedades`,
+      `Tu número de compra es ${numero}. Dictalo en la puerta para entrar.`,
+    )
+  } catch {
+    // RNF-5: la venta ya está registrada; el correo que no sale no revierte nada.
+  }
   return compra
 }
 

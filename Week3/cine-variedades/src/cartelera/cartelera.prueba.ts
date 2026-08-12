@@ -7,6 +7,7 @@ import {
   abrirVenta,
   butacasDe,
   cancelarFuncion,
+  categoriaBase,
   crearSemana,
   eliminarFuncion,
   enVenta,
@@ -458,6 +459,13 @@ describe('cartelera: precios vigentes (T7)', () => {
     expect(() => precio(bd, viernes, 'general')).toThrow(
       'No hay precios vigentes para el 2026-08-14',
     )
+  })
+
+  it('categoriaBase: miércoles en funciones de miércoles, general en el resto (RN-13, RN-14)', () => {
+    const { bd, viernes, miercoles } = bdConFunciones()
+
+    expect(categoriaBase(bd, viernes)).toBe('general')
+    expect(categoriaBase(bd, miercoles)).toBe('miercoles')
   })
 
   it('rechaza montos que no sean enteros de céntimos mayores que cero (RN-12)', () => {
