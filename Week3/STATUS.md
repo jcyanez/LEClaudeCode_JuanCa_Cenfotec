@@ -4,16 +4,24 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 10 — cerrada con T8
-**Tarea en curso:** ninguna — T8 cerrada (72 pruebas en verde y typecheck limpio: `npm test` y
+**Última actualización:** 12 de agosto de 2026 · Sesión 12 — cerrada con T10
+**Tarea en curso:** ninguna — T10 cerrada (90 pruebas en verde y typecheck limpio: `npm test` y
 `npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** T9 — Compra por internet, T10 — Reservas o T11 — Puerta (paralelizables
-entre sí, todas desbloqueadas), o T13/T14 en carriles paralelos
+**Siguiente tarea:** T11 — Validación en puerta, o T13/T14 en carriles paralelos
 
 **Al retomar:**
-- Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T9–T11 está en `PLAN.md`.
-- Hasta T8 asentado en git (12/08/2026, en `main`, un commit por tarea). Pendiente: `push`
+- Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T11 está en `PLAN.md`.
+- Hasta T10 asentado en git (12/08/2026, en `main`, un commit por tarea). Pendiente: `push`
   cuando el usuario lo pida.
+- Existe `src/demo.ts` (fuera de los commits de tareas): demostración por consola del flujo
+  completo con `npx tsx src/demo.ts`, pedida por el usuario para ver el avance; las pantallas
+  reales siguen en Fase 6.
+- T9 y T10 agregaron a Cartelera dos consultas con sus pruebas, señaladas como crecimiento del
+  contrato: `categoriaBase(función)` (miércoles o general, `RN-13`, `RN-14`) e
+  `inicioDe(función)` (instante de inicio, vencimiento de reservas, `RN-30`).
+- La conversión de una reserva registra la compra con canal `taquilla` y su operador (el cobro
+  es en ventanilla, `RN-31`, y así suma al cierre de caja `RN-46`), conservando además el
+  contacto de la reserva para la búsqueda por nombre o correo de la puerta (`RF-18`).
 - La contradicción del CHECK de `entrada.categoria` (T2 vs. glosario) quedó **resuelta en T8**
   con la migración `002-categoria-miercoles`: el CHECK ahora admite las tres categorías del
   glosario (general, estudiante, miércoles), con reversa al esquema original.
@@ -81,8 +89,18 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   monto congelado por entrada (`RN-16`, `CA-4`); `jornadaDe` con corte 06:00 congelada al
   escribir (`RN-10`, `RN-11`, `CA-8`); función no en venta → rechazo (`RF-13`); migración
   `002-categoria-miercoles` habilita la categoría miércoles en `entrada` (`CA-3`) · 10 pruebas
-- [ ] T9 — Compra por internet
-- [ ] T10 — Reservas de estudiante
+- [x] T9 — Compra por internet: `bloquear` de 5 minutos a favor de la sesión anónima (`RN-19`,
+  `RF-10`); `pagar` como punto único del pago simulado — convierte bloqueo en venta sin ventana
+  vía `cambiarMotivo` (`RN-26`), exige nombre/correo/teléfono (`RN-23`), canal internet
+  (`RN-27`); pago fallido sin rastro con el bloqueo vivo; bloqueo vencido → «las butacas
+  volvieron a estar libres» (`REG-8`); correo del número por la interfaz de Avisos, su falla no
+  revierte (`RNF-5`); miércoles a mitad vía `categoriaBase` (`CA-3`) · 8 pruebas
+- [x] T10 — Reservas de estudiante: `reservar` solo internet y sin pago, número propio y
+  vencimiento al inicio de la función (`RN-28`–`RN-30`, `REG-3`); sin reservas en miércoles
+  (`RN-14`); `convertir` en taquilla conserva el número — carné → estudiante, sin carné →
+  general (`RN-31`, `RN-32`, `RN-25`); `liberarReserva` para quien no acepta (`RN-32`);
+  `barrerVencidos` borra reservas vencidas sin dejar registro y llama al `barrer()` de
+  Ocupación (`RN-34`, `REG-8`) · 8 pruebas (+1 de `inicioDe` en cartelera)
 - [ ] T11 — Validación en puerta
 - [ ] T12 — Anulación, cancelación y devoluciones
 

@@ -238,7 +238,7 @@ compra · cálculo de jornada.
   congelada al escribir (`RN-10`, `RN-11`, `CA-8`); si Ocupación rechaza, no queda rastro
   (`REG-1`, `REG-2`); función no «en venta» → rechazo.
 
-### - [ ] T9 — Compra por internet
+### - [x] T9 — Compra por internet
 
 **Depende de:** T8 y T4. **Paralelizable con:** T10, T11.
 **Archivos:** componente `venta/` y sus pruebas.
@@ -251,7 +251,7 @@ vencimiento` · `pagar(bloqueo, contacto) → compra` (punto único del pago sim
   (`REG-8`); la compra guarda contacto y canal internet; el correo del número se encola vía la
   interfaz de Avisos y su falla no revierte nada (`RNF-5`).
 
-### - [ ] T10 — Reservas de estudiante
+### - [x] T10 — Reservas de estudiante
 
 **Depende de:** T8 y T4. **Paralelizable con:** T9, T11.
 **Archivos:** componente `venta/` y sus pruebas.
