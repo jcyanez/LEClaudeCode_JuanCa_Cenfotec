@@ -11,8 +11,8 @@
 
 **Al retomar:**
 - Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T4 está en `PLAN.md`.
-- Pendiente de decidir: **commit de lo hecho** (T0–T3). Nada está asentado en git todavía; se
-  hace solo si el usuario lo pide (el plan sugiere un commit por tarea).
+- Todo lo hecho hasta T3 está asentado en git (12/08/2026, seis commits: PROMPT · especificación
+  y diseño · T0 · T1 · T2 · T3, en `main`). Pendiente: `push` cuando el usuario lo pida.
 
 **Stack decidido en T0:** TypeScript (Node.js + Fastify · React + `@carbon/react`) · SQLite en
 modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14).
