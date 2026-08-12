@@ -2,7 +2,23 @@ import { describe, expect, it } from 'vitest'
 import { abrirBd, type Bd } from '../base/bd.js'
 import { listaMigraciones } from '../base/lista-migraciones.js'
 import { aplicarMigraciones } from '../base/migraciones.js'
-import { butacasDe, peliculas, registrarPelicula, sembrarSalas } from './cartelera.js'
+import { tomar } from '../ocupacion/ocupacion.js'
+import {
+  abrirVenta,
+  butacasDe,
+  cancelarFuncion,
+  crearSemana,
+  eliminarFuncion,
+  enVenta,
+  modificarFuncion,
+  peliculas,
+  programarFuncion,
+  registrarPelicula,
+  sembrarSalas,
+} from './cartelera.js'
+
+/** El miércoles 12 de agosto de 2026: su semana va del jueves 06 al miércoles 12. */
+const HOY = '2026-08-12'
 
 function bdConEsquema(): Bd {
   const bd = abrirBd()
@@ -100,5 +116,278 @@ describe('cartelera: películas (T5)', () => {
       'La duración debe ser un número entero de minutos mayor que cero',
     )
     expect(peliculas(bd)).toEqual([])
+  })
+})
+
+describe('cartelera: semanas de cartelera (T6)', () => {
+  it('crea una semana que empieza un jueves, cerrada a la venta hasta que se abra (RN-3, RN-9)', () => {
+    const bd = bdConEsquema()
+
+    const id = crearSemana(bd, '2026-08-13', HOY)
+
+    const semana = bd
+      .prepare(
+        `SELECT jueves_inicio AS juevesInicio, abierta_a_venta AS abierta
+         FROM semana_cartelera WHERE id = ?`,
+      )
+      .get(id)
+    expect(semana).toEqual({ juevesInicio: '2026-08-13', abierta: 0 })
+  })
+
+  it('rechaza una semana que no empieza un jueves (RN-3)', () => {
+    const bd = bdConEsquema()
+    expect(() => crearSemana(bd, '2026-08-14', HOY)).toThrow(
+      'Una semana de cartelera empieza un jueves',
+    )
+  })
+
+  it('solo pueden estar cargadas la semana en curso y la siguiente (RN-8)', () => {
+    const bd = bdConEsquema()
+    crearSemana(bd, '2026-08-06', HOY) // la en curso
+    crearSemana(bd, '2026-08-13', HOY) // la siguiente
+
+    // Ni una tercera hacia adelante, ni una semana que ya pasó.
+    expect(() => crearSemana(bd, '2026-08-20', HOY)).toThrow(
+      'Solo pueden estar cargadas la semana en curso y la siguiente',
+    )
+    expect(() => crearSemana(bd, '2026-07-30', HOY)).toThrow(
+      'Solo pueden estar cargadas la semana en curso y la siguiente',
+    )
+  })
+
+  it('una semana ya cargada no se carga dos veces (RN-8)', () => {
+    const bd = bdConEsquema()
+    crearSemana(bd, '2026-08-13', HOY)
+    expect(() => crearSemana(bd, '2026-08-13', HOY)).toThrow(
+      'La semana del jueves 2026-08-13 ya está cargada',
+    )
+  })
+
+  it('abrirVenta abre la venta de las funciones de la semana (RN-9, RF-5)', () => {
+    const bd = bdConEsquema()
+    const id = crearSemana(bd, '2026-08-13', HOY)
+
+    abrirVenta(bd, id)
+
+    const semana = bd
+      .prepare(`SELECT abierta_a_venta AS abierta FROM semana_cartelera WHERE id = ?`)
+      .get(id)
+    expect(semana).toEqual({ abierta: 1 })
+  })
+})
+
+/** Base con salas sembradas, una película de 120 minutos y la semana del jueves 13. */
+function bdConCartelera(): { bd: Bd; peliculaId: number; semanaId: number } {
+  const bd = bdConEsquema()
+  sembrarSalas(bd)
+  const peliculaId = registrarPelicula(bd, 'La película', 120)
+  const semanaId = crearSemana(bd, '2026-08-13', HOY)
+  return { bd, peliculaId, semanaId }
+}
+
+describe('cartelera: funciones (T6)', () => {
+  it('programa una función con película, sala, fecha y hora de inicio (RN-5, RF-2)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+
+    const id = programarFuncion(bd, {
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '19:00',
+    })
+
+    const funcion = bd
+      .prepare(
+        `SELECT pelicula_id AS peliculaId, sala_id AS salaId, semana_id AS semanaId,
+                fecha, hora_inicio AS horaInicio, estado
+         FROM funcion WHERE id = ?`,
+      )
+      .get(id)
+    expect(funcion).toEqual({
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '19:00',
+      estado: 'programada',
+    })
+  })
+
+  it('rechaza una fecha que no cae en la semana de jueves a miércoles (RN-3, RF-2)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    const base = { peliculaId, salaId: 1, semanaId, horaInicio: '19:00' }
+
+    expect(() => programarFuncion(bd, { ...base, fecha: '2026-08-12' })).toThrow(
+      'La fecha 2026-08-12 no cae en la semana del jueves 2026-08-13',
+    )
+    expect(() => programarFuncion(bd, { ...base, fecha: '2026-08-20' })).toThrow(
+      'La fecha 2026-08-20 no cae en la semana del jueves 2026-08-13',
+    )
+    // El miércoles final sí es parte de la semana.
+    expect(() => programarFuncion(bd, { ...base, fecha: '2026-08-19' })).not.toThrow()
+  })
+
+  it('CA-7: una de 120 minutos a las 19:00 impide otra en la misma sala antes de las 21:20, y admite las 21:20 (RN-6, RF-3)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    const base = { peliculaId, salaId: 1, semanaId, fecha: '2026-08-14' }
+    programarFuncion(bd, { ...base, horaInicio: '19:00' })
+
+    const mensaje =
+      'Choca con la función de Sala 1 que termina a las 21:00. La primera hora posible es 21:20'
+    expect(() => programarFuncion(bd, { ...base, horaInicio: '21:00' })).toThrow(mensaje)
+    expect(() => programarFuncion(bd, { ...base, horaInicio: '21:19' })).toThrow(mensaje)
+    expect(() => programarFuncion(bd, { ...base, horaInicio: '21:20' })).not.toThrow()
+  })
+
+  it('rechaza también a la que terminaría a menos de 20 minutos de la siguiente (RN-6, RF-3)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    const base = { peliculaId, salaId: 1, semanaId, fecha: '2026-08-14' }
+    programarFuncion(bd, { ...base, horaInicio: '19:00' })
+
+    // 16:50 + 120 min termina 18:50: deja solo 10 minutos antes de las 19:00.
+    expect(() => programarFuncion(bd, { ...base, horaInicio: '16:50' })).toThrow(
+      'Choca con la función de Sala 1 que termina a las 21:00. La primera hora posible es 21:20',
+    )
+    // 16:40 termina 18:40: los 20 minutos quedan justos.
+    expect(() => programarFuncion(bd, { ...base, horaInicio: '16:40' })).not.toThrow()
+  })
+
+  it('funciones de salas distintas no se estorban: el margen es por sala (RN-6)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    programarFuncion(bd, { peliculaId, salaId: 1, semanaId, fecha: '2026-08-14', horaInicio: '19:00' })
+
+    expect(() =>
+      programarFuncion(bd, { peliculaId, salaId: 2, semanaId, fecha: '2026-08-14', horaInicio: '19:00' }),
+    ).not.toThrow()
+  })
+
+  it('modificar cambia la función y vuelve a validar el margen (RF-4, RN-6)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    const base = { peliculaId, salaId: 1, semanaId, fecha: '2026-08-14' }
+    programarFuncion(bd, { ...base, horaInicio: '19:00' })
+    const id = programarFuncion(bd, { ...base, horaInicio: '21:20' })
+
+    expect(() => modificarFuncion(bd, id, { horaInicio: '21:10' }, '2026-08-12T10:00:00')).toThrow(
+      'Choca con la función de Sala 1 que termina a las 21:00. La primera hora posible es 21:20',
+    )
+
+    modificarFuncion(bd, id, { horaInicio: '21:30' }, '2026-08-12T10:00:00')
+    const funcion = bd.prepare(`SELECT hora_inicio AS horaInicio FROM funcion WHERE id = ?`).get(id)
+    expect(funcion).toEqual({ horaInicio: '21:30' })
+  })
+
+  it('una función con butacas tomadas no se modifica ni se elimina (RF-4)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    const id = programarFuncion(bd, {
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '19:00',
+    })
+    tomar(bd, id, [1], 'venta', 'compra-1', '2026-08-12T10:00:00')
+
+    expect(() => modificarFuncion(bd, id, { horaInicio: '20:00' }, '2026-08-12T10:00:00')).toThrow(
+      'La función tiene butacas tomadas y no se puede modificar',
+    )
+    expect(() => eliminarFuncion(bd, id, '2026-08-12T10:00:00')).toThrow(
+      'La función tiene butacas tomadas y no se puede eliminar',
+    )
+  })
+
+  it('eliminar borra una función sin butacas tomadas (RF-4)', () => {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    const id = programarFuncion(bd, {
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '19:00',
+    })
+
+    eliminarFuncion(bd, id, '2026-08-12T10:00:00')
+
+    expect(bd.prepare(`SELECT 1 FROM funcion WHERE id = ?`).get(id)).toBeUndefined()
+  })
+})
+
+describe('cartelera: cancelación y funciones en venta (T6)', () => {
+  const OPERADOR = { operadorId: 1, instante: '2026-08-14T20:15:00', jornada: '2026-08-14' }
+
+  function bdConFuncion(): { bd: Bd; funcionId: number; semanaId: number } {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    bd.prepare(
+      `INSERT INTO operador (nombre, puesto, credencial) VALUES ('Marta', 'taquilla', '1234')`,
+    ).run()
+    const funcionId = programarFuncion(bd, {
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '19:00',
+    })
+    return { bd, funcionId, semanaId }
+  }
+
+  it('cancelar deja la función cancelada con operador, instante, jornada y motivo (RN-41, REG-4)', () => {
+    const { bd, funcionId } = bdConFuncion()
+
+    cancelarFuncion(bd, funcionId, { ...OPERADOR, motivo: 'Falló el proyector' })
+
+    const funcion = bd
+      .prepare(
+        `SELECT estado, cancelada_operador AS operadorId, cancelada_instante AS instante,
+                cancelada_jornada AS jornada, cancelada_motivo AS motivo
+         FROM funcion WHERE id = ?`,
+      )
+      .get(funcionId)
+    expect(funcion).toEqual({
+      estado: 'cancelada',
+      operadorId: 1,
+      instante: '2026-08-14T20:15:00',
+      jornada: '2026-08-14',
+      motivo: 'Falló el proyector',
+    })
+  })
+
+  it('una función cancelada no bloquea el margen: su proyección no va a ocurrir (RN-6, RN-41)', () => {
+    const { bd, funcionId, semanaId } = bdConFuncion()
+    cancelarFuncion(bd, funcionId, { ...OPERADOR, motivo: 'Falló el proyector' })
+
+    expect(() =>
+      programarFuncion(bd, {
+        peliculaId: 1,
+        salaId: 1,
+        semanaId,
+        fecha: '2026-08-14',
+        horaInicio: '19:30',
+      }),
+    ).not.toThrow()
+  })
+
+  it('en venta exige la semana abierta: antes de abrirla, ninguna función se vende (RN-9)', () => {
+    const { bd, funcionId, semanaId } = bdConFuncion()
+    const antesDeLaFuncion = '2026-08-14T18:00:00'
+
+    expect(enVenta(bd, funcionId, antesDeLaFuncion)).toBe(false)
+    abrirVenta(bd, semanaId)
+    expect(enVenta(bd, funcionId, antesDeLaFuncion)).toBe(true)
+  })
+
+  it('la venta se cierra a la hora exacta de inicio (RN-21, CA-2)', () => {
+    const { bd, funcionId, semanaId } = bdConFuncion()
+    abrirVenta(bd, semanaId)
+
+    expect(enVenta(bd, funcionId, '2026-08-14T18:59:59')).toBe(true)
+    expect(enVenta(bd, funcionId, '2026-08-14T19:00:00')).toBe(false)
+  })
+
+  it('una función cancelada no está en venta (RN-43)', () => {
+    const { bd, funcionId, semanaId } = bdConFuncion()
+    abrirVenta(bd, semanaId)
+    cancelarFuncion(bd, funcionId, { ...OPERADOR, motivo: 'Falló el proyector' })
+
+    expect(enVenta(bd, funcionId, '2026-08-14T18:00:00')).toBe(false)
   })
 })
