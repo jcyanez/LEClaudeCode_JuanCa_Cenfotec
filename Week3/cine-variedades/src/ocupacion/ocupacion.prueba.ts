@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { abrirBd, type Bd } from '../base/bd.js'
 import { listaMigraciones } from '../base/lista-migraciones.js'
 import { aplicarMigraciones } from '../base/migraciones.js'
-import { tieneTomadas, tomadas, tomar } from './ocupacion.js'
+import { barrer, cambiarMotivo, liberar, tieneTomadas, tomadas, tomar } from './ocupacion.js'
 
 const AHORA = '2026-08-14T18:00:00'
 
@@ -112,6 +112,85 @@ describe('ocupación: tomar y consultar butacas (T3)', () => {
     tomar(bd, funcionId, [butacas[0]!], 'bloqueo', 'sesion-a', AHORA, '2026-08-14T18:05:00')
 
     expect(tieneTomadas(bd, funcionId, '2026-08-14T18:05:00')).toBe(false)
+  })
+
+  it('liberar borra todas las filas de una referencia y no toca las de otras (RN-40)', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(bd, funcionId, [butacas[0]!, butacas[1]!], 'venta', 'compra-1', AHORA)
+    tomar(bd, funcionId, [butacas[2]!], 'venta', 'compra-2', AHORA)
+
+    liberar(bd, 'compra-1')
+
+    expect(tomadas(bd, funcionId, AHORA)).toEqual([
+      { butacaId: butacas[2]!, motivo: 'venta', referencia: 'compra-2' },
+    ])
+  })
+
+  it('una butaca liberada puede volver a tomarse en el acto', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(bd, funcionId, [butacas[0]!], 'reserva', 'reserva-1', AHORA, '2026-08-14T19:00:00')
+
+    liberar(bd, 'reserva-1')
+
+    expect(tomar(bd, funcionId, [butacas[0]!], 'venta', 'compra-1', AHORA)).toEqual({
+      tomadas: true,
+    })
+  })
+
+  it('cambiarMotivo convierte un bloqueo en venta conservando la butaca, sin ventana (RN-26)', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(
+      bd,
+      funcionId,
+      [butacas[0]!, butacas[1]!],
+      'bloqueo',
+      'sesion-a',
+      AHORA,
+      '2026-08-14T18:05:00',
+    )
+
+    cambiarMotivo(bd, 'sesion-a', 'venta', 'compra-1')
+
+    // La venta no vence: mucho después del vencimiento del bloqueo, sigue tomada.
+    expect(tomadas(bd, funcionId, '2026-08-14T23:00:00')).toEqual([
+      { butacaId: butacas[0]!, motivo: 'venta', referencia: 'compra-1' },
+      { butacaId: butacas[1]!, motivo: 'venta', referencia: 'compra-1' },
+    ])
+  })
+
+  it('cambiarMotivo no toca las filas de otras referencias', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(bd, funcionId, [butacas[0]!], 'bloqueo', 'sesion-a', AHORA, '2026-08-14T18:05:00')
+    tomar(bd, funcionId, [butacas[1]!], 'bloqueo', 'sesion-b', AHORA, '2026-08-14T18:05:00')
+
+    cambiarMotivo(bd, 'sesion-a', 'venta', 'compra-1')
+
+    expect(tomadas(bd, funcionId, AHORA)).toEqual([
+      { butacaId: butacas[0]!, motivo: 'venta', referencia: 'compra-1' },
+      { butacaId: butacas[1]!, motivo: 'bloqueo', referencia: 'sesion-b' },
+    ])
+  })
+
+  it('barrer borra solo las vencidas y dice cuántas; ventas y vigentes quedan intactas (REG-8)', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(bd, funcionId, [butacas[0]!], 'bloqueo', 'sesion-a', AHORA, '2026-08-14T18:05:00')
+    tomar(bd, funcionId, [butacas[1]!], 'reserva', 'reserva-1', AHORA, '2026-08-14T19:00:00')
+    tomar(bd, funcionId, [butacas[2]!], 'venta', 'compra-1', AHORA)
+
+    const borradas = barrer(bd, '2026-08-14T18:30:00')
+
+    expect(borradas).toBe(1)
+    // Quedan la reserva aún vigente y la venta, que no vence nunca.
+    const filas = bd.prepare(`SELECT referencia FROM ocupacion ORDER BY butaca_id`).all()
+    expect(filas).toEqual([{ referencia: 'reserva-1' }, { referencia: 'compra-1' }])
+  })
+
+  it('barrer sin nada vencido no borra nada', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(bd, funcionId, [butacas[0]!], 'venta', 'compra-1', AHORA)
+
+    expect(barrer(bd, '2026-08-14T23:59:00')).toBe(0)
+    expect(tomadas(bd, funcionId, '2026-08-14T23:59:00')).toHaveLength(1)
   })
 
   it('dos conexiones sobre la misma butaca: una gana y la otra recibe el rechazo (RNF-4, CA-1)', () => {
