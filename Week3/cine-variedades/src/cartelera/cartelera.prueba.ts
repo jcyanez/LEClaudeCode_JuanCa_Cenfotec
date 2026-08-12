@@ -10,8 +10,10 @@ import {
   crearSemana,
   eliminarFuncion,
   enVenta,
+  fijarPrecios,
   modificarFuncion,
   peliculas,
+  precio,
   programarFuncion,
   registrarPelicula,
   sembrarSalas,
@@ -389,5 +391,83 @@ describe('cartelera: cancelación y funciones en venta (T6)', () => {
     cancelarFuncion(bd, funcionId, { ...OPERADOR, motivo: 'Falló el proyector' })
 
     expect(enVenta(bd, funcionId, '2026-08-14T18:00:00')).toBe(false)
+  })
+})
+
+describe('cartelera: precios vigentes (T7)', () => {
+  /** Una función por día que interesa: viernes 14, martes 18 y miércoles 19. */
+  function bdConFunciones(): { bd: Bd; viernes: number; martes: number; miercoles: number } {
+    const { bd, peliculaId, semanaId } = bdConCartelera()
+    const base = { peliculaId, salaId: 1, semanaId, horaInicio: '19:00' }
+    const viernes = programarFuncion(bd, { ...base, fecha: '2026-08-14' })
+    const martes = programarFuncion(bd, { ...base, fecha: '2026-08-18' })
+    const miercoles = programarFuncion(bd, { ...base, fecha: '2026-08-19' })
+    return { bd, viernes, martes, miercoles }
+  }
+
+  it('la dueña fija los dos montos y el precio sale de ahí, por categoría (RN-12, RF-6, RF-7)', () => {
+    const { bd, viernes } = bdConFunciones()
+
+    fijarPrecios(bd, 8000, 5000, '2026-08-01')
+
+    expect(precio(bd, viernes, 'general')).toBe(8000)
+    expect(precio(bd, viernes, 'estudiante')).toBe(5000)
+  })
+
+  it('el precio se determina por la fecha de la función, no por la del cambio (RN-15)', () => {
+    const { bd, viernes, martes } = bdConFunciones()
+    fijarPrecios(bd, 8000, 5000, '2026-08-01')
+    fijarPrecios(bd, 9000, 6000, '2026-08-15')
+
+    // El historial explica el monto viejo aunque el vigente haya cambiado (DISENO.md).
+    expect(precio(bd, viernes, 'general')).toBe(8000)
+    expect(precio(bd, martes, 'general')).toBe(9000)
+  })
+
+  it('CA-3: en una función de miércoles toda entrada vale la mitad del precio general (RN-13)', () => {
+    const { bd, miercoles } = bdConFunciones()
+    fijarPrecios(bd, 8000, 5000, '2026-08-01')
+
+    expect(precio(bd, miercoles, 'miercoles')).toBe(4000)
+  })
+
+  it('CA-3: en miércoles no existen las categorías general ni estudiante (RN-14)', () => {
+    const { bd, miercoles } = bdConFunciones()
+    fijarPrecios(bd, 8000, 5000, '2026-08-01')
+
+    expect(() => precio(bd, miercoles, 'estudiante')).toThrow(
+      'En las funciones de miércoles no existe el precio de estudiante',
+    )
+    expect(() => precio(bd, miercoles, 'general')).toThrow(
+      'En las funciones de miércoles toda entrada se vende a la categoría miércoles',
+    )
+  })
+
+  it('la categoría miércoles no existe fuera del miércoles (RN-13)', () => {
+    const { bd, viernes } = bdConFunciones()
+    fijarPrecios(bd, 8000, 5000, '2026-08-01')
+
+    expect(() => precio(bd, viernes, 'miercoles')).toThrow(
+      'La categoría miércoles es solo para funciones de miércoles',
+    )
+  })
+
+  it('sin precios vigentes a la fecha de la función, el rechazo lo dice (RN-15)', () => {
+    const { bd, viernes } = bdConFunciones()
+
+    expect(() => precio(bd, viernes, 'general')).toThrow(
+      'No hay precios vigentes para el 2026-08-14',
+    )
+  })
+
+  it('rechaza montos que no sean enteros de céntimos mayores que cero (RN-12)', () => {
+    const { bd } = bdConFunciones()
+
+    expect(() => fijarPrecios(bd, 0, 5000, '2026-08-01')).toThrow(
+      'Los montos deben ser enteros de céntimos mayores que cero',
+    )
+    expect(() => fijarPrecios(bd, 8000, 50.5, '2026-08-01')).toThrow(
+      'Los montos deben ser enteros de céntimos mayores que cero',
+    )
   })
 })

@@ -273,6 +273,66 @@ export function cancelarFuncion(bd: Bd, funcionId: number, cancelacion: Cancelac
   )
 }
 
+const MIERCOLES = 3
+
+export type CategoriaPrecio = 'general' | 'estudiante' | 'miercoles'
+
+/**
+ * Fija el precio general y el de estudiante desde una fecha (RN-12, RF-6).
+ * Cada cambio se agrega al historial en vez de pisar el anterior, para poder
+ * explicar un monto viejo (decisión de DISENO.md). Montos en céntimos enteros.
+ */
+export function fijarPrecios(
+  bd: Bd,
+  montoGeneral: number,
+  montoEstudiante: number,
+  desde: string,
+): void {
+  const sonValidos = [montoGeneral, montoEstudiante].every(
+    (monto) => Number.isInteger(monto) && monto > 0,
+  )
+  if (!sonValidos) {
+    throw new Error('Los montos deben ser enteros de céntimos mayores que cero')
+  }
+  bd.prepare(
+    `INSERT INTO precio_vigente (monto_general, monto_estudiante, desde) VALUES (?, ?, ?)`,
+  ).run(montoGeneral, montoEstudiante, desde)
+}
+
+/**
+ * El precio de una entrada según la fecha de la función y la categoría (RF-7,
+ * RN-15). En miércoles la única categoría es «miércoles», a mitad del precio
+ * general (RN-13, RN-14, CA-3). Lo que se cobra lo congela Venta (RN-16), no
+ * este componente.
+ */
+export function precio(bd: Bd, funcionId: number, categoria: CategoriaPrecio): number {
+  const funcion = funcionProgramada(bd, funcionId)
+  const vigente = bd
+    .prepare(
+      `SELECT monto_general AS general, monto_estudiante AS estudiante
+       FROM precio_vigente WHERE desde <= ? ORDER BY desde DESC LIMIT 1`,
+    )
+    .get(funcion.fecha) as { general: number; estudiante: number } | undefined
+  if (vigente === undefined) {
+    throw new Error(`No hay precios vigentes para el ${funcion.fecha}`)
+  }
+
+  if (diaDeLaSemana(funcion.fecha) === MIERCOLES) {
+    if (categoria === 'estudiante') {
+      throw new Error('En las funciones de miércoles no existe el precio de estudiante')
+    }
+    if (categoria === 'general') {
+      throw new Error('En las funciones de miércoles toda entrada se vende a la categoría miércoles')
+    }
+    // La mitad se redondea al céntimo si el general fuera impar.
+    return Math.round(vigente.general / 2)
+  }
+  if (categoria === 'miercoles') {
+    throw new Error('La categoría miércoles es solo para funciones de miércoles')
+  }
+  return categoria === 'general' ? vigente.general : vigente.estudiante
+}
+
 /**
  * Si la función está en venta: su semana abierta (RN-9), no cancelada (RN-43)
  * y su hora de inicio todavía no llegó — la venta se cierra a la hora exacta
