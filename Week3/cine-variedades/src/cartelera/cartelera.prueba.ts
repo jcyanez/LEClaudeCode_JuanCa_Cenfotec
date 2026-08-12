@@ -11,6 +11,7 @@ import {
   crearSemana,
   eliminarFuncion,
   enVenta,
+  inicioDe,
   fijarPrecios,
   modificarFuncion,
   peliculas,
@@ -466,6 +467,12 @@ describe('cartelera: precios vigentes (T7)', () => {
 
     expect(categoriaBase(bd, viernes)).toBe('general')
     expect(categoriaBase(bd, miercoles)).toBe('miercoles')
+  })
+
+  it('inicioDe devuelve el instante de inicio de la función, para vencimientos (RN-30)', () => {
+    const { bd, viernes } = bdConFunciones()
+
+    expect(inicioDe(bd, viernes)).toBe('2026-08-14T19:00:00')
   })
 
   it('rechaza montos que no sean enteros de céntimos mayores que cero (RN-12)', () => {

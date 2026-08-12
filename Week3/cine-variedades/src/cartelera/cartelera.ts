@@ -343,6 +343,12 @@ export function categoriaBase(bd: Bd, funcionId: number): CategoriaPrecio {
   return diaDeLaSemana(funcion.fecha) === MIERCOLES ? 'miercoles' : 'general'
 }
 
+/** El instante de inicio de la función; es el vencimiento de sus reservas (RN-5, RN-30). */
+export function inicioDe(bd: Bd, funcionId: number): string {
+  const funcion = funcionProgramada(bd, funcionId)
+  return `${funcion.fecha}T${funcion.horaInicio}:00`
+}
+
 /**
  * Si la función está en venta: su semana abierta (RN-9), no cancelada (RN-43)
  * y su hora de inicio todavía no llegó — la venta se cierra a la hora exacta

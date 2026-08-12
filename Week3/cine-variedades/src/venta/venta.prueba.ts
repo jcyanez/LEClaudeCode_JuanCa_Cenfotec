@@ -13,11 +13,15 @@ import {
 } from '../cartelera/cartelera.js'
 import { tomadas, tomar } from '../ocupacion/ocupacion.js'
 import {
+  barrerVencidos,
   bloquear,
   ButacasYaTomadas,
   buscarCompra,
+  convertir,
   jornadaDe,
+  liberarReserva,
   pagar,
+  reservar,
   venderEnTaquilla,
   type Avisos,
 } from './venta.js'
@@ -384,3 +388,132 @@ describe('venta: compra por internet (T9)', () => {
   })
 })
 
+describe('venta: reservas de estudiante (T10)', () => {
+  it('reservar aparta butacas sin pago, con número, hasta el inicio de la función (RN-25, RN-29, RN-30, REG-3)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const avisos = avisosSimulados()
+
+    const reserva = reservar(bd, avisos, viernes, [1, 2], CONTACTO, AHORA)
+
+    expect(reserva.numero).toMatch(NUMERO_LEGIBLE)
+    expect(reserva).toMatchObject({ funcionId: viernes, butacaIds: [1, 2], vence: '2026-08-14T19:00:00' })
+    expect(tomadas(bd, viernes, AHORA)).toEqual([
+      { butacaId: 1, motivo: 'reserva', referencia: reserva.numero },
+      { butacaId: 2, motivo: 'reserva', referencia: reserva.numero },
+    ])
+    // REG-3: la reserva vigente guarda contacto e instante, en su propia tabla.
+    const guardada = bd
+      .prepare(`SELECT nombre, correo, telefono, instante FROM reserva WHERE numero = ?`)
+      .get(reserva.numero)
+    expect(guardada).toEqual({ ...CONTACTO, instante: AHORA })
+    // No es una venta: ninguna consulta de compras la ve (decisión del modelo).
+    expect(buscarCompra(bd, reserva.numero)).toBeUndefined()
+    // El número llega por correo (recorrido de la especificación).
+    expect(avisos.encolados[0]?.cuerpo).toContain(reserva.numero)
+    // Vence al empezar la función, desde el instante exacto (RN-30).
+    expect(tomadas(bd, viernes, '2026-08-14T19:00:00')).toEqual([])
+  })
+
+  it('no hay reservas en las funciones de miércoles (RN-14, CA-3)', () => {
+    const { bd, semanaId } = bdListaParaVender()
+    const miercoles = programarFuncion(bd, {
+      peliculaId: 1,
+      salaId: 2,
+      semanaId,
+      fecha: '2026-08-19',
+      horaInicio: '19:00',
+    })
+
+    expect(() =>
+      reservar(bd, avisosSimulados(), miercoles, [121], CONTACTO, '2026-08-19T18:00:00'),
+    ).toThrow('En las funciones de miércoles no hay reservas de estudiante')
+  })
+
+  it('reservar exige contacto, función en venta y butacas libres (RN-23, RF-13, RNF-4)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    tomar(bd, viernes, [1], 'venta', 'compra-x', AHORA)
+
+    expect(() =>
+      reservar(bd, avisosSimulados(), viernes, [2], { ...CONTACTO, correo: ' ' }, AHORA),
+    ).toThrow('La reserva necesita nombre, correo y teléfono')
+    expect(() => reservar(bd, avisosSimulados(), viernes, [1], CONTACTO, AHORA)).toThrow(
+      ButacasYaTomadas,
+    )
+    expect(() =>
+      reservar(bd, avisosSimulados(), viernes, [2], CONTACTO, '2026-08-14T19:00:00'),
+    ).toThrow('La función no está en venta')
+  })
+
+  it('convertir con carné cobra precio estudiante y conserva el número (RN-31, RN-25)', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const reserva = reservar(bd, avisosSimulados(), viernes, [1, 2], CONTACTO, AHORA)
+
+    const compra = convertir(bd, reserva.numero, true, operadorId, '2026-08-14T18:30:00')
+
+    expect(compra.numero).toBe(reserva.numero)
+    expect(compra).toMatchObject({ canal: 'taquilla', montoTotal: 10000, operadorId })
+    expect(compra.entradas.map((e) => e.categoria)).toEqual(['estudiante', 'estudiante'])
+    // La butaca nunca queda libre en el medio, y la venta ya no vence (RN-26 aplicado a reservas).
+    expect(tomadas(bd, viernes, '2026-08-14T23:00:00')).toEqual([
+      { butacaId: 1, motivo: 'venta', referencia: reserva.numero },
+      { butacaId: 2, motivo: 'venta', referencia: reserva.numero },
+    ])
+    // La reserva ya no existe como tal: ahora es una compra.
+    expect(bd.prepare(`SELECT COUNT(*) AS n FROM reserva`).get()).toEqual({ n: 0 })
+  })
+
+  it('convertir sin carné cobra precio general (RN-32)', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const reserva = reservar(bd, avisosSimulados(), viernes, [1], CONTACTO, AHORA)
+
+    const compra = convertir(bd, reserva.numero, false, operadorId, '2026-08-14T18:30:00')
+
+    expect(compra.montoTotal).toBe(8000)
+    expect(compra.entradas[0]).toMatchObject({ categoria: 'general', monto: 8000 })
+  })
+
+  it('una reserva vencida no se convierte: venció al empezar la función (RN-30)', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const reserva = reservar(bd, avisosSimulados(), viernes, [1], CONTACTO, AHORA)
+
+    expect(() => convertir(bd, reserva.numero, true, operadorId, '2026-08-14T19:00:00')).toThrow(
+      'La reserva venció al empezar la función: las butacas volvieron a estar libres',
+    )
+    expect(() => convertir(bd, 'XXXXXX', true, operadorId, AHORA)).toThrow(
+      'No existe una reserva con ese número',
+    )
+    expect(contar(bd, 'compra')).toBe(0)
+  })
+
+  it('quien no presenta carné y no paga general libera las butacas en el acto (RN-32)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const reserva = reservar(bd, avisosSimulados(), viernes, [1, 2], CONTACTO, AHORA)
+
+    liberarReserva(bd, reserva.numero)
+
+    expect(tomadas(bd, viernes, AHORA)).toEqual([])
+    expect(bd.prepare(`SELECT COUNT(*) AS n FROM reserva`).get()).toEqual({ n: 0 })
+  })
+
+  it('el barrido borra reservas vencidas con sus butacas y no toca las vigentes (RN-34, REG-8)', () => {
+    const { bd, viernes, semanaId } = bdListaParaVender()
+    const manana = programarFuncion(bd, {
+      peliculaId: 1,
+      salaId: 2,
+      semanaId,
+      fecha: '2026-08-15',
+      horaInicio: '10:00',
+    })
+    const vencida = reservar(bd, avisosSimulados(), viernes, [1], CONTACTO, AHORA)
+    const vigente = reservar(bd, avisosSimulados(), manana, [121], CONTACTO, AHORA)
+
+    const barrido = barrerVencidos(bd, '2026-08-14T19:00:00')
+
+    expect(barrido.reservas).toBe(1)
+    const quedan = bd.prepare(`SELECT numero FROM reserva`).all()
+    expect(quedan).toEqual([{ numero: vigente.numero }])
+    // Las vencidas no se conservan (RN-34) y sus filas de ocupación tampoco.
+    expect(bd.prepare(`SELECT COUNT(*) AS n FROM ocupacion WHERE referencia = ?`).get(vencida.numero)).toEqual({ n: 0 })
+    expect(tomadas(bd, manana, '2026-08-14T19:00:00')).toHaveLength(1)
+  })
+})

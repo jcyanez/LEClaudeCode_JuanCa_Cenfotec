@@ -1,7 +1,13 @@
 import { randomInt } from 'node:crypto'
 import type { Bd } from '../base/bd.js'
-import { categoriaBase, enVenta, precio, type CategoriaPrecio } from '../cartelera/cartelera.js'
-import { cambiarMotivo, tomar } from '../ocupacion/ocupacion.js'
+import {
+  categoriaBase,
+  enVenta,
+  inicioDe,
+  precio,
+  type CategoriaPrecio,
+} from '../cartelera/cartelera.js'
+import { barrer, cambiarMotivo, liberar, tomadas, tomar } from '../ocupacion/ocupacion.js'
 
 export interface ButacaElegida {
   butacaId: number
@@ -270,6 +276,161 @@ export function pagar(
     // RNF-5: la venta ya está registrada; el correo que no sale no revierte nada.
   }
   return compra
+}
+
+export interface Reserva {
+  numero: string
+  funcionId: number
+  butacaIds: number[]
+  /** La reserva vence al empezar la función (RN-30). */
+  vence: string
+}
+
+/**
+ * Reserva de estudiante: solo por internet, sin pago (RN-28, RN-29). Aparta
+ * las butacas hasta el inicio de la función con un número propio que se
+ * conserva al convertirse (RN-25, RN-30). Vive en su propia tabla para que
+ * ninguna consulta de ventas pueda contarla (decisión del modelo, REG-3).
+ */
+export function reservar(
+  bd: Bd,
+  avisos: Avisos,
+  funcionId: number,
+  butacaIds: number[],
+  contacto: Contacto,
+  ahora: string,
+): Reserva {
+  if (butacaIds.length === 0) {
+    throw new Error('Una reserva necesita al menos una butaca')
+  }
+  const contactoCompleto = [contacto.nombre, contacto.correo, contacto.telefono].every(
+    (dato) => dato.trim() !== '',
+  )
+  if (!contactoCompleto) {
+    throw new Error('La reserva necesita nombre, correo y teléfono')
+  }
+  if (!enVenta(bd, funcionId, ahora)) {
+    throw new Error('La función no está en venta')
+  }
+  if (categoriaBase(bd, funcionId) === 'miercoles') {
+    throw new Error('En las funciones de miércoles no hay reservas de estudiante')
+  }
+  const numero = generarNumero(bd)
+  const vence = inicioDe(bd, funcionId)
+  const insertarReserva = bd.prepare(
+    `INSERT INTO reserva (numero, funcion_id, nombre, correo, telefono, instante)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+  )
+  bd.transaction(() => {
+    const resultado = tomar(bd, funcionId, butacaIds, 'reserva', numero, ahora, vence)
+    if (!resultado.tomadas) {
+      throw new ButacasYaTomadas(resultado.seAdelantaron)
+    }
+    insertarReserva.run(numero, funcionId, contacto.nombre, contacto.correo, contacto.telefono, ahora)
+  })()
+  try {
+    avisos.encolar(
+      contacto.correo,
+      `Tu reserva ${numero} — Cine Variedades`,
+      `Tu número de reserva es ${numero}. Presentá tu carné en taquilla antes del inicio de la función.`,
+    )
+  } catch {
+    // RNF-5: la reserva ya está hecha; el correo que no sale no revierte nada.
+  }
+  return { numero, funcionId, butacaIds, vence }
+}
+
+/**
+ * Convierte una reserva en compra, solo en taquilla: con carné cobra precio
+ * de estudiante, sin carné precio general si la persona acepta (RN-31,
+ * RN-32). Conserva el número (RN-25) y la butaca nunca queda libre en el
+ * medio: es el mismo cambio de motivo sin ventana de los bloqueos.
+ */
+export function convertir(
+  bd: Bd,
+  numero: string,
+  conCarne: boolean,
+  operadorId: number,
+  ahora: string,
+): Compra {
+  const reserva = bd
+    .prepare(
+      `SELECT funcion_id AS funcionId, nombre, correo, telefono FROM reserva WHERE numero = ?`,
+    )
+    .get(numero) as { funcionId: number; nombre: string; correo: string; telefono: string } | undefined
+  if (reserva === undefined) {
+    throw new Error('No existe una reserva con ese número')
+  }
+  if (ahora >= inicioDe(bd, reserva.funcionId)) {
+    throw new Error('La reserva venció al empezar la función: las butacas volvieron a estar libres')
+  }
+  const butacaIds = tomadas(bd, reserva.funcionId, ahora)
+    .filter((butaca) => butaca.referencia === numero)
+    .map((butaca) => butaca.butacaId)
+  const categoria: CategoriaPrecio = conCarne ? 'estudiante' : 'general'
+  const monto = precio(bd, reserva.funcionId, categoria)
+  const insertarCompra = bd.prepare(
+    `INSERT INTO compra (numero, canal, instante, jornada, funcion_id, monto_total, operador_id,
+                         contacto_nombre, contacto_correo, contacto_telefono)
+     VALUES (?, 'taquilla', ?, ?, ?, ?, ?, ?, ?, ?)`,
+  )
+  const insertarEntrada = bd.prepare(
+    `INSERT INTO entrada (compra_id, butaca_id, categoria, monto) VALUES (?, ?, ?, ?)`,
+  )
+  bd.transaction(() => {
+    cambiarMotivo(bd, numero, 'venta', numero)
+    bd.prepare(`DELETE FROM reserva WHERE numero = ?`).run(numero)
+    const compraId = Number(
+      insertarCompra.run(
+        numero,
+        ahora,
+        jornadaDe(ahora),
+        reserva.funcionId,
+        monto * butacaIds.length,
+        operadorId,
+        reserva.nombre,
+        reserva.correo,
+        reserva.telefono,
+      ).lastInsertRowid,
+    )
+    for (const butacaId of butacaIds) {
+      insertarEntrada.run(compraId, butacaId, categoria, monto)
+    }
+  })()
+  const compra = buscarCompra(bd, numero)
+  if (compra === undefined) throw new Error(`La compra ${numero} no quedó registrada`)
+  return compra
+}
+
+/**
+ * Libera una reserva no convertida: quien no presenta carné y no paga precio
+ * general deja las butacas libres en el acto (RN-32), sin dejar registro.
+ */
+export function liberarReserva(bd: Bd, numero: string): void {
+  bd.transaction(() => {
+    liberar(bd, numero)
+    bd.prepare(`DELETE FROM reserva WHERE numero = ?`).run(numero)
+  })()
+}
+
+/**
+ * El barrido de Venta (lo llama el Reloj en T17): borra las reservas cuya
+ * función ya empezó (RN-30, RN-34) y le pide a Ocupación que barra sus filas
+ * vencidas. Si no corre, nada se rompe: la corrección vive en cada operación
+ * (decisión 4 de DISENO.md).
+ */
+export function barrerVencidos(bd: Bd, ahora: string): { reservas: number; ocupaciones: number } {
+  const reservas = bd
+    .prepare(`SELECT numero, funcion_id AS funcionId FROM reserva`)
+    .all() as { numero: string; funcionId: number }[]
+  let borradas = 0
+  for (const reserva of reservas) {
+    if (inicioDe(bd, reserva.funcionId) <= ahora) {
+      bd.prepare(`DELETE FROM reserva WHERE numero = ?`).run(reserva.numero)
+      borradas++
+    }
+  }
+  return { reservas: borradas, ocupaciones: barrer(bd, ahora) }
 }
 
 /** La compra con sus entradas, por número (RF-18 la usa desde la puerta). */
