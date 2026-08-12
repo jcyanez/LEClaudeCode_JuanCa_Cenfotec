@@ -11,8 +11,8 @@
 
 **Al retomar:**
 - Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T11 está en `PLAN.md`.
-- Hasta T10 asentado en git (12/08/2026, en `main`, un commit por tarea). Pendiente: `push`
-  cuando el usuario lo pida.
+- Hasta T10 asentado en git y **subido a GitHub** (12/08/2026, `main` → `origin/main`, un commit
+  por tarea). Acuerdo del usuario (12/08): cuando pida commits, el `push` va incluido.
 - Existe `src/demo.ts` (fuera de los commits de tareas): demostración por consola del flujo
   completo con `npx tsx src/demo.ts`, pedida por el usuario para ver el avance; las pantallas
   reales siguen en Fase 6.
