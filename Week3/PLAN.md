@@ -208,7 +208,7 @@ con duración.
   posible (`RN-5`, `RN-6`, tabla de errores); una función con butacas tomadas no se modifica ni
   elimina (`RF-4`); «en venta» = semana abierta, no cancelada, no empezada.
 
-### - [ ] T7 — Precios vigentes
+### - [x] T7 — Precios vigentes
 
 **Depende de:** T6.
 **Archivos:** componente `cartelera/` y sus pruebas.
@@ -225,7 +225,7 @@ desde.
 `encolar(destinatario, asunto, cuerpo, adjunto?) → void` — **acepta siempre, nunca falla ni
 bloquea** (`RNF-5`). Hasta T14 se usa una implementación simulada en pruebas.
 
-### - [ ] T8 — Compra en taquilla
+### - [x] T8 — Compra en taquilla
 
 **Depende de:** T3 y T7.
 **Archivos:** componente `venta/` y sus pruebas.

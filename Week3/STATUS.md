@@ -4,22 +4,28 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 8 — cerrada con T6
-**Tarea en curso:** ninguna — T6 cerrada (55 pruebas en verde y typecheck limpio: `npm test` y
+**Última actualización:** 12 de agosto de 2026 · Sesión 10 — cerrada con T8
+**Tarea en curso:** ninguna — T8 cerrada (72 pruebas en verde y typecheck limpio: `npm test` y
 `npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** T13 — Operadores (secuencia recomendada) o T7 — Precios vigentes
+**Siguiente tarea:** T9 — Compra por internet, T10 — Reservas o T11 — Puerta (paralelizables
+entre sí, todas desbloqueadas), o T13/T14 en carriles paralelos
 
 **Al retomar:**
-- Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T13 y T7 está en `PLAN.md`.
-- Hasta T6 asentado en git (12/08/2026, en `main`, un commit por tarea). Pendiente: `push`
+- Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T9–T11 está en `PLAN.md`.
+- Hasta T8 asentado en git (12/08/2026, en `main`, un commit por tarea). Pendiente: `push`
   cuando el usuario lo pida.
+- La contradicción del CHECK de `entrada.categoria` (T2 vs. glosario) quedó **resuelta en T8**
+  con la migración `002-categoria-miercoles`: el CHECK ahora admite las tres categorías del
+  glosario (general, estudiante, miércoles), con reversa al esquema original.
 - Dos interpretaciones tomadas en T6, a revisar por el usuario: (1) `RF-4` habla de butacas
   «vendida o reservada», pero se sigue a `DISENO.md`/`PLAN.md` y se usa `tieneTomadas` (incluye
   bloqueos vigentes, más estricto); (2) una función cancelada no bloquea el margen de 20 minutos
   (`RN-6`) porque su proyección no va a ocurrir (`RN-41`).
-- Pedido del usuario (12/08): propuesta de diseño UX/UI del mapa de butacas y cartelera —
-  se presenta como mockup para decidir (skill `ui-ux-pro-max` obligatoria); las pantallas
-  reales siguen siendo de la Fase 6 (T18–T19).
+- Mockup UX/UI (12/08): la propuesta está completa en el artifact «Cine Variedades — Propuesta
+  UX/UI» (tokens Carbon, mapa opciones A/B con B recomendada, estados por canal, cartelera y
+  flujo bloqueo → pago → número). **Esperan decisión del usuario:** (1) opción A o B del mapa
+  angosto — al decidirse se registra en `DISENO.md`; (2) moneda y formato de precio en pantalla;
+  (3) texto de la etiqueta «MIÉRCOLES ½ PRECIO». Las pantallas reales siguen en Fase 6 (T18–T19).
 
 **Stack decidido en T0:** TypeScript (Node.js + Fastify · React + `@carbon/react`) · SQLite en
 modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14).
@@ -63,10 +69,18 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   `RF-3`, `CA-7`); modificar/eliminar solo sin butacas tomadas (`RF-4`, vía Ocupación);
   cancelación lógica con REG-4 (plazo `RN-42` queda para T12); `enVenta` = semana abierta ∧ no
   cancelada ∧ no empezada (`RN-21`, `RN-43`, borde `CA-2`) · 13 pruebas
-- [ ] T7 — Precios vigentes
+- [x] T7 — Precios vigentes: `fijarPrecios` con historial con fecha desde (decisión de
+  `DISENO.md`); `precio(función, categoría)` calculado por la fecha de la función (`RN-15`);
+  miércoles a mitad del general con categoría propia y sin estudiante (`RN-13`, `RN-14`, `CA-3`);
+  el congelado del monto queda para Venta (`RN-16`) · 7 pruebas
 
 ### Fase 3 · Venta
-- [ ] T8 — Compra en taquilla
+- [x] T8 — Compra en taquilla: `venderEnTaquilla` de libre a vendida sin paso intermedio
+  (`RN-20`), una sola transacción con Ocupación y sin rastro si algo se adelanta (`RNF-4`,
+  `REG-1`); número de 6 caracteres sin `0/O/1/I/L` único entre compras y reservas (`RN-25`);
+  monto congelado por entrada (`RN-16`, `CA-4`); `jornadaDe` con corte 06:00 congelada al
+  escribir (`RN-10`, `RN-11`, `CA-8`); función no en venta → rechazo (`RF-13`); migración
+  `002-categoria-miercoles` habilita la categoría miércoles en `entrada` (`CA-3`) · 10 pruebas
 - [ ] T9 — Compra por internet
 - [ ] T10 — Reservas de estudiante
 - [ ] T11 — Validación en puerta
