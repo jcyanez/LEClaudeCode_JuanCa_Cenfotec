@@ -170,7 +170,7 @@ adelantaron` · `tomadas(función) → [(butaca, motivo, referencia)]` · `¿tie
   fila vencida se comporta como libre al leer, desde el instante exacto (`RN-17`–`RN-20`); dos
   procesos concurrentes sobre la misma butaca: uno gana, el otro recibe el rechazo.
 
-### - [ ] T4 — Liberar, vencer y barrer
+### - [x] T4 — Liberar, vencer y barrer
 
 **Depende de:** T3.
 **Archivos:** componente `ocupacion/` y sus pruebas.
@@ -185,7 +185,7 @@ adelantaron` · `tomadas(función) → [(butaca, motivo, referencia)]` · `¿tie
 
 ## Fase 2 — Cartelera
 
-### - [ ] T5 — Salas, butacas fijas y películas
+### - [x] T5 — Salas, butacas fijas y películas
 
 **Depende de:** T2. **Paralelizable con:** T3, T13, T14.
 **Archivos:** componente `cartelera/` y sus pruebas; datos semilla de salas.
@@ -196,7 +196,7 @@ con duración.
   creadas una sola vez e inmutables (`RN-1`, `RN-2`); identificación por fila y número (`A1`,
   `F7`); película exige título y duración (`RN-4`).
 
-### - [ ] T6 — Semanas de cartelera y funciones
+### - [x] T6 — Semanas de cartelera y funciones
 
 **Depende de:** T5 y T3 (consulta `¿tieneTomadas?`).
 **Archivos:** componente `cartelera/` y sus pruebas.
