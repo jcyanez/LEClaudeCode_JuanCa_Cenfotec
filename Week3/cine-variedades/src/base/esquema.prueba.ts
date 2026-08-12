@@ -145,9 +145,27 @@ describe('esquema inicial', () => {
     ).toThrow(/UNIQUE/)
   })
 
-  it('la reversa deja la base sin ninguna tabla del modelo', () => {
+  it('una entrada congela cualquiera de las tres categorías del glosario, incluida miércoles (REG-1)', () => {
     const bd = bdConEsquema()
-    revertirUltimaMigracion(bd, listaMigraciones)
+    sembrarFuncion(bd)
+    bd.prepare(
+      `INSERT INTO compra (numero, canal, instante, jornada, funcion_id, monto_total)
+       VALUES ('ABC234', 'taquilla', '2026-08-19T10:00:00', '2026-08-19', 1, 4000)`,
+    ).run()
+    const insertar = bd.prepare(
+      `INSERT INTO entrada (compra_id, butaca_id, categoria, monto) VALUES (1, 1, ?, 4000)`,
+    )
+
+    expect(() => insertar.run('miercoles')).not.toThrow()
+    // El valor cerrado sigue cerrado: una categoría inventada se rechaza.
+    expect(() => insertar.run('vip')).toThrow(/CHECK/)
+  })
+
+  it('la reversa completa deja la base sin ninguna tabla del modelo', () => {
+    const bd = bdConEsquema()
+    while (revertirUltimaMigracion(bd, listaMigraciones) !== null) {
+      // se revierte una por una hasta vaciar el registro
+    }
     const tablas = tablasExistentes(bd)
     for (const tabla of TABLAS) expect(tablas).not.toContain(tabla)
   })
