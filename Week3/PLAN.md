@@ -291,7 +291,7 @@ nombre o correo.
 
 ## Fase 4 — Salidas, Avisos y Operadores
 
-### - [ ] T13 — Operadores
+### - [x] T13 — Operadores
 
 **Depende de:** T2. **Paralelizable con:** T3–T12 (no comparte archivos con nadie).
 **Archivos:** componente `operadores/` y sus pruebas.

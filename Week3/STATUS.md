@@ -4,11 +4,11 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T12 (Fase 3 completa)
-**Tarea en curso:** ninguna — T11 y T12 cerradas (106 pruebas en verde y typecheck limpio: `npm test`
-y `npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** Fase 4 — T13 (Operadores), T14 (Avisos), T15 (Cierre de caja), T16 (Reporte
-mensual), autorizadas en bloque por el usuario (12/08) junto con T11 y T12
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T13
+**Tarea en curso:** ninguna — T13 cerrada (111 pruebas en verde y typecheck limpio: `npm test` y
+`npm run typecheck` en `cine-variedades/`)
+**Siguiente tarea:** T14 — Avisos (necesita del usuario la elección del proveedor de correo antes
+de implementar el envío real, `DISENO.md` §Decisiones dejadas abiertas), luego T15 y T16
 
 **Al retomar:**
 - Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T13–T16 está en `PLAN.md`.
@@ -25,6 +25,12 @@ mensual), autorizadas en bloque por el usuario (12/08) junto con T11 y T12
   en qué jornada — un evento que puede ocurrir un día distinto (RF-25, RN-44). Se agregó la
   migración `003-devolucion-entregada` con columnas propias (`entrega_operador_id`,
   `entrega_instante`, `entrega_jornada`) sin tocar `reversa_*`.
+- **Interpretación a revisar (T13):** el esquema no tiene tabla de sesión (las 13 entidades de
+  `DISENO.md` no incluyen ninguna), y Operadores «no depende de nada» según ese mismo documento.
+  Se implementaron `identificar` y `puede` como funciones puras sin estado; «abrir sesión» es el
+  propio llamado a `identificar` desde Entrada, y «cerrarla al terminar la jornada» queda como
+  responsabilidad de Entrada (T18), que es quien sostiene la sesión, no un dato que Operadores
+  guarde o borre.
 - **Interpretación a revisar (T12):** `cancelarFuncion` no impide volver a cancelar una función ya
   cancelada dentro de la misma jornada (sobrescribiría el motivo/operador de la cancelación
   original); no hay ninguna `RN-`/`RF-` que lo exija y arreglarlo exigía tocar `cartelera.ts`, fuera
@@ -138,7 +144,11 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   `003-devolucion-entregada` (ver nota más arriba) · 9 pruebas
 
 ### Fase 4 · Salidas, Avisos y Operadores
-- [ ] T13 — Operadores
+- [x] T13 — Operadores: `identificar(PIN)` devuelve el operador con su puesto o nada; `puede
+  (operador, operación)` responde por puesto sobre una matriz fija de permisos —dueña, taquilla,
+  puerta— (`RN-50` a `RN-54`, `RF-32`, `RF-33`); no depende de nada ni conoce sesiones: identificar
+  y exigir el operador en cada pantalla es trabajo de Entrada (T18), no de este componente ni de
+  quien compra por internet (`RN-55`) · 5 pruebas
 - [ ] T14 — Avisos
 - [ ] T15 — Cierre de caja
 - [ ] T16 — Reporte mensual y consultas
