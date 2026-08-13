@@ -324,7 +324,7 @@ cuerpo, adjunto?) → void`, más el envío con proveedor aislado tras interfaz 
   (decisión de `DISENO.md`); las reservas no suman jamás (viven en otra tabla); solo lectura:
   correr dos veces no cambia nada.
 
-### - [ ] T16 — Reporte mensual y consultas
+### - [x] T16 — Reporte mensual y consultas
 
 **Depende de:** T12 y T14. **Paralelizable con:** T15, T18.
 **Archivos:** componente `salidas/` y sus pruebas.

@@ -4,10 +4,10 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T15
-**Tarea en curso:** ninguna — T15 cerrada (126 pruebas en verde y typecheck limpio: `npm test` y
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T16 (Fase 4 completa)
+**Tarea en curso:** ninguna — T16 cerrada (134 pruebas en verde y typecheck limpio: `npm test` y
 `npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** T16 — Reporte mensual y consultas (cierra la Fase 4)
+**Siguiente tarea:** Fase 5 — T17 (Reloj); depende de T4, T10 y T16, ya cerradas
 
 **Decisión del usuario (12/08, en esta sesión):** proveedor de correo saliente para Avisos (T14) →
 **SMTP genérico vía Nodemailer**, credenciales por variables de entorno (nunca commiteadas).
@@ -34,7 +34,17 @@ apruebe esa edición sección por sección (mismo trámite pendiente que las dec
   `DISENO.md` solo lista para el Reloj el barrido de Venta y el reporte mensual, sin mencionar los
   reintentos de Avisos — T17 debe agregar una tercera llamada periódica a `procesarPendientes` con
   el `EnviarCorreo` real (`crearEnviarPorSmtp` + `crearTransportadorSmtp` con las variables de
-  entorno), igual que ya hace con Venta y Salidas.
+  entorno), igual que ya hace con Venta y Salidas. `enviarReporte` (T16) también espera a T17: es el
+  día 1 quien debe llamarlo con el correo de `correoDelDistribuidor`.
+- **Interpretación a revisar (T16):** `enviarReporte` no pasa por la cola de Avisos —hace su propio
+  intento con el `EnviarCorreo` inyectado y siempre inserta una fila nueva en `envio_reporte`— en
+  vez de encolar y dejar el reintento al mecanismo genérico de T14. Se decidió así porque `REG-7`
+  pide «si salió o falló» por cada envío real (uno por llamada, sin pisar el anterior), y el
+  reintento de `RF-28` queda modelado como «alguien vuelve a llamar a `enviarReporte`» —el día 1 el
+  Reloj (T17), o la dueña a mano— en vez de un reintento automático con espaciado interno como el de
+  Avisos. «Avisar a la dueña» del fallo (tabla de errores) se resuelve dejando el intento fallido
+  visible en `envio_reporte` para que su pantalla (T21) lo muestre, no como un correo aparte: no hay
+  ninguna entidad que guarde un correo de la dueña.
 - **Interpretación a revisar (T13):** el esquema no tiene tabla de sesión (las 13 entidades de
   `DISENO.md` no incluyen ninguna), y Operadores «no depende de nada» según ese mismo documento.
   Se implementaron `identificar` y `puede` como funciones puras sin estado; «abrir sesión» es el
@@ -173,7 +183,15 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   jornada* —la de la entrega, no la de la venta (`RN-44`, `CA-8`)—; internet solo informativo y
   nunca se mezcla con ventanilla (`RN-46`, `RF-26`, `CA-6`); no toca `reserva` en absoluto, así que
   nunca puede sumarlas; es de solo lectura, correrlo dos veces no cambia nada · 6 pruebas
-- [ ] T16 — Reporte mensual y consultas
+- [x] T16 — Reporte mensual y consultas: `reporteMensual(mes)` arma el detalle función por función
+  contando entradas de compras `pagada` o `devuelta` —nunca `anulada`— y marca las canceladas, con
+  sus entradas vendidas y devueltas a la vista (`RF-27`, `RN-41`, `CA-5`); `enviarReporte` entrega
+  resumen en el cuerpo y una hoja de cálculo adjunta (decisión de `DISENO.md`) y **siempre** deja un
+  registro nuevo en `envio_reporte` —éxito o fallo, sin pisar intentos previos— para que un fallo
+  quede visible y se pueda reenviar a mano (`REG-7`, `RF-28`, `RN-48`); `correoDelDistribuidor` /
+  `fijarCorreoDelDistribuidor` sobre `configuracion`, sin admitir vacío (`RN-49`, `RF-29`);
+  `ocupacionDeFunciones` (entradas vendidas sobre butacas de la sala, por función, en un período,
+  `RF-30`) y `entradasPorCategoriaYCanal` (agrupado, en un período, `RF-31`) · 8 pruebas
 
 ### Fase 5 · Reloj
 - [ ] T17 — Tareas programadas
