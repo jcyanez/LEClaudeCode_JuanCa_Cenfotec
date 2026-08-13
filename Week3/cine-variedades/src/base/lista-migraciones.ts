@@ -2,10 +2,12 @@ import type { Migracion } from './migraciones.js'
 import { migracion001EsquemaInicial } from './migracion-001-esquema-inicial.js'
 import { migracion002CategoriaMiercoles } from './migracion-002-categoria-miercoles.js'
 import { migracion003DevolucionEntregada } from './migracion-003-devolucion-entregada.js'
+import { migracion004ColaAvisos } from './migracion-004-cola-avisos.js'
 
 /** Lista ordenada de migraciones del esquema. */
 export const listaMigraciones: Migracion[] = [
   migracion001EsquemaInicial,
   migracion002CategoriaMiercoles,
   migracion003DevolucionEntregada,
+  migracion004ColaAvisos,
 ]

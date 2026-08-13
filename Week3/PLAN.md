@@ -302,7 +302,7 @@ nombre o correo.
   sesión que se cierra al terminar la jornada (decisión de `DISENO.md`); `¿puede?` responde por
   operación (`RN-54`, `RF-32`); ningún concepto de cuenta de comprador (`RN-55`).
 
-### - [ ] T14 — Avisos
+### - [x] T14 — Avisos
 
 **Depende de:** T2. **Paralelizable con:** T3–T13.
 **Archivos:** componente `avisos/` y sus pruebas.

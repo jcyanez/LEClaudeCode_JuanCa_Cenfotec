@@ -4,11 +4,16 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T13
-**Tarea en curso:** ninguna — T13 cerrada (111 pruebas en verde y typecheck limpio: `npm test` y
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T14
+**Tarea en curso:** ninguna — T14 cerrada (120 pruebas en verde y typecheck limpio: `npm test` y
 `npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** T14 — Avisos (necesita del usuario la elección del proveedor de correo antes
-de implementar el envío real, `DISENO.md` §Decisiones dejadas abiertas), luego T15 y T16
+**Siguiente tarea:** T15 — Cierre de caja, luego T16 — Reporte mensual
+
+**Decisión del usuario (12/08, en esta sesión):** proveedor de correo saliente para Avisos (T14) →
+**SMTP genérico vía Nodemailer**, credenciales por variables de entorno (nunca commiteadas).
+Pendiente: registrar esta decisión en `DISENO.md` §Decisiones dejadas abiertas cuando el usuario
+apruebe esa edición sección por sección (mismo trámite pendiente que las decisiones de UI del
+11/08, `CLAUDE.md` §8).
 
 **Al retomar:**
 - Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T13–T16 está en `PLAN.md`.
@@ -25,6 +30,11 @@ de implementar el envío real, `DISENO.md` §Decisiones dejadas abiertas), luego
   en qué jornada — un evento que puede ocurrir un día distinto (RF-25, RN-44). Se agregó la
   migración `003-devolucion-entregada` con columnas propias (`entrega_operador_id`,
   `entrega_instante`, `entrega_jornada`) sin tocar `reversa_*`.
+- **Pendiente para T17:** `procesarPendientes` de Avisos queda lista pero nadie la llama todavía;
+  `DISENO.md` solo lista para el Reloj el barrido de Venta y el reporte mensual, sin mencionar los
+  reintentos de Avisos — T17 debe agregar una tercera llamada periódica a `procesarPendientes` con
+  el `EnviarCorreo` real (`crearEnviarPorSmtp` + `crearTransportadorSmtp` con las variables de
+  entorno), igual que ya hace con Venta y Salidas.
 - **Interpretación a revisar (T13):** el esquema no tiene tabla de sesión (las 13 entidades de
   `DISENO.md` no incluyen ninguna), y Operadores «no depende de nada» según ese mismo documento.
   Se implementaron `identificar` y `puede` como funciones puras sin estado; «abrir sesión» es el
@@ -149,7 +159,14 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   puerta— (`RN-50` a `RN-54`, `RF-32`, `RF-33`); no depende de nada ni conoce sesiones: identificar
   y exigir el operador en cada pantalla es trabajo de Entrada (T18), no de este componente ni de
   quien compra por internet (`RN-55`) · 5 pruebas
-- [ ] T14 — Avisos
+- [x] T14 — Avisos: `crearAvisos(bd, ahora)` fabrica el contrato fijo desde T9 — `encolar` es un
+  INSERT simple que nunca falla ni bloquea (`RNF-5`) sobre la tabla propia `aviso` (migración `004`,
+  fuera de las 13 entidades del modelo porque Avisos no sabe qué es una compra); `procesarPendientes`
+  intenta los que ya vencieron, reintenta con espaciado creciente duplicando la espera en cada
+  vuelta, y marca fallido y visible al superar las 24 horas desde que se encoló (`RN-48`); el envío
+  real queda aislado tras `EnviarCorreo`, un método único (decisión de `DISENO.md`), con
+  `crearEnviarPorSmtp` adaptando Nodemailer —proveedor elegido por el usuario— sin que quien encola
+  se entere si cambia · 9 pruebas (6 de la cola y reintentos, 3 del adaptador)
 - [ ] T15 — Cierre de caja
 - [ ] T16 — Reporte mensual y consultas
 

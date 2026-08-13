@@ -1,4 +1,5 @@
 import { randomInt } from 'node:crypto'
+import type { Avisos } from '../avisos/avisos.js'
 import type { Bd } from '../base/bd.js'
 import {
   cancelarFuncion as marcarFuncionCancelada,
@@ -9,6 +10,8 @@ import {
   type CategoriaPrecio,
 } from '../cartelera/cartelera.js'
 import { barrer, cambiarMotivo, liberar, tomadas, tomar } from '../ocupacion/ocupacion.js'
+
+export type { Avisos }
 
 export interface ButacaElegida {
   butacaId: number
@@ -138,15 +141,6 @@ export function venderEnTaquilla(
   const compra = buscarCompra(bd, numero)
   if (compra === undefined) throw new Error(`La compra ${numero} no quedó registrada`)
   return compra
-}
-
-/**
- * Contrato fijo de Avisos (PLAN, Fase 3): encolar acepta siempre, nunca falla
- * ni bloquea (RNF-5). La implementación real llega en T14; hasta entonces las
- * pruebas usan una simulada.
- */
-export interface Avisos {
-  encolar(destinatario: string, asunto: string, cuerpo: string, adjunto?: unknown): void
 }
 
 export interface Contacto {
