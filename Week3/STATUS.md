@@ -4,17 +4,23 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T17 (Fase 5 completa)
-**Tarea en curso:** ninguna — T17 cerrada (140 pruebas en verde y typecheck limpio: `npm test` y
-`npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** Fase 6 — T18 (Base de la capa de entrada); invoca la skill `ui-ux-pro-max`
-antes de diseñar (`CLAUDE.md` §8)
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T18
+**Tarea en curso:** ninguna — T18 cerrada (155 pruebas en verde en `cine-variedades/`, typecheck
+limpio en los dos paquetes; el cliente además compila con `npm run build`)
+**Siguiente tarea:** T19 — Web pública del comprador (invoca `ui-ux-pro-max` antes de diseñar
+pantallas, `CLAUDE.md` §8)
 
 **Decisión del usuario (12/08, en esta sesión):** el Reloj (T17) agrega un tercer trabajo no
 listado en `DISENO.md` — llamar cada 10 minutos a `procesarPendientes` de Avisos con el envío real
 — porque sin eso ningún correo se enviaría nunca. Pendiente: registrar esto en `DISENO.md` §Reloj
 cuando el usuario apruebe esa edición sección por sección (mismo trámite pendiente que las otras
 decisiones de esta sesión).
+
+**Nota sobre `ui-ux-pro-max` en T18:** el script `search.py` de la skill no pudo correr en este
+entorno (no hay Python instalado, solo el stub de Microsoft Store). Los tokens de T18 se basaron en
+el sistema real de Carbon (`@carbon/react`, ya decidido en T0, no solo inspiración) y en el
+checklist estático de accesibilidad/objetivos táctiles de la skill (`references/quick-reference.md`),
+no en una búsqueda de paletas. A revisar en T19 si se consigue un intérprete de Python.
 
 **Decisión del usuario (12/08, en esta sesión):** proveedor de correo saliente para Avisos (T14) →
 **SMTP genérico vía Nodemailer**, credenciales por variables de entorno (nunca commiteadas).
@@ -37,11 +43,21 @@ apruebe esa edición sección por sección (mismo trámite pendiente que las dec
   en qué jornada — un evento que puede ocurrir un día distinto (RF-25, RN-44). Se agregó la
   migración `003-devolucion-entregada` con columnas propias (`entrega_operador_id`,
   `entrega_instante`, `entrega_jornada`) sin tocar `reversa_*`.
-- **Pendiente para T18:** `iniciarReloj` (T17) recibe `DependenciasReloj` ya armadas, pero nadie las
-  arma todavía con la base de datos real: quien componga el servidor debe atar `barrerVencidos`,
-  `procesarPendientes` (con `crearEnviarPorSmtp` + `crearTransportadorSmtp` y las variables de
-  entorno) y `enviarReporte` (con el correo de `correoDelDistribuidor`) a un `bd` concreto antes de
-  llamar a `iniciarReloj`.
+- **Pendiente para T19 (o el cierre de Fase 6):** T18 dejó `crearApp` como fábrica, probada con
+  `.inject()`, pero **todavía no existe un punto de entrada que la arranque de verdad** —un
+  `app.listen(...)` con un `bd` real abierto y un secreto de cookies de una variable de entorno—.
+  Tampoco se ató `iniciarReloj` (T17) a dependencias reales todavía: sigue pendiente lo mismo que ya
+  estaba anotado (`barrerVencidos`, `procesarPendientes` con `crearEnviarPorSmtp` +
+  `crearTransportadorSmtp`, `enviarReporte` con `correoDelDistribuidor`). T19 va a necesitar rutas
+  reales sirviendo cartelera y butacas, así que ese arranque real llega con esa tarea.
+- **Decisiones de implementación de T18, sin necesitar al usuario** (bundler no es de los que
+  `CLAUDE.md` §6 reserva — ya estaba fijo React + Fastify + `@carbon/react` desde T0): **Vite**
+  como bundler del cliente, tema Carbon **`g10`**. Dos ajustes técnicos: la minificación de CSS de
+  Vite 8 (`lightningcss`) todavía no entiende una regla nueva (`@position-try`) que emite el SCSS
+  de Carbon, así que se apagó (`build.cssMinify: false`) hasta que el ecosistema se ponga al día;
+  y las fuentes IBM Plex de Carbon usan rutas al estilo webpack que Vite no resuelve, así que se
+  desactivó el `@font-face` de Carbon (`$css--font-face: false`) y se cargan por Google Fonts en
+  `index.html` en su lugar.
 - **Interpretación a revisar (T16):** `enviarReporte` no pasa por la cola de Avisos —hace su propio
   intento con el `EnviarCorreo` inyectado y siempre inserta una fila nueva en `envio_reporte`— en
   vez de encolar y dejar el reintento al mecanismo genérico de T14. Se decidió así porque `REG-7`
@@ -105,6 +121,10 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
 - [x] Decisiones de T0 registradas en `DISENO.md` con aprobación del usuario
 
 ## Construcción — en curso (autorización sesión por sesión)
+
+**Nuevo desde T18:** el proyecto tiene dos paquetes npm. `cine-variedades/` (dominio + servidor,
+Node/Vitest, sin cambios de comando) y `cine-variedades/entrada-cliente/` (React + Vite + PWA,
+`npm install` propio; `npm run dev` para verla, `npm run build`/`typecheck` propios).
 
 ### Preparación
 - [x] T1 — Andamiaje del proyecto: `cine-variedades/` con TypeScript estricto, Vitest, SQLite (WAL) y migraciones aplicar/revertir · 7 pruebas
@@ -210,7 +230,19 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   vendiendo en taquilla sin que corriera ningún tick (decisión 4 de `DISENO.md`) · 6 pruebas
 
 ### Fase 6 · Entrada (PWA · Carbon)
-- [ ] T18 — Base de la capa de entrada
+- [x] T18 — Base de la capa de entrada:
+  - **Servidor** (`entrada/servidor/`, Fastify + `@fastify/cookie`): sesión de operador —el
+    operador completo viaja firmado en la cookie, sin tabla de sesiones— con `exigirOperador
+    (operación)` que exige identificarse y delega el permiso en `puede` de Operadores (RF-32,
+    RN-54); sesión anónima del comprador con id aleatorio en cookie, sin exigir nada (RN-55);
+    traductor de errores de dominio a status HTTP + cuerpo estructurado por cada una de las 6
+    clases de rechazo de Venta, con límite conocido documentado para los rechazos sin clase propia
+    · 15 pruebas
+  - **Cliente** (`entrada-cliente/`, paquete npm propio): React 19 + Vite 8 + `@carbon/react`
+    (tema `g10`) + `react-router-dom`; PWA instalable vía `vite-plugin-pwa` — manifest con íconos
+    SVG, service worker que precachea solo el cascarón y nunca rutas `/api` (`RNF-3`); cascarón de
+    rutas para los tres públicos (web pública, taquilla, puerta), sin ninguna pantalla real
+    todavía (T19–T21). `npm run build`/`typecheck` en verde.
 - [ ] T19 — Web pública del comprador
 - [ ] T20 — Pantalla de taquilla
 - [ ] T21 — Puerta y pantallas de la dueña

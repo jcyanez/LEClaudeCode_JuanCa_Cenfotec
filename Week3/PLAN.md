@@ -353,7 +353,7 @@ consultas de ocupación y por categoría/canal.
 
 Toda tarea de esta fase invoca la skill `ui-ux-pro-max` antes de diseñar (`CLAUDE.md` §8).
 
-### - [ ] T18 — Base de la capa de entrada
+### - [x] T18 — Base de la capa de entrada
 
 **Depende de:** T13. **Paralelizable con:** T8–T12, T15, T16.
 **Archivos:** componente `entrada/` (servidor y cliente), `manifest` y `service worker` de la PWA,

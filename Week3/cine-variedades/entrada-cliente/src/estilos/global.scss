@@ -1,0 +1,21 @@
+// Carbon emite sus @font-face con rutas al estilo webpack (`~@ibm/plex/...`)
+// que Vite no resuelve, así que se apagan acá y las fuentes se cargan
+// aparte (index.html) para que `npm run dev`/`build` no dependan de ese
+// alias roto.
+@use '@carbon/styles/scss/config' with ($css--font-face: false);
+@use '@carbon/react';
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* Objetivo táctil mínimo (CLAUDE.md §8, prioridad 2 de ui-ux-pro-max):
+   ningún control interactivo del mapa de butacas puede ser menor a esto. */
+:root {
+  --objetivo-tactil-minimo: 44px;
+}
