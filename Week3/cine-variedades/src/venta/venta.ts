@@ -9,7 +9,7 @@ import {
   precio,
   type CategoriaPrecio,
 } from '../cartelera/cartelera.js'
-import { barrer, cambiarMotivo, liberar, tomadas, tomar } from '../ocupacion/ocupacion.js'
+import { barrer, cambiarMotivo, liberar, tomadas, tomar, venceDe } from '../ocupacion/ocupacion.js'
 
 export type { Avisos }
 
@@ -197,6 +197,22 @@ export function bloquear(
     categoria: categoriaBase(bd, funcionId),
     vence,
   }
+}
+
+/**
+ * Reconstruye el bloqueo vigente de una sesión anónima a partir de lo que
+ * ya quedó escrito en Ocupación (T19): Entrada no guarda el bloqueo entre
+ * pedidos, así que se lo pide de nuevo antes de pagar. Si ya venció o
+ * nunca existió, `tomadas` ya lo excluyó y no hay nada que reconstruir.
+ */
+export function bloqueoVigente(bd: Bd, funcionId: number, sesion: string, ahora: string): Bloqueo | undefined {
+  const butacaIds = tomadas(bd, funcionId, ahora)
+    .filter((butaca) => butaca.motivo === 'bloqueo' && butaca.referencia === sesion)
+    .map((butaca) => butaca.butacaId)
+  if (butacaIds.length === 0) return undefined
+  const vence = venceDe(bd, funcionId, sesion)
+  if (vence === undefined || vence === null) return undefined
+  return { sesion, funcionId, butacaIds, categoria: categoriaBase(bd, funcionId), vence }
 }
 
 /**

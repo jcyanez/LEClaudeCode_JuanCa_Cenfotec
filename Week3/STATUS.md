@@ -4,11 +4,14 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T18
-**Tarea en curso:** ninguna — T18 cerrada (155 pruebas en verde en `cine-variedades/`, typecheck
-limpio en los dos paquetes; el cliente además compila con `npm run build`)
-**Siguiente tarea:** T19 — Web pública del comprador (invoca `ui-ux-pro-max` antes de diseñar
-pantallas, `CLAUDE.md` §8)
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T19
+**Tarea en curso:** ninguna — T19 cerrada (172 pruebas en verde en `cine-variedades/`, typecheck
+limpio en los dos paquetes, cliente y servidor corriendo de verdad uno contra el otro)
+**Siguiente tarea:** T20 — Pantalla de taquilla (también invoca `ui-ux-pro-max`, `CLAUDE.md` §8)
+
+**Decisiones del usuario (12/08, en esta sesión, para T19):** moneda y formato de precio → colón
+costarricense sin decimales, separador de miles con espacio (`₡8 000`); etiqueta de la categoría
+miércoles → «MIÉRCOLES ½ PRECIO» en mayúsculas, tal como en el mockup del 11/08.
 
 **Decisión del usuario (12/08, en esta sesión):** el Reloj (T17) agrega un tercer trabajo no
 listado en `DISENO.md` — llamar cada 10 minutos a `procesarPendientes` de Avisos con el envío real
@@ -43,13 +46,21 @@ apruebe esa edición sección por sección (mismo trámite pendiente que las dec
   en qué jornada — un evento que puede ocurrir un día distinto (RF-25, RN-44). Se agregó la
   migración `003-devolucion-entregada` con columnas propias (`entrega_operador_id`,
   `entrega_instante`, `entrega_jornada`) sin tocar `reversa_*`.
-- **Pendiente para T19 (o el cierre de Fase 6):** T18 dejó `crearApp` como fábrica, probada con
-  `.inject()`, pero **todavía no existe un punto de entrada que la arranque de verdad** —un
-  `app.listen(...)` con un `bd` real abierto y un secreto de cookies de una variable de entorno—.
-  Tampoco se ató `iniciarReloj` (T17) a dependencias reales todavía: sigue pendiente lo mismo que ya
-  estaba anotado (`barrerVencidos`, `procesarPendientes` con `crearEnviarPorSmtp` +
-  `crearTransportadorSmtp`, `enviarReporte` con `correoDelDistribuidor`). T19 va a necesitar rutas
-  reales sirviendo cartelera y butacas, así que ese arranque real llega con esa tarea.
+- **Resuelto en T19:** `entrada/servidor/principal.ts` es el primer punto de entrada real
+  (`app.listen`), con `bd` de archivo (`RUTA_BD`) y secreto de cookies por variable de entorno
+  (`SECRETO_COOKIES`). Corre con `npm run servidor` (`tsx watch`, agregado a `cine-variedades/`).
+- **Sigue pendiente:** `iniciarReloj` (T17) todavía no está atado a dependencias reales —
+  `barrerVencidos`, `procesarPendientes` con `crearEnviarPorSmtp` + `crearTransportadorSmtp`,
+  `enviarReporte` con `correoDelDistribuidor`— ni llamado desde `principal.ts`. Debe resolverse
+  antes del cierre de Fase 6, para que el barrido y los avisos corran de verdad.
+- **Interpretación a revisar (T19, mapa en pantalla angosta):** `DISENO.md` delega esta decisión a
+  quien implemente, y el mockup del 11/08 recomendaba la opción B (sala reducida a escala). Al
+  construirlo apareció una tensión real: la Sala 1 tiene 12 butacas por fila, y encogerlas para que
+  las 12 entren en un teléfono angosto bajaría el objetivo táctil por debajo de 44×44px — de
+  cumplimiento **obligatorio** (`CLAUDE.md` §8). Se prioriza esa regla no negociable: el mapa se
+  dibuja a tamaño real (44px mínimo) y el contenedor de cada fila se desplaza de lado si no entra
+  en la pantalla (más cerca de la opción A, aunque sin scroll cuando sí entra). Se documenta acá en
+  vez de decidir en silencio, tal como pide `CLAUDE.md` §4.
 - **Decisiones de implementación de T18, sin necesitar al usuario** (bundler no es de los que
   `CLAUDE.md` §6 reserva — ya estaba fijo React + Fastify + `@carbon/react` desde T0): **Vite**
   como bundler del cliente, tema Carbon **`g10`**. Dos ajustes técnicos: la minificación de CSS de
@@ -243,7 +254,24 @@ Node/Vitest, sin cambios de comando) y `cine-variedades/entrada-cliente/` (React
     SVG, service worker que precachea solo el cascarón y nunca rutas `/api` (`RNF-3`); cascarón de
     rutas para los tres públicos (web pública, taquilla, puerta), sin ninguna pantalla real
     todavía (T19–T21). `npm run build`/`typecheck` en verde.
-- [ ] T19 — Web pública del comprador
+- [x] T19 — Web pública del comprador:
+  - **Crecimiento de contrato** en Cartelera y Ocupación (mismo patrón que T9/T10):
+    `detalleFuncion`/`funcionesEnVenta` (con `filas`/`butacasPorFila` de la sala) en `cartelera.ts`;
+    `venceDe` en `ocupacion.ts`; `bloqueoVigente` en `venta.ts` (reconstruye el bloqueo de una
+    sesión anónima entre pedidos HTTP, sin que Entrada lea la tabla de ocupación directamente) · 7
+    pruebas
+  - **Servidor** (`entrada/servidor/rutas-publicas.ts`): `GET /api/cartelera` (RF-8), `GET
+    /api/funciones/:id/mapa` compone `butacasDe` + `tomadas` y colapsa a libre/no-disponible
+    (RF-9, RN-56, CA-9), `POST .../bloqueo` (RF-10), `POST .../pago` (RF-11, reconstruye el bloqueo
+    por la cookie anónima) y `POST .../reserva` (RF-14) · 10 pruebas. `principal.ts`: primer punto
+    de entrada real (`app.listen`), con `bd` de archivo y solo las salas sembradas — nunca datos de
+    negocio de mentira, esos los carga la dueña en T21.
+  - **Cliente**: `Cartelera` (lista con precios y la etiqueta de miércoles), `Funcion` (mapa +
+    flujo bloqueo → pago → número + reserva, sondeo cada 3 s mientras se eligen butacas,
+    mensajes de la tabla de errores), `MapaDeButacas` (butacas de 44×44px reales, nunca menos —
+    ver interpretación más abajo). Sin pruebas automatizadas de componentes (no hay
+    testing-library configurado); verificado corriendo el cliente y el servidor reales uno contra
+    el otro (`npm run servidor` + `npm run dev` en `entrada-cliente/`).
 - [ ] T20 — Pantalla de taquilla
 - [ ] T21 — Puerta y pantallas de la dueña
 

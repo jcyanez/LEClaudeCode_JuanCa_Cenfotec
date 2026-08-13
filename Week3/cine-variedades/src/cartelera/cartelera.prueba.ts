@@ -9,10 +9,12 @@ import {
   cancelarFuncion,
   categoriaBase,
   crearSemana,
+  detalleFuncion,
   eliminarFuncion,
   enVenta,
   inicioDe,
   fijarPrecios,
+  funcionesEnVenta,
   modificarFuncion,
   peliculas,
   precio,
@@ -484,5 +486,69 @@ describe('cartelera: precios vigentes (T7)', () => {
     expect(() => fijarPrecios(bd, 8000, 50.5, '2026-08-01')).toThrow(
       'Los montos deben ser enteros de céntimos mayores que cero',
     )
+  })
+})
+
+describe('cartelera: detalle de función y funciones en venta (T19)', () => {
+  function bdConCartelera(): { bd: Bd; viernes: number; miercoles: number } {
+    const bd = bdConEsquema()
+    sembrarSalas(bd)
+    bd.prepare(`INSERT INTO operador (nombre, puesto, credencial) VALUES ('Rosa', 'dueña', '1111')`).run()
+    const peliculaId = registrarPelicula(bd, 'La película', 120)
+    const semanaId = crearSemana(bd, '2026-08-13', HOY)
+    abrirVenta(bd, semanaId)
+    const viernes = programarFuncion(bd, {
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '19:00',
+    })
+    const miercoles = programarFuncion(bd, {
+      peliculaId,
+      salaId: 2,
+      semanaId,
+      fecha: '2026-08-19',
+      horaInicio: '19:00',
+    })
+    return { bd, viernes, miercoles }
+  }
+
+  it('detalleFuncion trae sala, película y categoría base', () => {
+    const { bd, viernes, miercoles } = bdConCartelera()
+
+    expect(detalleFuncion(bd, viernes)).toEqual({
+      funcionId: viernes,
+      salaId: 1,
+      pelicula: 'La película',
+      sala: 'Sala 1',
+      filas: 10,
+      butacasPorFila: 12,
+      fecha: '2026-08-14',
+      horaInicio: '19:00',
+      categoriaBase: 'general',
+    })
+    expect(detalleFuncion(bd, miercoles)?.categoriaBase).toBe('miercoles')
+    expect(detalleFuncion(bd, 999)).toBeUndefined()
+  })
+
+  it('funcionesEnVenta lista solo las que están en venta, en orden (RF-8, RN-9, RN-21, RN-43)', () => {
+    const { bd, viernes, miercoles } = bdConCartelera()
+
+    const enVentaAntes = funcionesEnVenta(bd, '2026-08-14T18:00:00')
+    expect(enVentaAntes.map((f) => f.funcionId)).toEqual([viernes, miercoles])
+
+    // A la hora exacta de inicio del viernes, ya no aparece (RN-21, CA-2).
+    const despuesDeEmpezar = funcionesEnVenta(bd, '2026-08-14T19:00:00')
+    expect(despuesDeEmpezar.map((f) => f.funcionId)).toEqual([miercoles])
+
+    // Cancelada, tampoco aparece (RN-43); el viernes sigue en venta.
+    cancelarFuncion(bd, miercoles, {
+      operadorId: 1,
+      instante: '2026-08-14T18:00:00',
+      jornada: '2026-08-14',
+      motivo: 'motivo',
+    })
+    expect(funcionesEnVenta(bd, '2026-08-14T18:00:00').map((f) => f.funcionId)).toEqual([viernes])
   })
 })

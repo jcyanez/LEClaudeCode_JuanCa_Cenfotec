@@ -3,6 +3,7 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import type { Bd } from '../../base/bd.js'
 import { manejarErrorDeDominio } from './errores.js'
 import { registrarSesionOperador } from './operadores-sesion.js'
+import { registrarRutasPublicas } from './rutas-publicas.js'
 
 export interface OpcionesApp {
   bd: Bd
@@ -24,6 +25,7 @@ export function crearApp(opciones: OpcionesApp): FastifyInstance {
   app.setErrorHandler(manejarErrorDeDominio)
 
   registrarSesionOperador(app, opciones.bd)
+  registrarRutasPublicas(app, opciones.bd)
 
   app.get('/api/salud', async () => ({ estado: 'ok' }))
 

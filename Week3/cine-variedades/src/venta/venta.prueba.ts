@@ -16,6 +16,7 @@ import {
   anular,
   barrerVencidos,
   bloquear,
+  bloqueoVigente,
   ButacasYaTomadas,
   buscarCompra,
   buscarCompraPorContacto,
@@ -406,6 +407,29 @@ describe('venta: compra por internet (T9)', () => {
     const compra = pagar(bd, avisosSimulados(), bloqueo, CONTACTO, '2026-08-19T18:02:00')
     expect(compra.montoTotal).toBe(4000)
     expect(compra.entradas[0]).toMatchObject({ categoria: 'miercoles', monto: 4000 })
+  })
+
+  it('bloqueoVigente reconstruye el bloqueo de una sesión para pagar en otro pedido (T19)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    bloquear(bd, viernes, [1, 2], 'sesion-a', AHORA)
+
+    const reconstruido = bloqueoVigente(bd, viernes, 'sesion-a', '2026-08-14T18:03:00')
+
+    expect(reconstruido).toEqual({
+      sesion: 'sesion-a',
+      funcionId: viernes,
+      butacaIds: [1, 2],
+      categoria: 'general',
+      vence: '2026-08-14T18:05:00',
+    })
+  })
+
+  it('bloqueoVigente no encuentra nada si venció o nunca existió', () => {
+    const { bd, viernes } = bdListaParaVender()
+    bloquear(bd, viernes, [1], 'sesion-a', AHORA)
+
+    expect(bloqueoVigente(bd, viernes, 'sesion-a', '2026-08-14T18:05:00')).toBeUndefined()
+    expect(bloqueoVigente(bd, viernes, 'nadie', AHORA)).toBeUndefined()
   })
 })
 

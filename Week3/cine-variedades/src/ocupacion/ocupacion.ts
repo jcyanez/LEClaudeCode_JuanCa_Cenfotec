@@ -126,3 +126,16 @@ export function tomadas(bd: Bd, funcionId: number, ahora: string): ButacaTomada[
     )
     .all(funcionId, ahora) as ButacaTomada[]
 }
+
+/**
+ * Cuándo vence una referencia (un bloqueo, RN-19), o `null` si no vence
+ * (una venta). `undefined` si esa referencia no tiene ninguna fila en esta
+ * función. Lo usa Venta para reconstruir un bloqueo vigente por su sesión
+ * (T19), sin que Entrada tenga que leer la tabla de ocupación directamente.
+ */
+export function venceDe(bd: Bd, funcionId: number, referencia: string): string | null | undefined {
+  const fila = bd
+    .prepare(`SELECT vence FROM ocupacion WHERE funcion_id = ? AND referencia = ? LIMIT 1`)
+    .get(funcionId, referencia) as { vence: string | null } | undefined
+  return fila?.vence
+}

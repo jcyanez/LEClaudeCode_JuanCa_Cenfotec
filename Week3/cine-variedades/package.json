@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "servidor": "tsx watch src/entrada/servidor/principal.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
@@ -19,6 +20,7 @@
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.2.0",
     "@types/nodemailer": "^8.0.1",
+    "tsx": "^4.23.12",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }

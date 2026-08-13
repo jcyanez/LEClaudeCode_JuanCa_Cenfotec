@@ -366,7 +366,7 @@ instalable.
   pública no exige nada (`RF-32`, `RN-55`); ninguna regla de negocio en esta capa (promesa de
   `DISENO.md`); la PWA instala con `manifest` válido, **sin venta offline** (`RNF-3`).
 
-### - [ ] T19 — Web pública del comprador
+### - [x] T19 — Web pública del comprador
 
 **Depende de:** T18, T9 y T10. **Paralelizable con:** T20, T21.
 **Archivos:** componente `entrada/`, pantallas públicas.

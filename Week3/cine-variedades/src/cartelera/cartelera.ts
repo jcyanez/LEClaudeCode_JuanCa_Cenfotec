@@ -349,6 +349,73 @@ export function inicioDe(bd: Bd, funcionId: number): string {
   return `${funcion.fecha}T${funcion.horaInicio}:00`
 }
 
+export interface DetalleFuncion {
+  funcionId: number
+  salaId: number
+  pelicula: string
+  sala: string
+  /** Filas y butacas por fila de la sala (RN-1): con qué arma Entrada el mapa. */
+  filas: number
+  butacasPorFila: number
+  fecha: string
+  horaInicio: string
+  categoriaBase: CategoriaPrecio
+}
+
+interface FilaDetalleFuncion {
+  funcionId: number
+  salaId: number
+  pelicula: string
+  sala: string
+  filas: number
+  butacasPorFila: number
+  fecha: string
+  horaInicio: string
+}
+
+const SELECT_DETALLE_FUNCION = `
+  SELECT f.id AS funcionId, f.sala_id AS salaId, p.titulo AS pelicula, s.nombre AS sala,
+         s.filas AS filas, s.butacas_por_fila AS butacasPorFila, f.fecha, f.hora_inicio AS horaInicio
+  FROM funcion f
+  JOIN pelicula p ON p.id = f.pelicula_id
+  JOIN sala s ON s.id = f.sala_id
+`
+
+/**
+ * Los datos de una función que necesita Entrada para armar sus pantallas
+ * (T19–T21): con qué sala componer el mapa, y la categoría base para saber
+ * qué precios pedir. Ninguna regla de negocio nueva: es la misma
+ * información que ya exponen `precio`, `categoriaBase` e `inicioDe`, junta.
+ */
+export function detalleFuncion(bd: Bd, funcionId: number): DetalleFuncion | undefined {
+  const fila = bd.prepare(`${SELECT_DETALLE_FUNCION} WHERE f.id = ?`).get(funcionId) as
+    | FilaDetalleFuncion
+    | undefined
+  if (fila === undefined) return undefined
+  return { ...fila, categoriaBase: diaDeLaSemana(fila.fecha) === MIERCOLES ? 'miercoles' : 'general' }
+}
+
+/**
+ * Las funciones en venta (RF-8): misma condición que `enVenta`, en lista,
+ * para la cartelera pública. Cualquiera puede verla sin identificarse
+ * (RN-55).
+ */
+export function funcionesEnVenta(bd: Bd, ahora: string): DetalleFuncion[] {
+  const filas = bd
+    .prepare(
+      `${SELECT_DETALLE_FUNCION}
+       JOIN semana_cartelera sem ON sem.id = f.semana_id
+       WHERE f.estado = 'programada' AND sem.abierta_a_venta = 1
+         AND (f.fecha || 'T' || f.hora_inicio || ':00') > ?
+       ORDER BY f.fecha, f.hora_inicio`,
+    )
+    .all(ahora) as FilaDetalleFuncion[]
+  return filas.map((fila) => ({
+    ...fila,
+    categoriaBase: diaDeLaSemana(fila.fecha) === MIERCOLES ? 'miercoles' : 'general',
+  }))
+}
+
 /**
  * Si la función está en venta: su semana abierta (RN-9), no cancelada (RN-43)
  * y su hora de inicio todavía no llegó — la venta se cierra a la hora exacta

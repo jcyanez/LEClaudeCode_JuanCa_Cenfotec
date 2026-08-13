@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { abrirBd, type Bd } from '../base/bd.js'
 import { listaMigraciones } from '../base/lista-migraciones.js'
 import { aplicarMigraciones } from '../base/migraciones.js'
-import { barrer, cambiarMotivo, liberar, tieneTomadas, tomadas, tomar } from './ocupacion.js'
+import { barrer, cambiarMotivo, liberar, tieneTomadas, tomadas, tomar, venceDe } from './ocupacion.js'
 
 const AHORA = '2026-08-14T18:00:00'
 
@@ -221,5 +221,27 @@ describe('ocupación: tomar y consultar butacas (T3)', () => {
       bdB.close()
       rmSync(carpeta, { recursive: true, force: true })
     }
+  })
+})
+
+describe('venceDe (T19)', () => {
+  it('da el vencimiento de un bloqueo por su referencia', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(bd, funcionId, [butacas[0] as number], 'bloqueo', 'sesion-a', AHORA, '2026-08-14T18:05:00')
+
+    expect(venceDe(bd, funcionId, 'sesion-a')).toBe('2026-08-14T18:05:00')
+  })
+
+  it('una venta no vence: null', () => {
+    const { bd, funcionId, butacas } = bdConFuncion()
+    tomar(bd, funcionId, [butacas[0] as number], 'venta', 'ABCDEF', AHORA)
+
+    expect(venceDe(bd, funcionId, 'ABCDEF')).toBeNull()
+  })
+
+  it('una referencia que no existe: undefined', () => {
+    const { bd, funcionId } = bdConFuncion()
+
+    expect(venceDe(bd, funcionId, 'nadie')).toBeUndefined()
   })
 })
