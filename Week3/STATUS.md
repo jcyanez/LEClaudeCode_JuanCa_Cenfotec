@@ -4,10 +4,17 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T16 (Fase 4 completa)
-**Tarea en curso:** ninguna — T16 cerrada (134 pruebas en verde y typecheck limpio: `npm test` y
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T17 (Fase 5 completa)
+**Tarea en curso:** ninguna — T17 cerrada (140 pruebas en verde y typecheck limpio: `npm test` y
 `npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** Fase 5 — T17 (Reloj); depende de T4, T10 y T16, ya cerradas
+**Siguiente tarea:** Fase 6 — T18 (Base de la capa de entrada); invoca la skill `ui-ux-pro-max`
+antes de diseñar (`CLAUDE.md` §8)
+
+**Decisión del usuario (12/08, en esta sesión):** el Reloj (T17) agrega un tercer trabajo no
+listado en `DISENO.md` — llamar cada 10 minutos a `procesarPendientes` de Avisos con el envío real
+— porque sin eso ningún correo se enviaría nunca. Pendiente: registrar esto en `DISENO.md` §Reloj
+cuando el usuario apruebe esa edición sección por sección (mismo trámite pendiente que las otras
+decisiones de esta sesión).
 
 **Decisión del usuario (12/08, en esta sesión):** proveedor de correo saliente para Avisos (T14) →
 **SMTP genérico vía Nodemailer**, credenciales por variables de entorno (nunca commiteadas).
@@ -30,12 +37,11 @@ apruebe esa edición sección por sección (mismo trámite pendiente que las dec
   en qué jornada — un evento que puede ocurrir un día distinto (RF-25, RN-44). Se agregó la
   migración `003-devolucion-entregada` con columnas propias (`entrega_operador_id`,
   `entrega_instante`, `entrega_jornada`) sin tocar `reversa_*`.
-- **Pendiente para T17:** `procesarPendientes` de Avisos queda lista pero nadie la llama todavía;
-  `DISENO.md` solo lista para el Reloj el barrido de Venta y el reporte mensual, sin mencionar los
-  reintentos de Avisos — T17 debe agregar una tercera llamada periódica a `procesarPendientes` con
-  el `EnviarCorreo` real (`crearEnviarPorSmtp` + `crearTransportadorSmtp` con las variables de
-  entorno), igual que ya hace con Venta y Salidas. `enviarReporte` (T16) también espera a T17: es el
-  día 1 quien debe llamarlo con el correo de `correoDelDistribuidor`.
+- **Pendiente para T18:** `iniciarReloj` (T17) recibe `DependenciasReloj` ya armadas, pero nadie las
+  arma todavía con la base de datos real: quien componga el servidor debe atar `barrerVencidos`,
+  `procesarPendientes` (con `crearEnviarPorSmtp` + `crearTransportadorSmtp` y las variables de
+  entorno) y `enviarReporte` (con el correo de `correoDelDistribuidor`) a un `bd` concreto antes de
+  llamar a `iniciarReloj`.
 - **Interpretación a revisar (T16):** `enviarReporte` no pasa por la cola de Avisos —hace su propio
   intento con el `EnviarCorreo` inyectado y siempre inserta una fila nueva en `envio_reporte`— en
   vez de encolar y dejar el reintento al mecanismo genérico de T14. Se decidió así porque `REG-7`
@@ -194,7 +200,14 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   `RF-30`) y `entradasPorCategoriaYCanal` (agrupado, en un período, `RF-31`) · 8 pruebas
 
 ### Fase 5 · Reloj
-- [ ] T17 — Tareas programadas
+- [x] T17 — Tareas programadas: `tickPeriodico` (cada 10 min) llama a `barrerVencidos` (Venta) y a
+  `procesarAvisos` (tercer trabajo aprobado por el usuario) con el mismo instante, sin tocar nunca
+  la tabla de ocupación directamente (`RN-19`, `RN-30`, `RN-48`); `tickMensual` el día 1 pide a
+  Salidas el reporte del mes recién terminado y su envío, y no hace nada los demás días (`RN-47`);
+  ninguno de los dos contiene una regla de negocio, solo llaman con el instante que reciben —las
+  pruebas lo verifican con dependencias falsas—; `iniciarReloj` es la única parte que mira el reloj
+  de verdad, con `node-cron` (decisión de T0) cada 10 minutos y a las 06:00 del día 1; se confirmó
+  vendiendo en taquilla sin que corriera ningún tick (decisión 4 de `DISENO.md`) · 6 pruebas
 
 ### Fase 6 · Entrada (PWA · Carbon)
 - [ ] T18 — Base de la capa de entrada

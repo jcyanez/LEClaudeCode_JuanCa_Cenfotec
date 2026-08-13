@@ -339,7 +339,7 @@ consultas de ocupación y por categoría/canal.
 
 ## Fase 5 — Reloj
 
-### - [ ] T17 — Tareas programadas
+### - [x] T17 — Tareas programadas
 
 **Depende de:** T4, T10 y T16. **Paralelizable con:** T18–T21.
 **Archivos:** componente `reloj/` y sus pruebas.
