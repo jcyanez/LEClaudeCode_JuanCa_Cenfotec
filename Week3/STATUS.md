@@ -4,10 +4,10 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T14
-**Tarea en curso:** ninguna — T14 cerrada (120 pruebas en verde y typecheck limpio: `npm test` y
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T15
+**Tarea en curso:** ninguna — T15 cerrada (126 pruebas en verde y typecheck limpio: `npm test` y
 `npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** T15 — Cierre de caja, luego T16 — Reporte mensual
+**Siguiente tarea:** T16 — Reporte mensual y consultas (cierra la Fase 4)
 
 **Decisión del usuario (12/08, en esta sesión):** proveedor de correo saliente para Avisos (T14) →
 **SMTP genérico vía Nodemailer**, credenciales por variables de entorno (nunca commiteadas).
@@ -167,7 +167,12 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   real queda aislado tras `EnviarCorreo`, un método único (decisión de `DISENO.md`), con
   `crearEnviarPorSmtp` adaptando Nodemailer —proveedor elegido por el usuario— sin que quien encola
   se entere si cambia · 9 pruebas (6 de la cola y reintentos, 3 del adaptador)
-- [ ] T15 — Cierre de caja
+- [x] T15 — Cierre de caja: `cierreDeCaja(jornada)` calcula al vuelo, sin foto, sobre `compra`
+  (decisión de `DISENO.md`); ventanilla = cobrado de esa jornada (cuenta aunque luego se anule o
+  devuelva, porque el monto queda congelado, `RN-16`) menos lo entregado en efectivo *en esa misma
+  jornada* —la de la entrega, no la de la venta (`RN-44`, `CA-8`)—; internet solo informativo y
+  nunca se mezcla con ventanilla (`RN-46`, `RF-26`, `CA-6`); no toca `reserva` en absoluto, así que
+  nunca puede sumarlas; es de solo lectura, correrlo dos veces no cambia nada · 6 pruebas
 - [ ] T16 — Reporte mensual y consultas
 
 ### Fase 5 · Reloj

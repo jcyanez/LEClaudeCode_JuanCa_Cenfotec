@@ -313,7 +313,7 @@ cuerpo, adjunto?) → void`, más el envío con proveedor aislado tras interfaz 
   durante 24 horas y después marcado fallido y visible (`RN-48`); el proveedor concreto se decide
   con el usuario en esta tarea (o antes) y se conecta sin tocar a quienes encolan.
 
-### - [ ] T15 — Cierre de caja
+### - [x] T15 — Cierre de caja
 
 **Depende de:** T12. **Paralelizable con:** T16, T18.
 **Archivos:** componente `salidas/` y sus pruebas.
