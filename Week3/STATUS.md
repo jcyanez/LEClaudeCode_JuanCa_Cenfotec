@@ -4,15 +4,35 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 12 — cerrada con T10
-**Tarea en curso:** ninguna — T10 cerrada (90 pruebas en verde y typecheck limpio: `npm test` y
-`npm run typecheck` en `cine-variedades/`)
-**Siguiente tarea:** T11 — Validación en puerta, o T13/T14 en carriles paralelos
+**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T12 (Fase 3 completa)
+**Tarea en curso:** ninguna — T11 y T12 cerradas (106 pruebas en verde y typecheck limpio: `npm test`
+y `npm run typecheck` en `cine-variedades/`)
+**Siguiente tarea:** Fase 4 — T13 (Operadores), T14 (Avisos), T15 (Cierre de caja), T16 (Reporte
+mensual), autorizadas en bloque por el usuario (12/08) junto con T11 y T12
 
 **Al retomar:**
-- Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T11 está en `PLAN.md`.
-- Hasta T10 asentado en git y **subido a GitHub** (12/08/2026, `main` → `origin/main`, un commit
-  por tarea). Acuerdo del usuario (12/08): cuando pida commits, el `push` va incluido.
+- Abrir con `CLAUDE.md` + `PLAN.md` + este archivo; el detalle de T13–T16 está en `PLAN.md`.
+- Hasta T12 asentado en git (commit conjunto T11+T12, ver nota de commits más abajo). Acuerdo del
+  usuario (12/08): cuando pida commits, el `push` va incluido; para este lote (T11–T16) el usuario
+  autorizó explícitamente saltar la propuesta previa por tarea (Fase 2 de `CLAUDE.md`) y pidió
+  mantener un commit por tarea con push al cerrar T16.
+- T11 (`validar`, `buscarCompraPorContacto`) y T12 (`anular`, `cancelarFuncion`, `marcarDevolucionEntregada`)
+  agregados a `venta/venta.ts`. `cancelarFuncion` de Venta llama internamente a `cancelarFuncion` de
+  Cartelera (aliasado como `marcarFuncionCancelada`) para no tocar la tabla `funcion` directamente.
+- **Gap de esquema encontrado y resuelto en T12** (mismo patrón que la migración `002` en T8):
+  `reversa_operador_id/instante/jornada/motivo` de `compra` alcanzan para REG-4 (anulación o
+  cancelación), pero REG-5 pide registrar aparte quién entregó la devolución en efectivo, cuándo y
+  en qué jornada — un evento que puede ocurrir un día distinto (RF-25, RN-44). Se agregó la
+  migración `003-devolucion-entregada` con columnas propias (`entrega_operador_id`,
+  `entrega_instante`, `entrega_jornada`) sin tocar `reversa_*`.
+- **Interpretación a revisar (T12):** `cancelarFuncion` no impide volver a cancelar una función ya
+  cancelada dentro de la misma jornada (sobrescribiría el motivo/operador de la cancelación
+  original); no hay ninguna `RN-`/`RF-` que lo exija y arreglarlo exigía tocar `cartelera.ts`, fuera
+  del alcance de archivos de T12 (`PLAN.md`). No toca reservas vigentes de la función cancelada:
+  siguen vivas hasta que el barrido de T17 las venza por su propio `inicioDe`, tal como antes.
+- T9 y T10 agregaron a Cartelera dos consultas con sus pruebas, señaladas como crecimiento del
+  contrato: `categoriaBase(función)` (miércoles o general, `RN-13`, `RN-14`) e
+  `inicioDe(función)` (instante de inicio, vencimiento de reservas, `RN-30`).
 - Existe `src/demo.ts` (fuera de los commits de tareas): demostración por consola del flujo
   completo con `npx tsx src/demo.ts`, pedida por el usuario para ver el avance; las pantallas
   reales siguen en Fase 6.
@@ -101,8 +121,21 @@ modo WAL · planificador embebido (node-cron). Abierto: proveedor de correo (T14
   general (`RN-31`, `RN-32`, `RN-25`); `liberarReserva` para quien no acepta (`RN-32`);
   `barrerVencidos` borra reservas vencidas sin dejar registro y llama al `barrer()` de
   Ocupación (`RN-34`, `REG-8`) · 8 pruebas (+1 de `inicioDe` en cartelera)
-- [ ] T11 — Validación en puerta
-- [ ] T12 — Anulación, cancelación y devoluciones
+- [x] T11 — Validación en puerta: `validar(función, número, operador, ahora)` marca instante y
+  operador en todas las entradas de una compra a la vez (`RF-18`, `RF-19`, `REG-2`); rechaza sin
+  registrar nada si el número no existe (`CompraInexistente`), es de otra función
+  (`NumeroDeOtraFuncion`), la función se canceló (`FuncionCancelada`), la compra está anulada
+  (`CompraAnulada`) o ya se validó (`EntradaYaUsada`, `RN-37`, `RF-20`); `buscarCompraPorContacto`
+  para la búsqueda alternativa por nombre o correo (`RF-18`) · 7 pruebas
+- [x] T12 — Anulación, cancelación y devoluciones: `anular` hasta el inicio de la función libera
+  butacas y registra operador/instante/jornada/motivo (`RN-38`, `RN-40`, `RF-21`, `REG-4`), y
+  rechaza con entradas ya usadas (`RN-39`, `RF-22`); `cancelarFuncion` hasta el final de la
+  jornada de la función (`RN-42`, `CA-8`) devuelve de una sola vez todas sus compras pagadas
+  —validadas o no— (`RN-41`, `RF-23`), libera sus butacas y avisa por correo solo a quien compró
+  por internet (`RF-24`); llama a `cancelarFuncion` de Cartelera para el estado de la función, sin
+  tocarla directamente; `marcarDevolucionEntregada` registra aparte quién entregó el efectivo,
+  cuándo y en qué jornada (`RF-25`, `REG-5`, `RN-44`), sobre columnas nuevas de la migración
+  `003-devolucion-entregada` (ver nota más arriba) · 9 pruebas
 
 ### Fase 4 · Salidas, Avisos y Operadores
 - [ ] T13 — Operadores

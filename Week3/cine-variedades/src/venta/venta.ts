@@ -1,6 +1,7 @@
 import { randomInt } from 'node:crypto'
 import type { Bd } from '../base/bd.js'
 import {
+  cancelarFuncion as marcarFuncionCancelada,
   categoriaBase,
   enVenta,
   inicioDe,
@@ -431,6 +432,233 @@ export function barrerVencidos(bd: Bd, ahora: string): { reservas: number; ocupa
     }
   }
   return { reservas: borradas, ocupaciones: barrer(bd, ahora) }
+}
+
+/** Rechazo esperado: ninguna compra tiene ese número (RF-18, RF-20). */
+export class CompraInexistente extends Error {
+  constructor(public readonly numero: string) {
+    super(`No encontramos ninguna compra con el número ${numero}`)
+    this.name = 'CompraInexistente'
+  }
+}
+
+/** Rechazo esperado: el número existe, pero es de otra función (tabla de errores). */
+export class NumeroDeOtraFuncion extends Error {
+  constructor(
+    public readonly numero: string,
+    public readonly funcionId: number,
+  ) {
+    super(`El número ${numero} es de otra función`)
+    this.name = 'NumeroDeOtraFuncion'
+  }
+}
+
+/** Rechazo esperado: las entradas ya se validaron antes (RN-37, RF-20, RF-22, REG-2). */
+export class EntradaYaUsada extends Error {
+  constructor(
+    public readonly numero: string,
+    public readonly usadaInstante: string,
+    public readonly usadaOperadorId: number,
+  ) {
+    super(`Las entradas de ${numero} ya se validaron a las ${usadaInstante.slice(11, 16)}`)
+    this.name = 'EntradaYaUsada'
+  }
+}
+
+/** Rechazo esperado: la función de esa compra se canceló y quedó devuelta (RF-20). */
+export class FuncionCancelada extends Error {
+  constructor(
+    public readonly numero: string,
+    public readonly funcionId: number,
+  ) {
+    super(`La función de ${numero} se canceló: la compra quedó devuelta`)
+    this.name = 'FuncionCancelada'
+  }
+}
+
+/** Rechazo esperado: la compra ya fue anulada (RF-20). */
+export class CompraAnulada extends Error {
+  constructor(public readonly numero: string) {
+    super(`La compra ${numero} ya fue anulada`)
+    this.name = 'CompraAnulada'
+  }
+}
+
+/**
+ * Valida una compra en la puerta: marca instante y operador en cada entrada,
+ * todas a la vez (RF-18, RF-19, REG-2). Rechaza sin registrar nada si el
+ * número no existe, es de otra función, la función se canceló, la compra
+ * está anulada, o las entradas ya se usaron (RF-20, RN-37, tabla de errores
+ * de DISENO.md).
+ */
+export function validar(
+  bd: Bd,
+  funcionId: number,
+  numero: string,
+  operadorId: number,
+  ahora: string,
+): Compra {
+  const compra = buscarCompra(bd, numero)
+  if (compra === undefined) {
+    throw new CompraInexistente(numero)
+  }
+  if (compra.funcionId !== funcionId) {
+    throw new NumeroDeOtraFuncion(numero, compra.funcionId)
+  }
+  if (compra.estado === 'devuelta') {
+    throw new FuncionCancelada(numero, compra.funcionId)
+  }
+  if (compra.estado === 'anulada') {
+    throw new CompraAnulada(numero)
+  }
+  const yaUsada = compra.entradas.find((entrada) => entrada.usadaInstante !== null)
+  if (yaUsada !== undefined) {
+    throw new EntradaYaUsada(numero, yaUsada.usadaInstante as string, yaUsada.usadaOperadorId as number)
+  }
+  bd.prepare(
+    `UPDATE entrada SET usada_instante = ?, usada_operador_id = ?
+     WHERE compra_id = (SELECT id FROM compra WHERE numero = ?)`,
+  ).run(ahora, operadorId, numero)
+  const validada = buscarCompra(bd, numero)
+  if (validada === undefined) throw new Error(`La compra ${numero} no quedó registrada`)
+  return validada
+}
+
+/** Búsqueda alternativa cuando no se tiene el número, por nombre o correo (RF-18). */
+export function buscarCompraPorContacto(bd: Bd, texto: string): Compra[] {
+  const numeros = bd
+    .prepare(
+      `SELECT numero FROM compra
+       WHERE contacto_nombre LIKE '%' || ? || '%' COLLATE NOCASE
+          OR contacto_correo LIKE '%' || ? || '%' COLLATE NOCASE
+       ORDER BY instante DESC`,
+    )
+    .all(texto, texto) as { numero: string }[]
+  return numeros
+    .map(({ numero }) => buscarCompra(bd, numero))
+    .filter((compra): compra is Compra => compra !== undefined)
+}
+
+/**
+ * Anula una compra hasta la hora de inicio de su función, con motivo (RN-38,
+ * RN-40, RF-21). No se puede si sus entradas ya se usaron (RN-39, RF-22).
+ * Libera todas las butacas de una sola vez y registra quién, cuándo y por
+ * qué (REG-4).
+ */
+export function anular(bd: Bd, numero: string, operadorId: number, motivo: string, ahora: string): void {
+  const compra = buscarCompra(bd, numero)
+  if (compra === undefined) {
+    throw new CompraInexistente(numero)
+  }
+  if (compra.estado !== 'pagada') {
+    throw new Error(`La compra ${numero} ya no está vigente`)
+  }
+  const yaUsada = compra.entradas.find((entrada) => entrada.usadaInstante !== null)
+  if (yaUsada !== undefined) {
+    throw new EntradaYaUsada(numero, yaUsada.usadaInstante as string, yaUsada.usadaOperadorId as number)
+  }
+  if (ahora >= inicioDe(bd, compra.funcionId)) {
+    throw new Error('La función ya empezó: no se puede anular la compra')
+  }
+  bd.transaction(() => {
+    liberar(bd, numero)
+    bd.prepare(
+      `UPDATE compra
+       SET estado = 'anulada', reversa_operador_id = ?, reversa_instante = ?,
+           reversa_jornada = ?, reversa_motivo = ?
+       WHERE numero = ?`,
+    ).run(operadorId, ahora, jornadaDe(ahora), motivo, numero)
+  })()
+}
+
+/**
+ * Cancela una función hasta el final de la jornada a la que pertenece
+ * (RN-41, RN-42, RF-23): sus compras pagadas quedan devueltas de una sola
+ * vez, hayan sido validadas en la puerta o no, y libera todas sus butacas.
+ * Avisa por correo a cada comprador de internet (RF-24); ningún aviso
+ * revierte nada (RNF-5). Nunca toca la tabla de reservas: viven aparte
+ * (decisión del modelo) y no pueden convertirse en compras de una función
+ * que ya no va a ocurrir.
+ */
+export function cancelarFuncion(
+  bd: Bd,
+  avisos: Avisos,
+  funcionId: number,
+  operadorId: number,
+  motivo: string,
+  ahora: string,
+): Compra[] {
+  const funcionJornada = jornadaDe(inicioDe(bd, funcionId))
+  if (jornadaDe(ahora) > funcionJornada) {
+    throw new Error('La jornada de esa función ya cerró: no se puede cancelar')
+  }
+  const jornada = jornadaDe(ahora)
+  const compras = bd
+    .prepare(
+      `SELECT numero, canal, contacto_correo AS contactoCorreo
+       FROM compra WHERE funcion_id = ? AND estado = 'pagada'`,
+    )
+    .all(funcionId) as { numero: string; canal: string; contactoCorreo: string | null }[]
+
+  bd.transaction(() => {
+    for (const compra of compras) {
+      liberar(bd, compra.numero)
+      bd.prepare(
+        `UPDATE compra
+         SET estado = 'devuelta', reversa_operador_id = ?, reversa_instante = ?,
+             reversa_jornada = ?, reversa_motivo = ?
+         WHERE numero = ?`,
+      ).run(operadorId, ahora, jornada, motivo, compra.numero)
+    }
+    marcarFuncionCancelada(bd, funcionId, { operadorId, instante: ahora, jornada, motivo })
+  })()
+
+  for (const compra of compras) {
+    if (compra.canal === 'internet' && compra.contactoCorreo !== null) {
+      try {
+        avisos.encolar(
+          compra.contactoCorreo,
+          'Tu función se canceló — Cine Variedades',
+          `La función de tu compra ${compra.numero} se canceló. Tu compra quedó devuelta.`,
+        )
+      } catch {
+        // RNF-5: la cancelación ya es firme; el correo que no sale no revierte nada.
+      }
+    }
+  }
+
+  return compras
+    .map((compra) => buscarCompra(bd, compra.numero))
+    .filter((compra): compra is Compra => compra !== undefined)
+}
+
+/**
+ * Marca entregada en efectivo la devolución de una compra de taquilla
+ * (RF-25, REG-5): un evento aparte de la anulación o la cancelación, con su
+ * propio operador, instante y jornada — la jornada que descuenta el cierre
+ * de caja es la de la entrega, no la de la anulación (RN-44).
+ */
+export function marcarDevolucionEntregada(
+  bd: Bd,
+  numero: string,
+  operadorId: number,
+  ahora: string,
+): void {
+  const compra = buscarCompra(bd, numero)
+  if (compra === undefined) {
+    throw new CompraInexistente(numero)
+  }
+  if (compra.canal !== 'taquilla') {
+    throw new Error('Solo las devoluciones de una compra de taquilla se entregan en efectivo')
+  }
+  if (compra.estado === 'pagada') {
+    throw new Error(`La compra ${numero} no está anulada ni devuelta`)
+  }
+  bd.prepare(
+    `UPDATE compra
+     SET entrega_operador_id = ?, entrega_instante = ?, entrega_jornada = ?
+     WHERE numero = ?`,
+  ).run(operadorId, ahora, jornadaDe(ahora), numero)
 }
 
 /** La compra con sus entradas, por número (RF-18 la usa desde la puerta). */

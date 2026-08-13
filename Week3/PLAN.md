@@ -264,7 +264,7 @@ vencimiento` · `pagar(bloqueo, contacto) → compra` (punto único del pago sim
   función y se borra (`RN-30`, `RN-34`); el barrido de Venta borra reservas vencidas y llama al
   `barrer()` de Ocupación.
 
-### - [ ] T11 — Validación en puerta
+### - [x] T11 — Validación en puerta
 
 **Depende de:** T8. **Paralelizable con:** T9, T10.
 **Archivos:** componente `venta/` y sus pruebas.
@@ -275,7 +275,7 @@ nombre o correo.
   usadas → rechazo «se validaron a las HH:MM, por N» sin registrar nada nuevo; número inexistente
   → ofrecer búsqueda alternativa; número de otra función → decir de cuál es (tabla de errores).
 
-### - [ ] T12 — Anulación, cancelación y devoluciones
+### - [x] T12 — Anulación, cancelación y devoluciones
 
 **Depende de:** T9.
 **Archivos:** componente `venta/` y sus pruebas.

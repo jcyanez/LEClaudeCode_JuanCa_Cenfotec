@@ -13,15 +13,25 @@ import {
 } from '../cartelera/cartelera.js'
 import { tomadas, tomar } from '../ocupacion/ocupacion.js'
 import {
+  anular,
   barrerVencidos,
   bloquear,
   ButacasYaTomadas,
   buscarCompra,
+  buscarCompraPorContacto,
+  cancelarFuncion as cancelarFuncionVenta,
+  CompraAnulada,
+  CompraInexistente,
   convertir,
+  EntradaYaUsada,
+  FuncionCancelada,
   jornadaDe,
   liberarReserva,
+  marcarDevolucionEntregada,
+  NumeroDeOtraFuncion,
   pagar,
   reservar,
+  validar,
   venderEnTaquilla,
   type Avisos,
 } from './venta.js'
@@ -30,8 +40,14 @@ const HOY = '2026-08-12'
 const AHORA = '2026-08-14T18:00:00'
 const NUMERO_LEGIBLE = /^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/
 
-/** Cartelera lista para vender: semana abierta, precios fijados, un operador de taquilla. */
-function bdListaParaVender(): { bd: Bd; viernes: number; semanaId: number; operadorId: number } {
+/** Cartelera lista para vender: semana abierta, precios fijados, un operador de taquilla y uno de puerta. */
+function bdListaParaVender(): {
+  bd: Bd
+  viernes: number
+  semanaId: number
+  operadorId: number
+  puertaId: number
+} {
   const bd = abrirBd()
   aplicarMigraciones(bd, listaMigraciones)
   sembrarSalas(bd)
@@ -42,6 +58,11 @@ function bdListaParaVender(): { bd: Bd; viernes: number; semanaId: number; opera
   bd.prepare(
     `INSERT INTO operador (nombre, puesto, credencial) VALUES ('Marta', 'taquilla', '1234')`,
   ).run()
+  const puertaId = Number(
+    bd
+      .prepare(`INSERT INTO operador (nombre, puesto, credencial) VALUES ('Nico', 'puerta', '5678')`)
+      .run().lastInsertRowid,
+  )
   const viernes = programarFuncion(bd, {
     peliculaId,
     salaId: 1,
@@ -49,7 +70,7 @@ function bdListaParaVender(): { bd: Bd; viernes: number; semanaId: number; opera
     fecha: '2026-08-14',
     horaInicio: '19:00',
   })
-  return { bd, viernes, semanaId, operadorId: 1 }
+  return { bd, viernes, semanaId, operadorId: 1, puertaId }
 }
 
 function contar(bd: Bd, tabla: 'compra' | 'entrada'): number {
@@ -515,5 +536,254 @@ describe('venta: reservas de estudiante (T10)', () => {
     // Las vencidas no se conservan (RN-34) y sus filas de ocupación tampoco.
     expect(bd.prepare(`SELECT COUNT(*) AS n FROM ocupacion WHERE referencia = ?`).get(vencida.numero)).toEqual({ n: 0 })
     expect(tomadas(bd, manana, '2026-08-14T19:00:00')).toHaveLength(1)
+  })
+})
+
+describe('venta: validación en puerta (T11)', () => {
+  it('marca instante y operador en cada entrada de la compra (RF-18, RF-19, REG-2)', () => {
+    const { bd, viernes, operadorId, puertaId } = bdListaParaVender()
+    const compra = venderEnTaquilla(
+      bd,
+      viernes,
+      [
+        { butacaId: 1, categoria: 'general' },
+        { butacaId: 2, categoria: 'general' },
+      ],
+      operadorId,
+      AHORA,
+    )
+    const puerta = puertaId
+
+    const validada = validar(bd, viernes, compra.numero, puerta, '2026-08-14T18:45:00')
+
+    expect(validada.entradas).toEqual([
+      { butacaId: 1, categoria: 'general', monto: 8000, usadaInstante: '2026-08-14T18:45:00', usadaOperadorId: puerta },
+      { butacaId: 2, categoria: 'general', monto: 8000, usadaInstante: '2026-08-14T18:45:00', usadaOperadorId: puerta },
+    ])
+  })
+
+  it('un número inexistente ofrece la búsqueda alternativa, sin registrar nada (RF-18)', () => {
+    const { bd, viernes, puertaId } = bdListaParaVender()
+
+    expect(() => validar(bd, viernes, 'XXXXXX', puertaId, AHORA)).toThrow(CompraInexistente)
+  })
+
+  it('un número de otra función dice de cuál es, y no se valida (tabla de errores)', () => {
+    const { bd, viernes, semanaId, operadorId, puertaId } = bdListaParaVender()
+    const sabado = programarFuncion(bd, {
+      peliculaId: 1,
+      salaId: 2,
+      semanaId,
+      fecha: '2026-08-15',
+      horaInicio: '21:00',
+    })
+    const compra = venderEnTaquilla(bd, sabado, [{ butacaId: 121, categoria: 'general' }], operadorId, AHORA)
+
+    let rechazo: unknown
+    try {
+      validar(bd, viernes, compra.numero, puertaId, AHORA)
+    } catch (error) {
+      rechazo = error
+    }
+
+    expect(rechazo).toBeInstanceOf(NumeroDeOtraFuncion)
+    expect((rechazo as NumeroDeOtraFuncion).funcionId).toBe(sabado)
+    expect(bd.prepare(`SELECT usada_instante FROM entrada`).get()).toEqual({ usada_instante: null })
+  })
+
+  it('unas entradas ya usadas no se vuelven a validar, y se muestra quién y cuándo (RN-37, REG-2)', () => {
+    const { bd, viernes, operadorId, puertaId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    validar(bd, viernes, compra.numero, puertaId, '2026-08-14T18:42:00')
+
+    let rechazo: unknown
+    try {
+      validar(bd, viernes, compra.numero, puertaId, '2026-08-14T18:50:00')
+    } catch (error) {
+      rechazo = error
+    }
+
+    expect(rechazo).toBeInstanceOf(EntradaYaUsada)
+    expect((rechazo as EntradaYaUsada).usadaInstante).toBe('2026-08-14T18:42:00')
+    expect((rechazo as EntradaYaUsada).usadaOperadorId).toBe(puertaId)
+  })
+
+  it('una compra de una función cancelada aparece devuelta y no se valida (tabla de errores)', () => {
+    const { bd, viernes, operadorId, puertaId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    cancelarFuncionVenta(bd, avisosSimulados(), viernes, operadorId, 'Falló el proyector', AHORA)
+
+    expect(() => validar(bd, viernes, compra.numero, puertaId, AHORA)).toThrow(FuncionCancelada)
+  })
+
+  it('una compra anulada no se valida (RF-20)', () => {
+    const { bd, viernes, operadorId, puertaId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    anular(bd, compra.numero, operadorId, 'Venta duplicada', AHORA)
+
+    expect(() => validar(bd, viernes, compra.numero, puertaId, AHORA)).toThrow(CompraAnulada)
+  })
+
+  it('buscarCompraPorContacto encuentra por nombre o correo, sin distinguir mayúsculas (RF-18)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const bloqueo = bloquear(bd, viernes, [1], 'sesion-a', AHORA)
+    const compra = pagar(bd, avisosSimulados(), bloqueo, CONTACTO, '2026-08-14T18:02:00')
+
+    expect(buscarCompraPorContacto(bd, 'ana solano').map((c) => c.numero)).toEqual([compra.numero])
+    expect(buscarCompraPorContacto(bd, 'ANA@correo.com').map((c) => c.numero)).toEqual([compra.numero])
+    expect(buscarCompraPorContacto(bd, 'nadie')).toEqual([])
+  })
+})
+
+describe('venta: anulación, cancelación y devolución (T12)', () => {
+  it('anular libera las butacas y registra operador, instante, jornada y motivo (RN-38, RN-40, REG-4)', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+
+    anular(bd, compra.numero, operadorId, 'Venta duplicada', '2026-08-14T18:45:00')
+
+    expect(tomadas(bd, viernes, '2026-08-14T18:45:00')).toEqual([])
+    const fila = bd
+      .prepare(
+        `SELECT estado, reversa_operador_id AS operadorId, reversa_instante AS instante,
+                reversa_jornada AS jornada, reversa_motivo AS motivo
+         FROM compra WHERE numero = ?`,
+      )
+      .get(compra.numero)
+    expect(fila).toEqual({
+      estado: 'anulada',
+      operadorId,
+      instante: '2026-08-14T18:45:00',
+      jornada: '2026-08-14',
+      motivo: 'Venta duplicada',
+    })
+    // Las butacas liberadas se pueden volver a vender (RN-38).
+    const reventa = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, '2026-08-14T18:46:00')
+    expect(reventa.numero).not.toBe(compra.numero)
+  })
+
+  it('rechaza anular un número inexistente (RF-21)', () => {
+    const { bd } = bdListaParaVender()
+    expect(() => anular(bd, 'XXXXXX', 1, 'motivo', AHORA)).toThrow(CompraInexistente)
+  })
+
+  it('rechaza anular una compra con entradas ya usadas (RN-39, RF-22)', () => {
+    const { bd, viernes, operadorId, puertaId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    validar(bd, viernes, compra.numero, puertaId, '2026-08-14T18:45:00')
+
+    expect(() => anular(bd, compra.numero, operadorId, 'motivo', '2026-08-14T18:50:00')).toThrow(EntradaYaUsada)
+  })
+
+  it('rechaza anular después de que empezó la función (RN-38)', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+
+    expect(() => anular(bd, compra.numero, operadorId, 'motivo', '2026-08-14T19:00:00')).toThrow(
+      'La función ya empezó: no se puede anular la compra',
+    )
+  })
+
+  it('rechaza anular una compra que ya no está vigente', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    anular(bd, compra.numero, operadorId, 'motivo', '2026-08-14T18:45:00')
+
+    expect(() => anular(bd, compra.numero, operadorId, 'otro motivo', '2026-08-14T18:46:00')).toThrow(
+      `La compra ${compra.numero} ya no está vigente`,
+    )
+  })
+
+  it('cancelarFuncion devuelve todas las compras pagadas, validadas o no, y libera sus butacas (RN-41, RF-23)', () => {
+    const { bd, viernes, operadorId, puertaId } = bdListaParaVender()
+    const enTaquilla = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    validar(bd, viernes, enTaquilla.numero, puertaId, '2026-08-14T18:45:00')
+    const bloqueo = bloquear(bd, viernes, [2], 'sesion-a', AHORA)
+    const porInternet = pagar(bd, avisosSimulados(), bloqueo, CONTACTO, '2026-08-14T18:02:00')
+    const avisos = avisosSimulados()
+
+    const devueltas = cancelarFuncionVenta(bd, avisos, viernes, operadorId, 'Falló el proyector', '2026-08-14T18:50:00')
+
+    expect(devueltas.map((c) => c.numero).sort()).toEqual([enTaquilla.numero, porInternet.numero].sort())
+    expect(devueltas.every((c) => c.estado === 'devuelta')).toBe(true)
+    expect(tomadas(bd, viernes, '2026-08-14T18:50:00')).toEqual([])
+    // Solo se avisa a quien compró por internet (RF-24).
+    expect(avisos.encolados).toHaveLength(1)
+    expect(avisos.encolados[0]?.destinatario).toBe('ana@correo.com')
+    expect(avisos.encolados[0]?.cuerpo).toContain(porInternet.numero)
+    // La función queda marcada cancelada (RN-41).
+    const funcion = bd.prepare(`SELECT estado, cancelada_motivo AS motivo FROM funcion WHERE id = ?`).get(viernes)
+    expect(funcion).toEqual({ estado: 'cancelada', motivo: 'Falló el proyector' })
+  })
+
+  it('CA-8: se puede cancelar pasada la medianoche si sigue la misma jornada (RN-42)', () => {
+    const { bd, semanaId, operadorId } = bdListaParaVender()
+    const nocturna = programarFuncion(bd, {
+      peliculaId: 1,
+      salaId: 2,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '23:00',
+    })
+
+    const devueltas = cancelarFuncionVenta(
+      bd,
+      avisosSimulados(),
+      nocturna,
+      operadorId,
+      'motivo',
+      '2026-08-15T00:15:00',
+    )
+    expect(devueltas).toEqual([])
+
+    // Al día siguiente (jornada ya cerrada) ya no se puede cancelar (RN-42).
+    const otraNocturna = programarFuncion(bd, {
+      peliculaId: 1,
+      salaId: 2,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '20:00',
+    })
+    expect(() =>
+      cancelarFuncionVenta(bd, avisosSimulados(), otraNocturna, operadorId, 'motivo', '2026-08-15T06:01:00'),
+    ).toThrow('La jornada de esa función ya cerró: no se puede cancelar')
+  })
+
+  it('marcarDevolucionEntregada registra su propio operador, instante y jornada (RF-25, REG-5, RN-44)', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const compra = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    anular(bd, compra.numero, operadorId, 'motivo', '2026-08-14T18:45:00')
+
+    marcarDevolucionEntregada(bd, compra.numero, operadorId, '2026-08-15T10:00:00')
+
+    const fila = bd
+      .prepare(
+        `SELECT entrega_operador_id AS operadorId, entrega_instante AS instante,
+                entrega_jornada AS jornada, reversa_instante AS reversaInstante
+         FROM compra WHERE numero = ?`,
+      )
+      .get(compra.numero)
+    expect(fila).toEqual({
+      operadorId,
+      instante: '2026-08-15T10:00:00',
+      jornada: '2026-08-15',
+      // El instante de la anulación no se pisa con el de la entrega (dos eventos distintos).
+      reversaInstante: '2026-08-14T18:45:00',
+    })
+  })
+
+  it('rechaza marcar entregada una devolución de internet o de una compra todavía pagada', () => {
+    const { bd, viernes, operadorId } = bdListaParaVender()
+    const pagada = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
+    expect(() => marcarDevolucionEntregada(bd, pagada.numero, operadorId, AHORA)).toThrow(
+      `La compra ${pagada.numero} no está anulada ni devuelta`,
+    )
+
+    const bloqueo = bloquear(bd, viernes, [2], 'sesion-a', AHORA)
+    const internet = pagar(bd, avisosSimulados(), bloqueo, CONTACTO, '2026-08-14T18:02:00')
+    anular(bd, internet.numero, operadorId, 'motivo', '2026-08-14T18:45:00')
+    expect(() => marcarDevolucionEntregada(bd, internet.numero, operadorId, AHORA)).toThrow(
+      'Solo las devoluciones de una compra de taquilla se entregan en efectivo',
+    )
   })
 })
