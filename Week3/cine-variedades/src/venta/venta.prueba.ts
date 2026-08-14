@@ -20,6 +20,7 @@ import {
   ButacasYaTomadas,
   buscarCompra,
   buscarCompraPorContacto,
+  buscarReserva,
   cancelarFuncion as cancelarFuncionVenta,
   CompraAnulada,
   CompraInexistente,
@@ -31,6 +32,7 @@ import {
   marcarDevolucionEntregada,
   NumeroDeOtraFuncion,
   pagar,
+  rangoDeJornada,
   reservar,
   validar,
   venderEnTaquilla,
@@ -796,6 +798,22 @@ describe('venta: anulación, cancelación y devolución (T12)', () => {
     })
   })
 
+  it('buscarReserva muestra a taquilla qué está por convertir: función, butacas y contacto (T20, RF-16)', () => {
+    const { bd, viernes } = bdListaParaVender()
+    const reserva = reservar(bd, avisosSimulados(), viernes, [3, 4], CONTACTO, AHORA)
+
+    const encontrada = buscarReserva(bd, reserva.numero, AHORA)
+
+    expect(encontrada).toMatchObject({
+      numero: reserva.numero,
+      funcionId: viernes,
+      butacaIds: [3, 4],
+      contacto: CONTACTO,
+      vence: '2026-08-14T19:00:00',
+    })
+    expect(buscarReserva(bd, 'NOEXIS', AHORA)).toBeUndefined()
+  })
+
   it('rechaza marcar entregada una devolución de internet o de una compra todavía pagada', () => {
     const { bd, viernes, operadorId } = bdListaParaVender()
     const pagada = venderEnTaquilla(bd, viernes, [{ butacaId: 1, categoria: 'general' }], operadorId, AHORA)
@@ -809,5 +827,22 @@ describe('venta: anulación, cancelación y devolución (T12)', () => {
     expect(() => marcarDevolucionEntregada(bd, internet.numero, operadorId, AHORA)).toThrow(
       'Solo las devoluciones de una compra de taquilla se entregan en efectivo',
     )
+  })
+})
+
+describe('venta: el rango de una jornada, inversa de jornadaDe (T21, RN-10, CA-8)', () => {
+  it('va de las 06:00 del día que la nombra a las 06:00 del siguiente', () => {
+    expect(rangoDeJornada('2026-08-14')).toEqual({
+      desde: '2026-08-14T06:00:00',
+      hasta: '2026-08-15T06:00:00',
+    })
+  })
+
+  it('una función de las 23:00 del viernes cae en la jornada del viernes, y una de las 00:30 también', () => {
+    const { desde, hasta } = rangoDeJornada('2026-08-14')
+    for (const inicio of ['2026-08-14T23:00:00', '2026-08-15T00:30:00']) {
+      expect(inicio >= desde && inicio < hasta).toBe(true)
+      expect(jornadaDe(inicio)).toBe('2026-08-14')
+    }
   })
 })

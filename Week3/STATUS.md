@@ -4,10 +4,31 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 12 de agosto de 2026 · Sesión 13 — cerrada con T19
-**Tarea en curso:** ninguna — T19 cerrada (172 pruebas en verde en `cine-variedades/`, typecheck
-limpio en los dos paquetes, cliente y servidor corriendo de verdad uno contra el otro)
-**Siguiente tarea:** T20 — Pantalla de taquilla (también invoca `ui-ux-pro-max`, `CLAUDE.md` §8)
+**Última actualización:** 13 de agosto de 2026 · Sesión 14 — deuda del Reloj, T20 y T21 cerradas
+**Tarea en curso:** ninguna. **Queda solo T22.**
+**Siguiente tarea:** T22 — Verificación final contra los `CA-` y prueba de carga de 200 usuarios
+(`RNF-1`). Es la última del plan: recorrer los diez `CA-`, verificar las tres promesas
+transversales de `DISENO.md` y revisar el diff acumulado contra el alcance.
+
+**Pruebas al cerrar la sesión 14:** 226 en `cine-variedades/` (`npm test`) y 13 de componentes en
+`cine-variedades/entrada-cliente/` (`npm test`), typecheck limpio en los dos paquetes y `build` del
+cliente en verde.
+
+**Sin commitear todavía (13/08):** el trabajo de esta sesión está en el árbol de trabajo pero sin
+commit, porque `CLAUDE.md` §6 lo condiciona a un pedido explícito del usuario. Al pedirlo, van
+tres commits: la deuda del Reloj, T20 y T21 (y el `push`, según el acuerdo del 12/08).
+
+**Cerrado en esta sesión (13/08), antes de T20 — la deuda del Reloj:** `iniciarReloj` ya está atado
+en `principal.ts` a sus dependencias reales, vía `entrada/servidor/composicion-reloj.ts`
+(`crearDependenciasReloj` + `crearEnviarDesdeEntorno`). Antes de esto el servidor corría sin barrer
+vencidos y sin sacar un solo correo de la cola. Tres decisiones de composición, ninguna es regla de
+negocio: (1) cada trabajo del Reloj atrapa su propio fallo y avisa por el log, porque
+`iniciarReloj` los dispara sin esperarlos y una promesa rechazada suelta tumbaría el proceso —justo
+al revés de la decisión 4 de `DISENO.md`; (2) sin `SMTP_HOST` el envío responde «no salió» en vez
+de fingir, así que el aviso espera en la cola, se reintenta y termina fallido y visible (`RN-48`);
+(3) sin correo del distribuidor configurado (`RF-29`) el tick mensual avisa y **no** inserta una
+fila en `envio_reporte`, porque `REG-7` registra envíos reales, no ausencias. El servidor cierra el
+Reloj en `SIGINT`/`SIGTERM` · 7 pruebas
 
 **Decisiones del usuario (12/08, en esta sesión, para T19):** moneda y formato de precio → colón
 costarricense sin decimales, separador de miles con espacio (`₡8 000`); etiqueta de la categoría
@@ -18,6 +39,25 @@ listado en `DISENO.md` — llamar cada 10 minutos a `procesarPendientes` de Avis
 — porque sin eso ningún correo se enviaría nunca. Pendiente: registrar esto en `DISENO.md` §Reloj
 cuando el usuario apruebe esa edición sección por sección (mismo trámite pendiente que las otras
 decisiones de esta sesión).
+
+**Nuevo en T20 — pruebas de componentes del cliente:** `entrada-cliente/` ya tiene su propia suite
+(`npm test` allí: Vitest + jsdom + testing-library). T19 había quedado sin ellas; se agregaron
+ahora porque taquilla mueve efectivo. Se prueban por texto y por rol accesible —nunca por detalles
+de implementación—: los cuatro estados del mapa, que una butaca ocupada sea alcanzable con el
+teclado, y que la categoría de precio elegida por butaca sea la que se cobra.
+
+**Decisión de accesibilidad de T20 (prioridad 1 de `ui-ux-pro-max`, `color-not-only`):** los
+estados del mapa se distinguen por **trazo y relleno**, no solo por color —lleno para vendida,
+discontinuo para reservada, punteado y rayado para bloqueada, rayado para no disponible— y cada
+butaca nombra su estado en el `aria-label`. Una butaca ocupada de taquilla queda alcanzable con el
+teclado (`aria-disabled` en vez de `disabled`) para poder consultar su número, que es justamente
+para lo que `RN-57` pide el detalle.
+
+**Interpretación a revisar (T20):** el motivo de una anulación se exige en la capa de entrada
+(rechazo 400 si viene vacío), no en `anular` de Venta. `RN-40` pide registrar por qué, y sin motivo
+no hay nada que registrar; se siguió el patrón ya usado en T18/T19 para «Hace falta un PIN» y
+«Elegí al menos una butaca» en vez de tocar el código de T12. Si se prefiere que la regla viva en
+el dominio, es un cambio de una línea en `venta.ts` con su prueba.
 
 **Nota sobre `ui-ux-pro-max` en T18:** el script `search.py` de la skill no pudo correr en este
 entorno (no hay Python instalado, solo el stub de Microsoft Store). Los tokens de T18 se basaron en
@@ -49,10 +89,10 @@ apruebe esa edición sección por sección (mismo trámite pendiente que las dec
 - **Resuelto en T19:** `entrada/servidor/principal.ts` es el primer punto de entrada real
   (`app.listen`), con `bd` de archivo (`RUTA_BD`) y secreto de cookies por variable de entorno
   (`SECRETO_COOKIES`). Corre con `npm run servidor` (`tsx watch`, agregado a `cine-variedades/`).
-- **Sigue pendiente:** `iniciarReloj` (T17) todavía no está atado a dependencias reales —
-  `barrerVencidos`, `procesarPendientes` con `crearEnviarPorSmtp` + `crearTransportadorSmtp`,
-  `enviarReporte` con `correoDelDistribuidor`— ni llamado desde `principal.ts`. Debe resolverse
-  antes del cierre de Fase 6, para que el barrido y los avisos corran de verdad.
+- **Resuelto en la sesión 14 (13/08):** `iniciarReloj` ya corre con el servidor (ver arriba). Queda
+  como dato de operación: las credenciales SMTP se pasan por entorno (`SMTP_HOST`, `SMTP_PUERTO`,
+  `SMTP_USUARIO`, `SMTP_CLAVE`, `SMTP_REMITENTE`, `SMTP_SEGURO`) y nunca se commitean
+  (`CLAUDE.md` §6). Sin ellas el sistema funciona igual; solo no sale ningún correo.
 - **Interpretación a revisar (T19, mapa en pantalla angosta):** `DISENO.md` delega esta decisión a
   quien implemente, y el mockup del 11/08 recomendaba la opción B (sala reducida a escala). Al
   construirlo apareció una tensión real: la Sala 1 tiene 12 butacas por fila, y encogerlas para que
@@ -272,8 +312,47 @@ Node/Vitest, sin cambios de comando) y `cine-variedades/entrada-cliente/` (React
     ver interpretación más abajo). Sin pruebas automatizadas de componentes (no hay
     testing-library configurado); verificado corriendo el cliente y el servidor reales uno contra
     el otro (`npm run servidor` + `npm run dev` en `entrada-cliente/`).
-- [ ] T20 — Pantalla de taquilla
-- [ ] T21 — Puerta y pantallas de la dueña
+- [x] T20 — Pantalla de taquilla:
+  - **Crecimiento de contrato** (mismo patrón que T9/T10/T19): `buscarReserva(número, ahora)` en
+    `venta.ts` —qué función, qué butacas y a nombre de quién, para ver la reserva antes de
+    convertirla (`RF-16`)—, pidiéndole las butacas a Ocupación y nunca a su tabla; y
+    `GET /api/operadores/sesion`, que dice quién está operando para no volver a pedir el PIN en
+    cada recarga (`RF-32`).
+  - **Servidor** (`entrada/servidor/rutas-taquilla.ts`, 16 pruebas): mapa con los cuatro estados de
+    `RN-17` —el recorte contrario al público (`RN-57`, `CA-9`)— que expone el número de la reserva
+    o de la compra pero **nunca** la sesión anónima de un bloqueo (`RN-55`); venta presencial con
+    categoría por butaca (`RF-12`); ver, convertir con o sin carné y liberar una reserva (`RF-16`,
+    `RF-17`, `RN-32`); anular con motivo (`RF-21`, `REG-4`); marcar la devolución entregada
+    (`RF-25`); y el cierre de caja de la jornada (`RF-26`), que por defecto usa la jornada que
+    calcula Venta con el corte de las 06:00 (`RN-10`). Cada ruta exige operador con permiso
+    (`RF-32`, `RF-33`): el puesto de puerta recibe 403 al intentar vender (`RN-53`).
+  - **Cliente**: `Taquilla` con cuatro pestañas —Vender, Reservas, Compras, Cierre de caja—,
+    `SesionOperador` (PIN, compartida con la puerta de T21) y el mapa de butacas generalizado a
+    los seis tratamientos visuales. 9 pruebas de componentes (ver nota de testing-library).
+- [x] T21 — Puerta y pantallas de la dueña:
+  - **Crecimiento de contrato**: en Cartelera, `semanas`, `funcionesDeSemana`, `funcionesEnRango` y
+    `preciosVigentes`; en Venta, `rangoDeJornada(jornada)` —la inversa de `jornadaDe`, que vive ahí
+    porque el corte de las 06:00 es una regla del negocio (`RN-10`) y Entrada no puede rehacerla
+    por su cuenta. La puerta pide el rango a Venta y las funciones a Cartelera, y compone: es
+    exactamente el trabajo que `DISENO.md` le asigna a Entrada · 5 pruebas
+  - **Servidor puerta** (`rutas-puerta.ts`, 8 pruebas): funciones de la jornada —la de las 23:00
+    del viernes sigue siendo del viernes (`CA-8`)—, validación por número (`RF-19`) con los cinco
+    rechazos con clase propia ya traducidos desde T18 (`RF-20`), y búsqueda por nombre o correo
+    (`RF-18`). Taquilla recibe 403 al intentar validar (`RN-53`).
+  - **Servidor dueña** (`rutas-administracion.ts`, 15 pruebas): películas (`RF-1`), semanas y su
+    apertura de venta (`RF-2`, `RF-5`), funciones con el mensaje del margen de 20 minutos tal como
+    lo redacta Cartelera (`RF-3`, `CA-7`), modificar y eliminar (`RF-4`), cancelar con motivo
+    —también permitida a taquilla (`RN-52`)— con el aviso a cada comprador de internet (`RF-23`,
+    `RF-24`), precios (`RF-6`), correo del distribuidor (`RF-29`), reporte del mes con sus envíos y
+    reenvío a mano (`RF-27`, `RF-28`, `REG-7`) y las dos consultas (`RF-30`, `RF-31`).
+    `crearApp` acepta ahora un `enviarCorreo` inyectable; si no viene, lo arma del entorno.
+  - **Cliente**: `Puerta` (función de la jornada, número, resultado y búsqueda alternativa) y
+    `Administracion` con cuatro pestañas —Cartelera, Precios y distribuidor, Reporte mensual,
+    Consultas—. 4 pruebas de componentes de la puerta, incluida la que comprueba que la búsqueda
+    por nombre solo se ofrece cuando el número no existe.
+  - **Verificado además contra el servidor real**, no solo con pruebas: sesión por PIN de los tres
+    puestos, venta, conversión de reserva, anulación, devolución entregada, cierre de caja,
+    validación en puerta (y su rechazo al repetirla), cancelación de función y reporte mensual.
 
 ### Cierre
 - [ ] T22 — Verificación final contra los `CA-` y carga de 200 usuarios

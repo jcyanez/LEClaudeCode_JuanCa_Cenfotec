@@ -378,7 +378,7 @@ instalable.
   táctiles de al menos 44×44 px y la decisión abierta del mapa en pantalla angosta se resuelve
   acá con el usuario.
 
-### - [ ] T20 — Pantalla de taquilla
+### - [x] T20 — Pantalla de taquilla
 
 **Depende de:** T18, T10 y T15. **Paralelizable con:** T19, T21.
 **Archivos:** componente `entrada/`, pantallas de taquilla.
@@ -387,7 +387,7 @@ instalable.
   presencial con categorías por butaca (`RF-12`); conversión de reservas con y sin carné;
   anulación con motivo; devoluciones entregadas; cierre de caja de la jornada a la vista.
 
-### - [ ] T21 — Puerta y pantallas de la dueña
+### - [x] T21 — Puerta y pantallas de la dueña
 
 **Depende de:** T18, T11 y T16. **Paralelizable con:** T19, T20.
 **Archivos:** componente `entrada/`, pantallas de puerta y administración.

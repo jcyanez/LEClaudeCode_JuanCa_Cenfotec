@@ -79,6 +79,22 @@ describe('entrada/servidor: sesión de operador (T18, RF-32, RN-54)', () => {
     expect(respuesta.statusCode).toBe(400)
   })
 
+  it('dice quién está operando ahora, para no volver a pedir el PIN en cada recarga (T20)', async () => {
+    const app = appDePrueba()
+    const abierta = await app.inject({
+      method: 'POST',
+      url: '/api/operadores/sesion',
+      payload: { pin: '2222' },
+    })
+    const cookie = cookieDe(abierta, 'operador_sesion') as string
+
+    const conSesion = await app.inject({ method: 'GET', url: '/api/operadores/sesion', headers: { cookie } })
+    const sinSesion = await app.inject({ method: 'GET', url: '/api/operadores/sesion' })
+
+    expect(conSesion.json()).toEqual({ id: 2, nombre: 'Marta', puesto: 'taquilla' })
+    expect(sinSesion.statusCode).toBe(401)
+  })
+
   it('cierra la sesión y limpia la cookie', async () => {
     const app = appDePrueba()
 

@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+// `vitest/config` en vez de `vite`: es el mismo `defineConfig` con el bloque
+// `test` de las pruebas de componentes (T20) ya tipado.
+import { defineConfig } from 'vitest/config'
 
 // Colores del tema Carbon `g10` (@carbon/react), para que el manifest y la
 // barra del navegador combinen con la app (CLAUDE.md §8: Carbon como
@@ -46,5 +48,15 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:3001',
     },
+  },
+  // Pruebas de componentes con testing-library (T20): las pantallas de
+  // taquilla y puerta mueven dinero y entradas, así que se verifican como
+  // las ve quien opera —por texto y por rol accesible—, no por detalles de
+  // implementación. El servidor tiene su propia suite en `cine-variedades/`.
+  test: {
+    environment: 'jsdom',
+    include: ['src/**/*.prueba.{ts,tsx}'],
+    globals: true,
+    setupFiles: ['./src/configuracion-pruebas.ts'],
   },
 })

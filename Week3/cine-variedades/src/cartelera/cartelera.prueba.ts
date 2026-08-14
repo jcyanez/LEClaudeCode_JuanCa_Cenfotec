@@ -14,8 +14,12 @@ import {
   enVenta,
   inicioDe,
   fijarPrecios,
+  funcionesDeSemana,
+  funcionesEnRango,
   funcionesEnVenta,
   modificarFuncion,
+  preciosVigentes,
+  semanas,
   peliculas,
   precio,
   programarFuncion,
@@ -550,5 +554,74 @@ describe('cartelera: detalle de función y funciones en venta (T19)', () => {
       motivo: 'motivo',
     })
     expect(funcionesEnVenta(bd, '2026-08-14T18:00:00').map((f) => f.funcionId)).toEqual([viernes])
+  })
+})
+
+describe('cartelera: consultas para las pantallas de la dueña y de la puerta (T21)', () => {
+  function bdConDosSemanas(): { bd: Bd; semanaId: number; viernes: number; sabadoTarde: number } {
+    const bd = bdConEsquema()
+    sembrarSalas(bd)
+    bd.prepare(`INSERT INTO operador (nombre, puesto, credencial) VALUES ('Rosa', 'dueña', '1111')`).run()
+    const peliculaId = registrarPelicula(bd, 'La película', 120)
+    const semanaId = crearSemana(bd, '2026-08-13', HOY)
+    const viernes = programarFuncion(bd, {
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-14',
+      horaInicio: '23:00',
+    })
+    const sabadoTarde = programarFuncion(bd, {
+      peliculaId,
+      salaId: 1,
+      semanaId,
+      fecha: '2026-08-15',
+      horaInicio: '19:00',
+    })
+    return { bd, semanaId, viernes, sabadoTarde }
+  }
+
+  it('semanas lista lo cargado con su apertura de venta, para que la dueña vea qué falta (RF-2, RF-5)', () => {
+    const { bd, semanaId } = bdConDosSemanas()
+
+    expect(semanas(bd)).toEqual([
+      { semanaId, juevesInicio: '2026-08-13', abiertaAVenta: false, funciones: 2 },
+    ])
+
+    abrirVenta(bd, semanaId)
+    expect(semanas(bd)[0]?.abiertaAVenta).toBe(true)
+  })
+
+  it('funcionesDeSemana trae las funciones de una semana con su estado, para modificarlas (RF-4)', () => {
+    const { bd, semanaId, viernes, sabadoTarde } = bdConDosSemanas()
+
+    const lista = funcionesDeSemana(bd, semanaId)
+
+    expect(lista.map((f) => f.funcionId)).toEqual([viernes, sabadoTarde])
+    expect(lista[0]).toMatchObject({ pelicula: 'La película', sala: 'Sala 1', cancelada: false })
+  })
+
+  it('funcionesEnRango respeta el corte de la jornada: la de las 23:00 del viernes sigue siendo del viernes (RN-10, CA-8)', () => {
+    const { bd, viernes, sabadoTarde } = bdConDosSemanas()
+
+    // La jornada del viernes va de las 06:00 del 14 a las 06:00 del 15.
+    const deLaJornada = funcionesEnRango(bd, '2026-08-14T06:00:00', '2026-08-15T06:00:00')
+
+    expect(deLaJornada.map((f) => f.funcionId)).toEqual([viernes])
+    expect(funcionesEnRango(bd, '2026-08-15T06:00:00', '2026-08-16T06:00:00').map((f) => f.funcionId)).toEqual([
+      sabadoTarde,
+    ])
+  })
+
+  it('preciosVigentes dice qué montos rigen hoy, para que la dueña vea antes de cambiarlos (RF-6)', () => {
+    const bd = bdConEsquema()
+
+    expect(preciosVigentes(bd, '2026-08-14')).toBeUndefined()
+
+    fijarPrecios(bd, 8000, 5000, '2026-08-01')
+    fijarPrecios(bd, 9000, 5500, '2026-09-01')
+
+    expect(preciosVigentes(bd, '2026-08-14')).toEqual({ general: 8000, estudiante: 5000, desde: '2026-08-01' })
+    expect(preciosVigentes(bd, '2026-09-02')).toEqual({ general: 9000, estudiante: 5500, desde: '2026-09-01' })
   })
 })

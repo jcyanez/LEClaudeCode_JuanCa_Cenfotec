@@ -65,6 +65,19 @@ export function jornadaDe(instante: string): string {
   return anterior.toISOString().slice(0, 10)
 }
 
+/**
+ * Los dos extremos de una jornada: de las 06:00 del día que la nombra a las
+ * 06:00 del siguiente (RN-10, CA-8). Es la inversa de `jornadaDe` y vive acá
+ * por lo mismo: el corte de las 06:00 es una regla del negocio, y Entrada
+ * (T21) la usa para pedirle a Cartelera las funciones de la jornada sin
+ * volver a hacer esa cuenta por su lado.
+ */
+export function rangoDeJornada(jornada: string): { desde: string; hasta: string } {
+  const siguiente = new Date(`${jornada}T00:00:00Z`)
+  siguiente.setUTCDate(siguiente.getUTCDate() + 1)
+  return { desde: `${jornada}T${CORTE_JORNADA}:00`, hasta: `${siguiente.toISOString().slice(0, 10)}T${CORTE_JORNADA}:00` }
+}
+
 /** Legible en voz alta: sin 0/O ni 1/I/L (RN-25, decisión de DISENO.md). */
 const ALFABETO_NUMERO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const LARGO_NUMERO = 6
@@ -349,6 +362,40 @@ export function reservar(
     // RNF-5: la reserva ya está hecha; el correo que no sale no revierte nada.
   }
   return { numero, funcionId, butacaIds, vence }
+}
+
+export interface ReservaConContacto extends Reserva {
+  contacto: Contacto
+}
+
+/**
+ * La reserva con sus butacas y su contacto, por número (T20, RF-16): lo que
+ * taquilla necesita ver antes de convertirla —qué función, qué butacas y a
+ * nombre de quién— sin tener que leer la tabla de ocupación por su cuenta.
+ * Crecimiento del contrato de Venta, sin ninguna regla nueva.
+ */
+export function buscarReserva(bd: Bd, numero: string, ahora: string): ReservaConContacto | undefined {
+  const reserva = bd
+    .prepare(
+      `SELECT numero, funcion_id AS funcionId, nombre, correo, telefono FROM reserva WHERE numero = ?`,
+    )
+    .get(numero) as
+    | { numero: string; funcionId: number; nombre: string; correo: string; telefono: string }
+    | undefined
+  if (reserva === undefined) return undefined
+  const vence = inicioDe(bd, reserva.funcionId)
+  // Las butacas se le piden a Ocupación, nunca a su tabla (límite de DISENO.md);
+  // es la misma vía que usa `convertir`, así que una reserva vencida no muestra ninguna.
+  const butacaIds = tomadas(bd, reserva.funcionId, ahora)
+    .filter((butaca) => butaca.referencia === numero)
+    .map((butaca) => butaca.butacaId)
+  return {
+    numero: reserva.numero,
+    funcionId: reserva.funcionId,
+    butacaIds,
+    vence,
+    contacto: { nombre: reserva.nombre, correo: reserva.correo, telefono: reserva.telefono },
+  }
 }
 
 /**

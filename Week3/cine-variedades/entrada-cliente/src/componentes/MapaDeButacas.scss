@@ -73,17 +73,51 @@
   outline-offset: 2px;
 }
 
+/* Cada estado se distingue por trazo y relleno además de por color
+   (`color-not-only`, prioridad 1 de ui-ux-pro-max): rayado para lo que no
+   está disponible en la web pública, punteado para un bloqueo en curso,
+   discontinuo para una reserva que todavía puede presentarse, y lleno para
+   lo ya vendido. */
+$rayado-no-disponible: repeating-linear-gradient(
+  45deg,
+  var(--cds-layer-disabled, #e0e0e0),
+  var(--cds-layer-disabled, #e0e0e0) 3px,
+  var(--cds-layer-accent-01, #c6c6c6) 3px,
+  var(--cds-layer-accent-01, #c6c6c6) 6px
+);
+
 .mapa-butacas__butaca--seleccionada {
   background: var(--cds-interactive, #0f62fe);
-  border-color: var(--cds-interactive, #0f62fe);
+  border: 2px solid var(--cds-interactive, #0f62fe);
   color: var(--cds-text-on-color, #ffffff);
 }
 
 .mapa-butacas__butaca--no-disponible {
-  background: var(--cds-layer-disabled, #e0e0e0);
+  background: $rayado-no-disponible;
   border-color: var(--cds-border-disabled, #c6c6c6);
-  color: var(--cds-text-disabled, #a8a8a8);
+  color: var(--cds-text-secondary, #525252);
   cursor: not-allowed;
+}
+
+.mapa-butacas__butaca--bloqueada {
+  background: $rayado-no-disponible;
+  border: 2px dotted var(--cds-support-warning, #8e6a00);
+  color: var(--cds-text-secondary, #525252);
+  cursor: help;
+}
+
+.mapa-butacas__butaca--reservada {
+  background: var(--cds-layer-01, #ffffff);
+  border: 2px dashed var(--cds-support-info, #0043ce);
+  color: var(--cds-text-primary, #161616);
+  cursor: help;
+}
+
+.mapa-butacas__butaca--vendida {
+  background: var(--cds-text-primary, #161616);
+  border: 2px solid var(--cds-text-primary, #161616);
+  color: var(--cds-text-on-color, #ffffff);
+  cursor: help;
 }
 
 .mapa-butacas__leyenda {
@@ -120,6 +154,21 @@
 }
 
 .mapa-butacas__marca--no-disponible {
-  background: var(--cds-layer-disabled, #e0e0e0);
+  background: $rayado-no-disponible;
   border-color: var(--cds-border-disabled, #c6c6c6);
+}
+
+.mapa-butacas__marca--bloqueada {
+  background: $rayado-no-disponible;
+  border: 2px dotted var(--cds-support-warning, #8e6a00);
+}
+
+.mapa-butacas__marca--reservada {
+  background: var(--cds-layer-01, #ffffff);
+  border: 2px dashed var(--cds-support-info, #0043ce);
+}
+
+.mapa-butacas__marca--vendida {
+  background: var(--cds-text-primary, #161616);
+  border-color: var(--cds-text-primary, #161616);
 }

@@ -36,6 +36,17 @@ export function registrarSesionOperador(app: FastifyInstance, bd: Bd): void {
     return operador
   })
 
+  // Quién está operando ahora (RF-32): la pantalla lo necesita para mostrarlo
+  // y para no volver a pedir el PIN en cada recarga. No abre ninguna sesión:
+  // solo lee la que ya venga firmada en la cookie.
+  app.get('/api/operadores/sesion', async (request, reply) => {
+    const operador = operadorDeLaSesion(request)
+    if (operador === undefined) {
+      return reply.status(401).send({ mensaje: 'Hace falta identificarse con un PIN' })
+    }
+    return operador
+  })
+
   app.delete('/api/operadores/sesion', async (_request, reply) => {
     reply.clearCookie(COOKIE_OPERADOR, { path: '/' })
     return reply.status(204).send()

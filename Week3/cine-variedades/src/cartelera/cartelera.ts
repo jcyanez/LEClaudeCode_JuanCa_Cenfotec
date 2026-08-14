@@ -440,6 +440,94 @@ export function enVenta(bd: Bd, funcionId: number, ahora: string): boolean {
   )
 }
 
+export interface SemanaCargada {
+  semanaId: number
+  juevesInicio: string
+  abiertaAVenta: boolean
+  funciones: number
+}
+
+/**
+ * Las semanas cargadas con su apertura de venta y cuántas funciones tienen
+ * (T21): lo que la dueña necesita para saber qué falta antes de dar una
+ * semana por cargada (RF-2, RF-5, RN-8, RN-9).
+ */
+export function semanas(bd: Bd): SemanaCargada[] {
+  return (
+    bd
+      .prepare(
+        `SELECT s.id AS semanaId, s.jueves_inicio AS juevesInicio, s.abierta_a_venta AS abierta,
+                (SELECT COUNT(*) FROM funcion f WHERE f.semana_id = s.id) AS funciones
+         FROM semana_cartelera s ORDER BY s.jueves_inicio`,
+      )
+      .all() as { semanaId: number; juevesInicio: string; abierta: number; funciones: number }[]
+  ).map(({ abierta, ...resto }) => ({ ...resto, abiertaAVenta: abierta === 1 }))
+}
+
+export interface FuncionDeSemana extends DetalleFuncion {
+  cancelada: boolean
+}
+
+/** Lo mismo que `SELECT_DETALLE_FUNCION`, más el estado: quien administra sí necesita ver las canceladas. */
+const SELECT_FUNCION_CON_ESTADO = `
+  SELECT f.id AS funcionId, f.sala_id AS salaId, p.titulo AS pelicula, s.nombre AS sala,
+         s.filas AS filas, s.butacas_por_fila AS butacasPorFila, f.fecha,
+         f.hora_inicio AS horaInicio, f.estado AS estado
+  FROM funcion f
+  JOIN pelicula p ON p.id = f.pelicula_id
+  JOIN sala s ON s.id = f.sala_id
+`
+
+function conCategoriaYEstado(filas: (FilaDetalleFuncion & { estado: string })[]): FuncionDeSemana[] {
+  return filas.map(({ estado, ...fila }) => ({
+    ...fila,
+    categoriaBase: diaDeLaSemana(fila.fecha) === MIERCOLES ? 'miercoles' : 'general',
+    cancelada: estado === 'cancelada',
+  }))
+}
+
+/** Las funciones de una semana, canceladas incluidas, para administrarlas (T21, RF-4, RF-23). */
+export function funcionesDeSemana(bd: Bd, semanaId: number): FuncionDeSemana[] {
+  const filas = bd
+    .prepare(`${SELECT_FUNCION_CON_ESTADO} WHERE f.semana_id = ? ORDER BY f.fecha, f.hora_inicio`)
+    .all(semanaId) as (FilaDetalleFuncion & { estado: string })[]
+  return conCategoriaYEstado(filas)
+}
+
+/**
+ * Las funciones que empiezan dentro de un rango de instantes (T21). Es una
+ * consulta, no una regla: quién decide qué rango cubre una jornada es Venta,
+ * que es donde vive el corte de las 06:00 (`RN-10`). La puerta la usa para
+ * elegir contra qué función valida (RF-18, RF-19).
+ */
+export function funcionesEnRango(bd: Bd, desde: string, hasta: string): FuncionDeSemana[] {
+  const filas = bd
+    .prepare(
+      `${SELECT_FUNCION_CON_ESTADO}
+       WHERE (f.fecha || 'T' || f.hora_inicio || ':00') >= ?
+         AND (f.fecha || 'T' || f.hora_inicio || ':00') < ?
+       ORDER BY f.fecha, f.hora_inicio`,
+    )
+    .all(desde, hasta) as (FilaDetalleFuncion & { estado: string })[]
+  return conCategoriaYEstado(filas)
+}
+
+export interface PreciosVigentes {
+  general: number
+  estudiante: number
+  desde: string
+}
+
+/** Los montos que rigen en una fecha, para verlos antes de cambiarlos (T21, RF-6). */
+export function preciosVigentes(bd: Bd, fecha: string): PreciosVigentes | undefined {
+  return bd
+    .prepare(
+      `SELECT monto_general AS general, monto_estudiante AS estudiante, desde
+       FROM precio_vigente WHERE desde <= ? ORDER BY desde DESC LIMIT 1`,
+    )
+    .get(fecha) as PreciosVigentes | undefined
+}
+
 /**
  * Crea las dos salas con sus 180 butacas fijas, una sola vez: si ya existen,
  * no hace nada. Las butacas son inmutables después de creadas (RN-1).
