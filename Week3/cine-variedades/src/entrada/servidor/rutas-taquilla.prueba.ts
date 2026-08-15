@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { abrirBd, type Bd } from '../../base/bd.js'
 import { listaMigraciones } from '../../base/lista-migraciones.js'
 import { aplicarMigraciones } from '../../base/migraciones.js'
@@ -18,6 +18,22 @@ import { crearApp } from './app.js'
 const HOY = '2026-08-12'
 const AHORA = '2026-08-14T18:00:00'
 const CONTACTO = { nombre: 'Ana Solano', correo: 'ana@correo.com', telefono: '8812 4455' }
+
+/**
+ * Las rutas leen el reloj del servidor (`ahoraServidor`), así que se congela en
+ * el mismo `AHORA` con el que el escenario vende: sin esto, pasado el inicio de
+ * la función del viernes deja de estar en venta (RN-21) y la prueba fallaría por
+ * el calendario y no por el sistema. Congelado, además, la jornada del servidor
+ * coincide con la de las ventas del escenario (RN-10).
+ */
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(`${AHORA}Z`))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 interface Escenario {
   app: FastifyInstance

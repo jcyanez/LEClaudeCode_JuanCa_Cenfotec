@@ -1,10 +1,26 @@
 import type { FastifyInstance } from 'fastify'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { abrirBd, type Bd } from '../../base/bd.js'
 import { listaMigraciones } from '../../base/lista-migraciones.js'
 import { aplicarMigraciones } from '../../base/migraciones.js'
 import { sembrarSalas } from '../../cartelera/cartelera.js'
 import { crearApp } from './app.js'
+
+/**
+ * El reloj se congela en un jueves: el escenario programa su función el viernes
+ * siguiente (`carteleraCargada`), y con el reloj real esa función ya habría
+ * pasado cualquier día que no fuera jueves o viernes temprano — una función
+ * cuya jornada cerró no se puede cancelar (RN-42), así que la prueba fallaría
+ * por el calendario y no por el sistema.
+ */
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-08-13T10:00:00Z'))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 /** El jueves de la semana en curso, calculado como lo pide RN-3, para no atar la prueba a una fecha fija. */
 function juevesDeEstaSemana(): string {

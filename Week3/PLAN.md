@@ -399,7 +399,7 @@ instalable.
 
 ## Cierre
 
-### - [ ] T22 — Verificación final
+### - [x] T22 — Verificación final
 
 **Depende de:** T17, T19, T20 y T21.
 

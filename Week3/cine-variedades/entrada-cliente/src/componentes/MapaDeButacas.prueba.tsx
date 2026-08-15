@@ -102,3 +102,39 @@ describe('MapaDeButacas: el mapa de taquilla distingue los cuatro estados (RN-57
     }
   })
 })
+
+describe('MapaDeButacas: CA-10 — la fila de Sala 1 y su pasillo (RN-1, RN-2, RF-9)', () => {
+  it('dibuja las doce butacas de la fila, de la A1 a la A12', () => {
+    render(
+      <MapaDeButacas
+        butacas={butacasDeUnaFila(Array.from({ length: 12 }, () => 'libre'))}
+        butacasPorFila={12}
+        seleccionadas={new Set()}
+        onCambiarSeleccion={vi.fn()}
+      />,
+    )
+
+    expect(screen.getAllByRole('button', { name: /^Butaca A/ })).toHaveLength(12)
+    expect(screen.getByRole('button', { name: /Butaca A1,/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Butaca A12,/ })).toBeInTheDocument()
+  })
+
+  it('deja el pasillo entre la 6 y la 7, y en ningún otro lugar de la fila', () => {
+    render(
+      <MapaDeButacas
+        butacas={butacasDeUnaFila(Array.from({ length: 12 }, () => 'libre'))}
+        butacasPorFila={12}
+        seleccionadas={new Set()}
+        onCambiarSeleccion={vi.fn()}
+      />,
+    )
+
+    // El pasillo es presentación pura —un hueco, no un elemento que se anuncie—,
+    // así que lo verificable es dónde cae el corte: después de la sexta butaca.
+    const conPasillo = screen
+      .getAllByRole('button', { name: /^Butaca A/ })
+      .filter((butaca) => butaca.className.includes('mapa-butacas__butaca--antes-del-pasillo'))
+    expect(conPasillo).toHaveLength(1)
+    expect(conPasillo[0]).toHaveAccessibleName(/Butaca A6,/)
+  })
+})

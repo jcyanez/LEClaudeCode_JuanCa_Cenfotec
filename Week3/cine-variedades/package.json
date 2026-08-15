@@ -7,7 +7,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "servidor": "tsx watch src/entrada/servidor/principal.ts"
+    "servidor": "tsx watch src/entrada/servidor/principal.ts",
+    "carga": "tsx src/carga/carga.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",

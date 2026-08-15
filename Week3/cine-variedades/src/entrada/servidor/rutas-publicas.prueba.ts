@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { abrirBd, type Bd } from '../../base/bd.js'
 import {
   abrirVenta,
@@ -54,6 +54,22 @@ function cookieDe(respuesta: { headers: Record<string, unknown> }, nombre: strin
 }
 
 const CONTACTO = { nombre: 'Ana Solano', correo: 'ana@correo.com', telefono: '8812 4455' }
+
+/**
+ * Las rutas leen el reloj del servidor (`ahoraServidor`), así que sin congelarlo
+ * el escenario caduca solo: pasado el 14/08/2026 a las 19:00 la función del
+ * viernes deja de estar en venta (RN-21) y estas pruebas fallarían por el
+ * calendario, no por el sistema. Se congela en el mismo instante que el
+ * escenario ya usa para vender, una hora antes de esa función.
+ */
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-08-14T18:00:00Z'))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('entrada/servidor: cartelera pública (T19, RF-8)', () => {
   it('lista las funciones en venta con sus precios, sin exigir sesión', async () => {

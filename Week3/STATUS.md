@@ -4,19 +4,46 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 13 de agosto de 2026 · Sesión 14 — deuda del Reloj, T20 y T21 cerradas
-**Tarea en curso:** ninguna. **Queda solo T22.**
-**Siguiente tarea:** T22 — Verificación final contra los `CA-` y prueba de carga de 200 usuarios
-(`RNF-1`). Es la última del plan: recorrer los diez `CA-`, verificar las tres promesas
-transversales de `DISENO.md` y revisar el diff acumulado contra el alcance.
+**Última actualización:** 15 de agosto de 2026 · Sesión 15 — **T22 cerrada: el plan T0–T22 está
+completo.**
+**Tarea en curso:** ninguna. **No queda ninguna tarea del plan.**
+**Siguiente paso:** ya no hay tareas de construcción. Queda abierto solo el trámite de documentación
+—registrar en `DISENO.md`, sección por sección con aprobación del usuario, las decisiones que ese
+documento dejaba abiertas y se tomaron durante la construcción (ver «Pendiente de registrar» más
+abajo)—.
 
-**Pruebas al cerrar la sesión 14:** 226 en `cine-variedades/` (`npm test`) y 13 de componentes en
+**Pruebas al cerrar la sesión 15:** 251 en `cine-variedades/` (`npm test`) y 15 de componentes en
 `cine-variedades/entrada-cliente/` (`npm test`), typecheck limpio en los dos paquetes y `build` del
-cliente en verde.
+cliente en verde. La constancia de la verificación final está en `VERIFICACION.md`.
 
-**Sin commitear todavía (13/08):** el trabajo de esta sesión está en el árbol de trabajo pero sin
-commit, porque `CLAUDE.md` §6 lo condiciona a un pedido explícito del usuario. Al pedirlo, van
-tres commits: la deuda del Reloj, T20 y T21 (y el `push`, según el acuerdo del 12/08).
+**Sin commitear todavía (15/08):** el trabajo de T22 está en el árbol pero sin commit, porque
+`CLAUDE.md` §6 lo condiciona a un pedido explícito del usuario. Al pedirlo va un commit de T22 (con
+`push`, según el acuerdo del 12/08). El trabajo de la sesión 14 —deuda del Reloj, T20 y T21— **ya
+está commiteado** en `05519d0`.
+
+**Hallazgo de la sesión 15, corregido:** al tomar la línea de base, 15 de las 226 pruebas fallaban.
+Ninguna era un defecto del sistema: las tres suites de rutas HTTP dejaban que el servidor leyera el
+reloj real mientras fijaban su escenario en fechas de agosto de 2026, así que **caducaban con el
+calendario** —pasado el inicio de la función del viernes, ya no está en venta (`RN-21`) y su jornada
+cerró (`RN-42`)—. Se congeló el reloj en cada suite con `vi.setSystemTime`, en el instante coherente
+con su propio escenario, sin tocar una línea de producción. Las 211 pruebas de dominio nunca
+fallaron, porque reciben `ahora` como parámetro en vez de mirar el reloj.
+
+**Nuevo en T22 — dos carpetas y un comando:** `src/aceptacion/` (los `CA-` y las promesas
+transversales, dentro de `npm test`) y `src/carga/` con `npm run carga`, que levanta el servidor
+real y mide 200 usuarios simultáneos; queda fuera de la suite porque tarda y no debe volver lenta a
+`npm test`.
+
+**Límite conocido que la verificación deja anotado** (ya documentado en `errores.ts` desde T18): los
+rechazos de dominio sin clase de error propia son `Error` simples, y la capa de entrada no puede
+distinguirlos de un error de programación real sin envolver cada `throw` de T1–T17. Ambos salen como
+400 con su mensaje. Para quien opera es correcto —el mensaje nombra siempre el objeto concreto—,
+pero un fallo técnico auténtico se vería como un rechazo de negocio.
+
+**Pendiente de registrar en `DISENO.md`** (no es deuda de código; es el trámite de aprobación
+sección por sección de `CLAUDE.md` §6): Carbon y PWA (`CLAUDE.md` §8, 11/08), el proveedor SMTP de
+T14, el tercer trabajo del Reloj de T17, el mapa a tamaño real en pantalla angosta de T19, y la
+moneda y etiquetas de precio de T19. Cada una está anotada abajo con su razón.
 
 **Cerrado en esta sesión (13/08), antes de T20 — la deuda del Reloj:** `iniciarReloj` ya está atado
 en `principal.ts` a sus dependencias reales, vía `entrada/servidor/composicion-reloj.ts`
@@ -355,4 +382,9 @@ Node/Vitest, sin cambios de comando) y `cine-variedades/entrada-cliente/` (React
     validación en puerta (y su rechazo al repetirla), cancelación de función y reporte mensual.
 
 ### Cierre
-- [ ] T22 — Verificación final contra los `CA-` y carga de 200 usuarios
+- [x] T22 — Verificación final contra los `CA-` y carga de 200 usuarios: los diez criterios con
+  una prueba propia cada uno (`src/aceptacion/criterios.prueba.ts`, 17 pruebas), las tres promesas
+  transversales de `DISENO.md` (`src/aceptacion/promesas.prueba.ts`, 8 pruebas) y la prueba de carga
+  de `RNF-1` contra el servidor real (`npm run carga`): 200 compradores simultáneos sobre 120
+  butacas, 920 pedidos en 2,10 s, sin un solo 5xx y sin ninguna butaca tomada ni vendida dos veces.
+  Constancia completa en `VERIFICACION.md`
