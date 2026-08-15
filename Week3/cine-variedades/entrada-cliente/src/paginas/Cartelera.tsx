@@ -1,6 +1,6 @@
-import { ClickableTile, Column, Grid, InlineLoading, InlineNotification } from '@carbon/react'
 import { useEffect, useState } from 'react'
 import { esErrorDeApi, obtenerCartelera, type FuncionEnCartelera } from '../api/cliente.js'
+import { Aviso, Cargando, TarjetaEnlace } from '../componentes/base/index.js'
 import { ETIQUETA_MIERCOLES, formatearColones, formatearFecha } from '../utilidades/formato.js'
 
 function textoDePrecios(funcion: FuncionEnCartelera): string {
@@ -22,34 +22,39 @@ export function Cartelera() {
   }, [])
 
   if (error !== null) {
-    return <InlineNotification kind="error" title="No se pudo cargar" subtitle={error} hideCloseButton />
+    return <Aviso tono="error" titulo="No se pudo cargar" detalle={error} />
   }
   if (funciones === null) {
-    return <InlineLoading description="Cargando cartelera…" />
-  }
-  if (funciones.length === 0) {
-    return <p>No hay funciones en venta por ahora.</p>
+    return <Cargando descripcion="Cargando cartelera…" />
   }
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={12}>
-        <h1>Cartelera</h1>
-      </Column>
-      {funciones.map((funcion) => (
-        <Column sm={4} md={4} lg={4} key={funcion.funcionId}>
-          <ClickableTile href={`/funciones/${funcion.funcionId}`}>
-            <h3>{funcion.pelicula}</h3>
-            <p>
-              {funcion.sala} · {formatearFecha(funcion.fecha)} · {funcion.horaInicio}
-            </p>
-            {funcion.categoriaBase === 'miercoles' ? (
-              <p className="etiqueta-miercoles">{ETIQUETA_MIERCOLES}</p>
-            ) : null}
-            <p>{textoDePrecios(funcion)}</p>
-          </ClickableTile>
-        </Column>
-      ))}
-    </Grid>
+    <div className="pagina">
+      <header className="pagina__encabezado">
+        <p className="pagina__marca">Cine Variedades</p>
+        <h1 className="pagina__titulo">Cartelera</h1>
+      </header>
+
+      {funciones.length === 0 ? (
+        <Aviso tono="informacion" titulo="No hay funciones en venta por ahora" detalle="Volvé a mirar cuando se cargue la semana." />
+      ) : (
+        <ul className="cartelera">
+          {funciones.map((funcion) => (
+            <li key={funcion.funcionId}>
+              <TarjetaEnlace href={`/funciones/${funcion.funcionId}`}>
+                <h2 className="cartelera__pelicula">{funcion.pelicula}</h2>
+                <p className="cartelera__cuando">
+                  {formatearFecha(funcion.fecha)} · {funcion.horaInicio} · {funcion.sala}
+                </p>
+                {funcion.categoriaBase === 'miercoles' ? (
+                  <p className="etiqueta-miercoles">{ETIQUETA_MIERCOLES}</p>
+                ) : null}
+                <p className="cartelera__precios">{textoDePrecios(funcion)}</p>
+              </TarjetaEnlace>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }

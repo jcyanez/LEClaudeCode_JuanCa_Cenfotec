@@ -15,10 +15,14 @@ nadie conoce a Entrada ni al Reloj). La garantía de no doble venta (`RNF-4`) vi
 de unicidad sobre (función, butaca), no en código.
 
 **Stack (decidido en T0, registrado en `DISENO.md`):** **TypeScript** en todo el proyecto —
-Node.js con **Fastify** en el servidor, **React con `@carbon/react`** en la PWA—, **SQLite en
-modo WAL** como base de datos y **planificador embebido** (node-cron) para el Reloj. Interfaz
-inspirada en **Carbon Design System (IBM)** y aplicación **PWA** (ver `CLAUDE.md` §8). Queda
-abierto solo el proveedor de correo (a más tardar en T14).
+Node.js con **Fastify** en el servidor, **React** en la PWA—, **SQLite en modo WAL** como base de
+datos y **planificador embebido** (node-cron) para el Reloj. Correo saliente por **SMTP vía
+Nodemailer** (decidido en T14).
+
+**Sistema visual (cambiado el 15/08, registrado en `DISENO.md`):** sistema **propio de tokens y
+componentes**, derivado de la skill `ui-ux-pro-max` (entrada `Theater/Cinema`), en dos temas
+—oscuro para el comprador, claro para las pantallas de trabajo—. Reemplaza a `@carbon/react`, que
+sigue solo en taquilla, puerta y administración hasta completarse la migración. Ver `CLAUDE.md` §8.
 
 ## Restricciones globales
 
@@ -118,6 +122,8 @@ T15 → T20 → T22.
 
 ### - [x] T0 — Decidir el stack con el usuario
 
+> **Evidencia** (T0, verificada el 15/08/2026): Decisión registrada en `DISENO.md` con aprobación del usuario (stack TypeScript · SQLite WAL · node-cron). No produce código, así que su evidencia es el documento actualizado.
+
 **Depende de:** nada. **Bloquea:** todo lo demás.
 **Produce:** decisión registrada de motor de BD relacional, lenguaje y marco del servicio, y
 mecanismo de tareas programadas (el proveedor de correo puede diferirse hasta T14, porque Avisos
@@ -132,6 +138,8 @@ lo aísla tras una interfaz).
 
 ### - [x] T1 — Andamiaje del proyecto
 
+> **Evidencia** (T1, verificada el 15/08/2026): `cd cine-variedades && npm test` → **7 pruebas** en verde: la suite corre, una migración aplica y revierte, y la conexión abre en modo WAL.
+
 **Depende de:** T0.
 **Produce:** estructura de carpetas por componente (`ocupacion/`, `cartelera/`, `venta/`,
 `salidas/`, `avisos/`, `operadores/`, `reloj/`, `entrada/`), gestor de dependencias, base de
@@ -143,6 +151,8 @@ las tareas siguientes quedan fijadas por esta estructura.
 * Primer archivo de código del proyecto: requiere la autorización explícita de construir.
 
 ### - [x] T2 — Esquema de base de datos
+
+> **Evidencia** (T2, verificada el 15/08/2026): `npm test` → **9 pruebas**: las migraciones aplican desde cero y **insertar dos filas de ocupación con la misma (función, butaca) falla por el motor** (`RNF-4`, `CA-1`).
 
 **Depende de:** T1.
 **Produce:** migraciones para las 13 entidades del modelo de `DISENO.md` (Sala, Butaca, Película,
@@ -158,6 +168,8 @@ modelo) y la **restricción de unicidad sobre (función, butaca)** en la tabla d
 
 ### - [x] T3 — Tomar y consultar butacas
 
+> **Evidencia** (T3, verificada el 15/08/2026): `npm test` → **8 pruebas**: `tomar` es todo-o-nada, devuelve exactamente cuáles se adelantaron, y una fila vencida se lee como libre en el instante exacto.
+
 **Depende de:** T2. **Paralelizable con:** T5, T13, T14.
 **Archivos:** componente `ocupacion/` y sus pruebas.
 **Produce (interfaz para T6, T8, T9, T10):**
@@ -171,6 +183,8 @@ adelantaron` · `tomadas(función) → [(butaca, motivo, referencia)]` · `¿tie
   procesos concurrentes sobre la misma butaca: uno gana, el otro recibe el rechazo.
 
 ### - [x] T4 — Liberar, vencer y barrer
+
+> **Evidencia** (T4, verificada el 15/08/2026): `npm test` → **6 pruebas**: `liberar` borra todas las filas de una referencia, `cambiarMotivo` convierte sin ventana, y `barrer` borra solo vencidas y devuelve cuántas.
 
 **Depende de:** T3.
 **Archivos:** componente `ocupacion/` y sus pruebas.
@@ -187,6 +201,8 @@ adelantaron` · `tomadas(función) → [(butaca, motivo, referencia)]` · `¿tie
 
 ### - [x] T5 — Salas, butacas fijas y películas
 
+> **Evidencia** (T5, verificada el 15/08/2026): `npm test` → **7 pruebas**: la semilla crea 180 butacas (Sala 1 A–J×12, Sala 2 A–F×10) una sola vez, y una película exige título y duración.
+
 **Depende de:** T2. **Paralelizable con:** T3, T13, T14.
 **Archivos:** componente `cartelera/` y sus pruebas; datos semilla de salas.
 **Produce (interfaz para T6, T18–T21):** `butacasDe(sala) → [butaca]` · alta/consulta de películas
@@ -197,6 +213,8 @@ con duración.
   `F7`); película exige título y duración (`RN-4`).
 
 ### - [x] T6 — Semanas de cartelera y funciones
+
+> **Evidencia** (T6, verificada el 15/08/2026): `npm test` → **13 pruebas**: semanas de jueves a miércoles, margen de 20 minutos con el mensaje de la primera hora posible (`CA-7`), y `enVenta` en el borde exacto (`CA-2`).
 
 **Depende de:** T5 y T3 (consulta `¿tieneTomadas?`).
 **Archivos:** componente `cartelera/` y sus pruebas.
@@ -209,6 +227,8 @@ con duración.
   elimina (`RF-4`); «en venta» = semana abierta, no cancelada, no empezada.
 
 ### - [x] T7 — Precios vigentes
+
+> **Evidencia** (T7, verificada el 15/08/2026): `npm test` → **7 pruebas**: el precio sale de la fecha de la función, y en miércoles es la mitad del general sin categoría estudiante (`CA-3`).
 
 **Depende de:** T6.
 **Archivos:** componente `cartelera/` y sus pruebas.
@@ -227,6 +247,8 @@ bloquea** (`RNF-5`). Hasta T14 se usa una implementación simulada en pruebas.
 
 ### - [x] T8 — Compra en taquilla
 
+> **Evidencia** (T8, verificada el 15/08/2026): `npm test` → **10 pruebas**: venta directa sin paso intermedio, número de 6 caracteres sin `0/O/1/I/L`, monto congelado (`CA-4`) y jornada con corte 06:00 (`CA-8`).
+
 **Depende de:** T3 y T7.
 **Archivos:** componente `venta/` y sus pruebas.
 **Produce (interfaz para T9–T12, T15, T20):** `venderEnTaquilla(función, butacas+categorías,
@@ -239,6 +261,8 @@ compra · cálculo de jornada.
   (`REG-1`, `REG-2`); función no «en venta» → rechazo.
 
 ### - [x] T9 — Compra por internet
+
+> **Evidencia** (T9, verificada el 15/08/2026): `npm test` → **8 pruebas**: bloqueo de 5 minutos, pago que convierte sin ventana, pago fallido sin rastro y bloqueo vencido rechazado.
 
 **Depende de:** T8 y T4. **Paralelizable con:** T10, T11.
 **Archivos:** componente `venta/` y sus pruebas.
@@ -253,6 +277,8 @@ vencimiento` · `pagar(bloqueo, contacto) → compra` (punto único del pago sim
 
 ### - [x] T10 — Reservas de estudiante
 
+> **Evidencia** (T10, verificada el 15/08/2026): `npm test` → **8 pruebas** (+1 de `inicioDe`): la reserva vive en su tabla y no aparece en ninguna consulta de ventas; conserva el número al convertirse, con o sin carné.
+
 **Depende de:** T8 y T4. **Paralelizable con:** T9, T11.
 **Archivos:** componente `venta/` y sus pruebas.
 **Produce (interfaz para T17, T19, T20):** `reservar(función, datos) → reserva con número` ·
@@ -266,6 +292,8 @@ vencimiento` · `pagar(bloqueo, contacto) → compra` (punto único del pago sim
 
 ### - [x] T11 — Validación en puerta
 
+> **Evidencia** (T11, verificada el 15/08/2026): `npm test` → **7 pruebas**: `validar` marca instante y operador en todas las entradas a la vez, y rechaza sin registrar nada en los cinco casos con clase propia.
+
 **Depende de:** T8. **Paralelizable con:** T9, T10.
 **Archivos:** componente `venta/` y sus pruebas.
 **Produce (interfaz para T21):** `validar(número, operador) → entradas marcadas` · búsqueda por
@@ -276,6 +304,8 @@ nombre o correo.
   → ofrecer búsqueda alternativa; número de otra función → decir de cuál es (tabla de errores).
 
 ### - [x] T12 — Anulación, cancelación y devoluciones
+
+> **Evidencia** (T12, verificada el 15/08/2026): `npm test` → **9 pruebas**: anulación con motivo dentro de plazo, cancelación que devuelve todas las compras de una vez, y devolución entregada con su propia jornada (`REG-5`).
 
 **Depende de:** T9.
 **Archivos:** componente `venta/` y sus pruebas.
@@ -293,6 +323,8 @@ nombre o correo.
 
 ### - [x] T13 — Operadores
 
+> **Evidencia** (T13, verificada el 15/08/2026): `npm test` → **5 pruebas**: `identificar` por PIN y `puede` por puesto sobre la matriz fija; el puesto de puerta no puede vender.
+
 **Depende de:** T2. **Paralelizable con:** T3–T12 (no comparte archivos con nadie).
 **Archivos:** componente `operadores/` y sus pruebas.
 **Produce (interfaz para T18):** `identificar(PIN) → operador con puesto | nada` ·
@@ -303,6 +335,8 @@ nombre o correo.
   operación (`RN-54`, `RF-32`); ningún concepto de cuenta de comprador (`RN-55`).
 
 ### - [x] T14 — Avisos
+
+> **Evidencia** (T14, verificada el 15/08/2026): `npm test` → **9 pruebas** (6 de la cola, 3 del adaptador SMTP): `encolar` nunca falla, los reintentos espacian, y a las 24 horas queda fallido y visible (`RN-48`).
 
 **Depende de:** T2. **Paralelizable con:** T3–T13.
 **Archivos:** componente `avisos/` y sus pruebas.
@@ -315,6 +349,8 @@ cuerpo, adjunto?) → void`, más el envío con proveedor aislado tras interfaz 
 
 ### - [x] T15 — Cierre de caja
 
+> **Evidencia** (T15, verificada el 15/08/2026): `npm test` → **6 pruebas**: ventanilla menos devoluciones entregadas *en esa* jornada, internet nunca mezclado, y correrlo dos veces no cambia nada.
+
 **Depende de:** T12. **Paralelizable con:** T16, T18.
 **Archivos:** componente `salidas/` y sus pruebas.
 **Produce (interfaz para T20):** `cierreDeCaja(jornada) → ventanilla + internet`.
@@ -325,6 +361,8 @@ cuerpo, adjunto?) → void`, más el envío con proveedor aislado tras interfaz 
   correr dos veces no cambia nada.
 
 ### - [x] T16 — Reporte mensual y consultas
+
+> **Evidencia** (T16, verificada el 15/08/2026): `npm test` → **8 pruebas**: el reporte cuenta `pagada` y `devuelta` pero nunca `anulada`, marca las canceladas, y cada envío deja su registro (`REG-7`).
 
 **Depende de:** T12 y T14. **Paralelizable con:** T15, T18.
 **Archivos:** componente `salidas/` y sus pruebas.
@@ -341,6 +379,8 @@ consultas de ocupación y por categoría/canal.
 
 ### - [x] T17 — Tareas programadas
 
+> **Evidencia** (T17, verificada el 15/08/2026): `npm test` → **6 pruebas** con dependencias falsas: los dos ticks llaman a quien corresponde con el mismo instante y no contienen ninguna regla. Se confirmó vendiendo en taquilla con el Reloj apagado.
+
 **Depende de:** T4, T10 y T16. **Paralelizable con:** T18–T21.
 **Archivos:** componente `reloj/` y sus pruebas.
 
@@ -355,6 +395,8 @@ Toda tarea de esta fase invoca la skill `ui-ux-pro-max` antes de diseñar (`CLAU
 
 ### - [x] T18 — Base de la capa de entrada
 
+> **Evidencia** (T18, verificada el 15/08/2026): `npm test` → **15 pruebas** del servidor (sesión de operador, sesión anónima y traducción de los 6 rechazos a HTTP). En el cliente, `npm run build` genera la PWA instalable con su `manifest`.
+
 **Depende de:** T13. **Paralelizable con:** T8–T12, T15, T16.
 **Archivos:** componente `entrada/` (servidor y cliente), `manifest` y `service worker` de la PWA,
 tokens de estilo inspirados en Carbon.
@@ -368,6 +410,8 @@ instalable.
 
 ### - [x] T19 — Web pública del comprador
 
+> **Evidencia** (T19, verificada el 15/08/2026): `npm test` → **10 pruebas** de rutas públicas + **7** del crecimiento de contrato. Verificado además corriendo servidor y cliente reales, uno contra otro.
+
 **Depende de:** T18, T9 y T10. **Paralelizable con:** T20, T21.
 **Archivos:** componente `entrada/`, pantallas públicas.
 
@@ -380,6 +424,8 @@ instalable.
 
 ### - [x] T20 — Pantalla de taquilla
 
+> **Evidencia** (T20, verificada el 15/08/2026): `npm test` → **16 pruebas** de rutas de taquilla + **9 de componentes** en `entrada-cliente`: los cuatro estados del mapa, la butaca ocupada alcanzable con el teclado, y el puesto de puerta recibe 403 al intentar vender.
+
 **Depende de:** T18, T10 y T15. **Paralelizable con:** T19, T21.
 **Archivos:** componente `entrada/`, pantallas de taquilla.
 
@@ -388,6 +434,8 @@ instalable.
   anulación con motivo; devoluciones entregadas; cierre de caja de la jornada a la vista.
 
 ### - [x] T21 — Puerta y pantallas de la dueña
+
+> **Evidencia** (T21, verificada el 15/08/2026): `npm test` → **8 pruebas** de puerta + **15** de administración + **5** del crecimiento de contrato + **4 de componentes**. Verificado además contra el servidor real: sesión de los tres puestos, venta, conversión, anulación, cierre de caja, validación y cancelación.
 
 **Depende de:** T18, T11 y T16. **Paralelizable con:** T19, T20.
 **Archivos:** componente `entrada/`, pantallas de puerta y administración.
@@ -400,6 +448,8 @@ instalable.
 ## Cierre
 
 ### - [x] T22 — Verificación final
+
+> **Evidencia** (T22, verificada el 15/08/2026): `npm test` → **17 pruebas** de los diez `CA-` + **8** de las tres promesas transversales. `npm run carga` → 200 compradores simultáneos, 920 pedidos en 2,10 s, sin un solo 5xx y sin ninguna butaca vendida dos veces. Detalle completo en `VERIFICACION.md`.
 
 **Depende de:** T17, T19, T20 y T21.
 

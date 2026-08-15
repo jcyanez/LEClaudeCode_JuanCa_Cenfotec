@@ -153,12 +153,17 @@ El trabajo de la etapa actual (plan de construcción) se considera terminado cua
 
 ## 8. Diseño de interfaz (UI/UX) — decisiones del usuario
 
-Decisiones tomadas por el usuario el 11 de agosto de 2026:
+**Decisión vigente, tomada por el usuario el 15 de agosto de 2026:**
 
-* **Inspiración visual: Carbon Design System de IBM.** La interfaz de las tres pantallas —web
-  pública, taquilla y puerta— toma de Carbon su lenguaje visual (tipografía, espaciado, tokens de
-  color, componentes sobrios orientados a productividad). Es *inspiración*, no dependencia
-  obligatoria de sus librerías: la elección de framework sigue abierta según la sección 6.
+* **El sistema visual es propio, guiado por la skill `ui-ux-pro-max`.** Sale de su entrada
+  `Theater/Cinema`: estilo «Dark Mode (OLED) + Motion-Driven», paleta «dramatic dark + spotlight
+  gold» y tipografía Inter. Se aplica en **dos temas sobre los mismos tokens** —oscuro para la web
+  del comprador, claro y funcional para taquilla y puerta—, porque la skill trata a esos dos
+  públicos como productos distintos. Los tokens y los ajustes de contraste están en
+  `entrada-cliente/src/estilos/tokens.scss`; la decisión, registrada en `DISENO.md`.
+* **Esto reemplaza la decisión del 11/08**, que era usar Carbon Design System de IBM. La migración
+  va **por etapas**: la web pública ya no usa `@carbon/react`; taquilla, puerta y administración
+  siguen con él hasta completarse la etapa 2. Mientras tanto, ambos sistemas conviven a propósito.
 * **La aplicación se desarrolla como PWA** (Progressive Web App): instalable desde el teléfono,
   con `manifest` y `service worker`. Esto no reintroduce alcance fuera de `ESPECIFICACION.md`
   (sin funcionamiento offline para la venta: una caída se asume como pérdida, `RNF-3`).
@@ -170,5 +175,5 @@ Decisiones tomadas por el usuario el 11 de agosto de 2026:
 > de construcción de **Entrada**. Sus prioridades 1 y 2 (accesibilidad y objetivos táctiles) son
 > de cumplimiento obligatorio en el mapa de butacas del teléfono.
 
-Pendiente: registrar formalmente estas dos decisiones en `DISENO.md` (con alternativas y razón,
-formato de «Otras decisiones»), cuando el usuario apruebe esa edición sección por sección.
+Ambas decisiones están registradas en `DISENO.md` («Otras decisiones»), con sus alternativas y su
+razón, aprobadas por el usuario el 15 de agosto de 2026.

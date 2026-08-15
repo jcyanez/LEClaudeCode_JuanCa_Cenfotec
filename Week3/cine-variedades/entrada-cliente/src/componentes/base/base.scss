@@ -1,0 +1,218 @@
+/**
+ * Los componentes base propios que reemplazan a los de `@carbon/react` en la
+ * web pública. Todos se pintan con los tokens de `tokens.scss`, así que la
+ * misma pieza sirve en el tema del comprador y en el de operación sin cambiar
+ * una línea.
+ *
+ * Nada acá es decorativo por sí solo: cada regla responde a una prioridad de
+ * la skill `ui-ux-pro-max` —objetivo táctil, foco visible, jerarquía, estado
+ * de carga— y así está anotada.
+ */
+
+/* ---------- Botón ---------- */
+
+.boton {
+  /* Prioridad 2: 44×44 px reales, no un rectángulo de 30 px con margen. */
+  min-height: var(--objetivo-tactil-minimo);
+  min-width: var(--objetivo-tactil-minimo);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-2) var(--espacio-5);
+  border: 1px solid transparent;
+  border-radius: var(--radio-chico);
+  font: var(--texto-cuerpo);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--transicion), border-color var(--transicion), color var(--transicion);
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+.boton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.boton--primario {
+  background: var(--color-acento);
+  color: var(--color-sobre-acento);
+}
+
+.boton--primario:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-acento) 85%, white);
+}
+
+.boton--secundario {
+  background: transparent;
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
+.boton--secundario:hover:not(:disabled) {
+  background: var(--color-atenuado);
+}
+
+.boton--fantasma {
+  background: transparent;
+  color: var(--color-texto);
+  padding-inline: var(--espacio-3);
+}
+
+.boton--fantasma:hover:not(:disabled) {
+  background: var(--color-atenuado);
+}
+
+/* ---------- Campo de texto ---------- */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+/* Prioridad 8: etiqueta visible siempre; nunca un placeholder haciendo de etiqueta. */
+.campo__etiqueta {
+  font: var(--texto-menor);
+  font-weight: 500;
+  color: var(--color-texto-atenuado);
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+}
+
+.campo__control {
+  min-height: var(--objetivo-tactil-minimo);
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-chico);
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font: var(--texto-cuerpo);
+}
+
+.campo__control:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 1px;
+}
+
+.campo__control:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Prioridad 8: el texto de ayuda y el error viven junto al campo, no arriba de todo. */
+.campo__ayuda {
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+.campo__error {
+  font: var(--texto-menor);
+  color: var(--color-error);
+}
+
+.campo--con-error .campo__control {
+  border-color: var(--color-error);
+  border-width: 2px;
+}
+
+/* ---------- Tarjeta ---------- */
+
+.tarjeta {
+  padding: var(--espacio-5);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+  background: var(--color-tarjeta);
+  color: var(--color-texto-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+}
+
+/* Una tarjeta que además es un enlace: toda la superficie es el objetivo. */
+.tarjeta--enlace {
+  display: block;
+  text-decoration: none;
+  transition: border-color var(--transicion), transform var(--transicion);
+}
+
+.tarjeta--enlace:hover {
+  border-color: var(--color-acento);
+}
+
+.tarjeta--enlace:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+/* ---------- Aviso ---------- */
+
+.aviso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+  padding: var(--espacio-4);
+  border-left: 4px solid var(--color-borde);
+  border-radius: var(--radio-chico);
+  background: var(--color-atenuado);
+  color: var(--color-texto);
+}
+
+.aviso__titulo {
+  font: var(--texto-encabezado);
+  margin: 0;
+}
+
+.aviso__detalle {
+  font: var(--texto-cuerpo);
+  margin: 0;
+  color: var(--color-texto-atenuado);
+}
+
+/* Prioridad 1 (`color-not-only`): el tono no es la única señal — el título
+   dice qué pasó y el borde cambia de grosor y de lado. */
+.aviso--error {
+  border-left-color: var(--color-error);
+}
+
+.aviso--exito {
+  border-left-color: var(--color-exito);
+}
+
+.aviso--informacion {
+  border-left-color: var(--color-acento);
+}
+
+/* ---------- Cargando ---------- */
+
+.cargando {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  font: var(--texto-cuerpo);
+  color: var(--color-texto-atenuado);
+}
+
+.cargando__marca {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--color-borde);
+  border-top-color: var(--color-acento);
+  border-radius: 50%;
+  animation: cargando-giro 900ms linear infinite;
+}
+
+@keyframes cargando-giro {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Prioridad 7: sin movimiento para quien lo pidió; la marca sigue visible. */
+@media (prefers-reduced-motion: reduce) {
+  .cargando__marca {
+    animation: none;
+  }
+}

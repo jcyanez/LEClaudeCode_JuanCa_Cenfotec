@@ -1,4 +1,3 @@
-import { Button, Column, Grid, InlineLoading, InlineNotification, Tile } from '@carbon/react'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -11,6 +10,7 @@ import {
   type Contacto,
   type MapaDeFuncion,
 } from '../api/cliente.js'
+import { Aviso, Boton, Cargando, Tarjeta } from '../componentes/base/index.js'
 import { FormularioContacto } from '../componentes/FormularioContacto.js'
 import { MapaDeButacas } from '../componentes/MapaDeButacas.js'
 import { ETIQUETA_MIERCOLES, formatearColones, formatearFecha } from '../utilidades/formato.js'
@@ -37,6 +37,18 @@ export function Funcion() {
   const navegar = useNavigate()
 
   const [datos, setDatos] = useState<MapaDeFuncion | null>(null)
+  /**
+   * Dos errores distintos y separados a propósito: el de **cargar el mapa**,
+   * que el propio sondeo corrige cuando vuelve a responder, y el de una
+   * **operación** —un bloqueo o un pago rechazado—, que es un rechazo del
+   * negocio y tiene que quedar a la vista hasta que la persona haga otra cosa.
+   *
+   * Con un solo estado, el sondeo cada 3 s borraba el rechazo apenas
+   * respondía: el mensaje aparecía y desaparecía casi en el acto, contra lo
+   * que pide la tabla de errores de `DISENO.md` («se informa qué pasó y qué
+   * hacer, con el estado actual a la vista»).
+   */
+  const [errorDeCarga, setErrorDeCarga] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [seleccionadas, setSeleccionadas] = useState<Set<number>>(new Set())
   const [paso, setPaso] = useState<Paso>({ tipo: 'eligiendo' })
@@ -46,9 +58,9 @@ export function Funcion() {
     obtenerMapa(funcionId)
       .then((respuesta) => {
         setDatos(respuesta)
-        setError(null)
+        setErrorDeCarga(null)
       })
-      .catch((error: unknown) => setError(esErrorDeApi(error) ? error.mensaje : 'No pudimos cargar el mapa'))
+      .catch((error: unknown) => setErrorDeCarga(esErrorDeApi(error) ? error.mensaje : 'No pudimos cargar el mapa'))
   }, [funcionId])
 
   useEffect(() => {
@@ -126,88 +138,91 @@ export function Funcion() {
     }
   }
 
-  if (error !== null && datos === null) {
-    return <InlineNotification kind="error" title="No se pudo cargar" subtitle={error} hideCloseButton />
+  if (errorDeCarga !== null && datos === null) {
+    return <Aviso tono="error" titulo="No se pudo cargar" detalle={errorDeCarga} />
   }
   if (datos === null) {
-    return <InlineLoading description="Cargando función…" />
+    return <Cargando descripcion="Cargando función…" />
   }
 
   const { funcion, mapa } = datos
   const eligiendoOFormulario = paso.tipo !== 'confirmado'
 
   return (
-    <Grid>
-      <Column sm={4} md={8} lg={12}>
-        <Button kind="ghost" onClick={() => navegar('/')}>
-          ← Volver a la cartelera
-        </Button>
-        <h1>{funcion.pelicula}</h1>
-        <p>
-          {funcion.sala} · {formatearFecha(funcion.fecha)} · {funcion.horaInicio}
+    <div className="pagina">
+      <Boton variante="fantasma" onClick={() => navegar('/')}>
+        ← Volver a la cartelera
+      </Boton>
+
+      <header className="pagina__encabezado">
+        <h1 className="pagina__titulo">{funcion.pelicula}</h1>
+        <p className="pagina__cuando">
+          {formatearFecha(funcion.fecha)} · {funcion.horaInicio} · {funcion.sala}
         </p>
         {funcion.categoriaBase === 'miercoles' ? <p className="etiqueta-miercoles">{ETIQUETA_MIERCOLES}</p> : null}
+      </header>
 
-        {error !== null ? (
-          <InlineNotification kind="error" title="No se pudo continuar" subtitle={error} hideCloseButton lowContrast />
-        ) : null}
+      {error !== null ? <Aviso tono="error" titulo="No se pudo continuar" detalle={error} /> : null}
 
-        {eligiendoOFormulario ? (
-          <MapaDeButacas
-            butacas={mapa}
-            butacasPorFila={funcion.butacasPorFila}
-            seleccionadas={seleccionadas}
-            onCambiarSeleccion={paso.tipo === 'eligiendo' ? alternarButaca : () => undefined}
-          />
-        ) : null}
+      {eligiendoOFormulario ? (
+        <MapaDeButacas
+          butacas={mapa}
+          butacasPorFila={funcion.butacasPorFila}
+          seleccionadas={seleccionadas}
+          onCambiarSeleccion={paso.tipo === 'eligiendo' ? alternarButaca : () => undefined}
+        />
+      ) : null}
 
-        {paso.tipo === 'eligiendo' && seleccionadas.size > 0 ? (
-          <Tile>
-            <p>
-              {seleccionadas.size} butaca{seleccionadas.size > 1 ? 's' : ''} seleccionada
-              {seleccionadas.size > 1 ? 's' : ''} · {formatearColones(precioDeCompra(datos) * seleccionadas.size)}
-            </p>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-              <Button disabled={enviando} onClick={continuarConCompra}>
-                Continuar a compra
-              </Button>
-              {funcion.categoriaBase !== 'miercoles' ? (
-                <Button kind="tertiary" disabled={enviando} onClick={() => setPaso({ tipo: 'contacto-reserva' })}>
-                  Reservar con carné de estudiante
-                </Button>
-              ) : null}
-            </div>
-          </Tile>
-        ) : null}
+      {paso.tipo === 'eligiendo' && seleccionadas.size > 0 ? (
+        <Tarjeta className="resumen">
+          <p className="resumen__linea">
+            {seleccionadas.size} butaca{seleccionadas.size > 1 ? 's' : ''} seleccionada
+            {seleccionadas.size > 1 ? 's' : ''} · {formatearColones(precioDeCompra(datos) * seleccionadas.size)}
+          </p>
+          <div className="resumen__acciones">
+            <Boton disabled={enviando} onClick={continuarConCompra}>
+              Continuar a compra
+            </Boton>
+            {funcion.categoriaBase !== 'miercoles' ? (
+              <Boton variante="secundario" disabled={enviando} onClick={() => setPaso({ tipo: 'contacto-reserva' })}>
+                Reservar con carné de estudiante
+              </Boton>
+            ) : null}
+          </div>
+        </Tarjeta>
+      ) : null}
 
-        {paso.tipo === 'contacto-compra' ? (
-          <FormularioContacto
-            titulo={`Confirmar compra · ${formatearColones(precioDeCompra(datos) * seleccionadas.size)}`}
-            textoConfirmar="Pagar"
-            enviando={enviando}
-            onCancelar={() => {
-              setPaso({ tipo: 'eligiendo' })
-              setSeleccionadas(new Set())
-              cargarMapa()
-            }}
-            onConfirmar={confirmarCompra}
-          />
-        ) : null}
+      {paso.tipo === 'contacto-compra' ? (
+        <FormularioContacto
+          titulo={`Confirmar compra · ${formatearColones(precioDeCompra(datos) * seleccionadas.size)}`}
+          textoConfirmar="Pagar"
+          enviando={enviando}
+          onCancelar={() => {
+            setPaso({ tipo: 'eligiendo' })
+            setSeleccionadas(new Set())
+            cargarMapa()
+          }}
+          onConfirmar={confirmarCompra}
+        />
+      ) : null}
 
-        {paso.tipo === 'contacto-reserva' ? (
-          <FormularioContacto
-            titulo="Confirmar reserva de estudiante"
-            textoConfirmar="Reservar"
-            enviando={enviando}
-            onCancelar={() => setPaso({ tipo: 'eligiendo' })}
-            onConfirmar={confirmarReserva}
-          />
-        ) : null}
+      {paso.tipo === 'contacto-reserva' ? (
+        <FormularioContacto
+          titulo="Confirmar reserva de estudiante"
+          textoConfirmar="Reservar"
+          enviando={enviando}
+          onCancelar={() => setPaso({ tipo: 'eligiendo' })}
+          onConfirmar={confirmarReserva}
+        />
+      ) : null}
 
-        {paso.tipo === 'confirmado' ? (
-          <InlineNotification kind="success" title={`Número: ${paso.numero}`} subtitle={paso.mensaje} hideCloseButton />
-        ) : null}
-      </Column>
-    </Grid>
+      {paso.tipo === 'confirmado' ? (
+        <Tarjeta className="numero-confirmado">
+          <p className="numero-confirmado__etiqueta">Tu número</p>
+          <p className="numero-confirmado__numero">{paso.numero}</p>
+          <p className="numero-confirmado__mensaje">{paso.mensaje}</p>
+        </Tarjeta>
+      ) : null}
+    </div>
   )
 }

@@ -1,0 +1,142 @@
+/**
+ * Las pantallas del comprador (T19), ya sin `@carbon/react`.
+ *
+ * Sigue el patrón que la skill `ui-ux-pro-max` recomienda para Theater/Cinema
+ * —«Hero-Centric Design + Conversion»— traído a lo que este cine realmente
+ * tiene: no hay tráilers ni imágenes de campaña, así que el peso visual lo
+ * cargan el título de la película y el mapa de butacas, que es lo que la
+ * persona vino a hacer.
+ */
+
+.pagina {
+  max-width: 60rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-5);
+}
+
+.pagina__encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-1);
+}
+
+/* La marca en versalitas y dorado: el «spotlight» de la paleta, usado una vez
+   por pantalla para no gastarlo. */
+.pagina__marca {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 500;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-acento);
+}
+
+.pagina__titulo {
+  margin: 0;
+  font: var(--texto-titulo);
+  letter-spacing: var(--interletrado-titulo);
+  color: var(--color-texto);
+}
+
+.pagina__cuando {
+  margin: 0;
+  font: var(--texto-cuerpo);
+  color: var(--color-texto-atenuado);
+}
+
+/* ---------- Cartelera ---------- */
+
+/* Prioridad 5: la grilla se acomoda sola, sin anchos fijos en píxeles ni
+   desplazamiento horizontal en un teléfono. */
+.cartelera {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--espacio-4);
+}
+
+.cartelera__pelicula {
+  margin: 0 0 var(--espacio-1);
+  font: var(--texto-subtitulo);
+  letter-spacing: var(--interletrado-titulo);
+  color: var(--color-texto-tarjeta);
+}
+
+.cartelera__cuando {
+  margin: 0;
+  font: var(--texto-cuerpo);
+  color: var(--color-texto-atenuado);
+}
+
+.cartelera__precios {
+  margin: var(--espacio-3) 0 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-tarjeta);
+}
+
+/* ---------- Resumen de la selección ---------- */
+
+.resumen__linea {
+  margin: 0 0 var(--espacio-3);
+  font: var(--texto-encabezado);
+}
+
+.resumen__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+/* ---------- Formulario de contacto ---------- */
+
+.formulario-contacto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.formulario-contacto__titulo {
+  margin: 0;
+  font: var(--texto-encabezado);
+}
+
+.formulario-contacto__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+/* ---------- El número, que es a lo que vino toda la operación ---------- */
+
+.numero-confirmado {
+  text-align: center;
+  border-color: var(--color-acento);
+}
+
+.numero-confirmado__etiqueta {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 500;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+}
+
+/* Se dicta en voz alta en la puerta (RN-25): grande y muy espaciado, para
+   leerlo de un vistazo y no confundir un carácter con otro. */
+.numero-confirmado__numero {
+  margin: var(--espacio-2) 0;
+  font: var(--texto-display);
+  letter-spacing: 0.2em;
+  color: var(--color-acento);
+}
+
+.numero-confirmado__mensaje {
+  margin: 0;
+  font: var(--texto-cuerpo);
+  color: var(--color-texto-atenuado);
+}

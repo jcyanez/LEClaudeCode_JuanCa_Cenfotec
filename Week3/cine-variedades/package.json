@@ -8,6 +8,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "servidor": "tsx watch src/entrada/servidor/principal.ts",
+    "semilla": "tsx src/semilla/semilla.ts",
     "carga": "tsx src/carga/carga.ts"
   },
   "dependencies": {

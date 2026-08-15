@@ -1,0 +1,135 @@
+/**
+ * Tokens de diseño del Cine Variedades.
+ *
+ * Salen de la skill `ui-ux-pro-max` (obligatoria por `CLAUDE.md` §8), de su
+ * entrada **Theater/Cinema**: estilo «Dark Mode (OLED) + Motion-Driven»,
+ * paleta «dramatic dark + spotlight gold» y el emparejamiento tipográfico
+ * «Modern Dark Cinema» (Inter en toda la escala).
+ *
+ * Dos temas sobre los mismos nombres de token, porque el sistema atiende a dos
+ * públicos distintos y la propia skill los trata como productos distintos:
+ *
+ * - `.tema-cine` — la web pública del comprador. Oscuro, con el dorado de
+ *   reflector. Es la recomendación literal para Theater/Cinema.
+ * - `.tema-operacion` — taquilla y puerta. Claro y funcional, siguiendo lo que
+ *   la skill recomienda para `Productivity Tool`: jerarquía clara, colores
+ *   funcionales, velocidad. Alguien que cobra efectivo con luz de sala no
+ *   necesita dramatismo, necesita leer rápido.
+ *
+ * **Dos ajustes sobre los valores de la base de datos**, ambos por la
+ * prioridad 1 de la skill (accesibilidad), que `CLAUDE.md` §8 vuelve
+ * innegociable. Se documentan acá en vez de aplicarse en silencio:
+ *
+ * 1. El borde venía `#4338CA`, que sobre el fondo da **2,39:1** — por debajo
+ *    del 3:1 que exige un elemento gráfico. Acá es el contorno de cada butaca
+ *    del mapa, así que sube a `#6366F1` (**3,80:1**).
+ * 2. El anillo de foco venía `#1E1B4B`, que sobre el fondo oscuro es
+ *    prácticamente invisible. Se usa el dorado `#CA8A04` (**6,42:1**): el foco
+ *    visible es requisito de accesibilidad, no una preferencia estética.
+ *
+ * **Regla de uso de los bordes, para no romper lo anterior sin darse cuenta:**
+ * `--color-borde` (4,55:1 en claro y 3,80:1 en oscuro) es el único que puede
+ * usarse en algo que se opera —un campo, un botón, una butaca—.
+ * `--color-borde-suave` da 1,48:1 y sirve **solo para separación decorativa**
+ * (una línea entre bloques): si transmite información o delimita un control,
+ * incumple el mínimo de 3:1.
+ */
+
+.tema-cine {
+  color-scheme: dark;
+
+  --color-primario: #1e1b4b;
+  --color-sobre-primario: #ffffff;
+  --color-secundario: #312e81;
+  --color-sobre-secundario: #ffffff;
+  --color-acento: #ca8a04;
+  --color-sobre-acento: #0f172a;
+
+  --color-fondo: #0f0f23;
+  --color-texto: #f8fafc;
+  --color-tarjeta: #1b1b30;
+  --color-texto-tarjeta: #f8fafc;
+  --color-atenuado: #27273b;
+  --color-texto-atenuado: #94a3b8;
+
+  --color-borde: #6366f1;
+  --color-borde-suave: #312e81;
+  --color-error: #ef4444;
+  --color-sobre-error: #ffffff;
+  --color-exito: #22c55e;
+  --color-foco: #ca8a04;
+
+  --sombra-tarjeta: 0 1px 3px rgb(0 0 0 / 45%);
+}
+
+.tema-operacion {
+  color-scheme: light;
+
+  --color-primario: #1e1b4b;
+  --color-sobre-primario: #ffffff;
+  --color-secundario: #312e81;
+  --color-sobre-secundario: #ffffff;
+  --color-acento: #a16207;
+  --color-sobre-acento: #ffffff;
+
+  --color-fondo: #f8fafc;
+  --color-texto: #0f172a;
+  --color-tarjeta: #ffffff;
+  --color-texto-tarjeta: #0f172a;
+  --color-atenuado: #e9edf1;
+  --color-texto-atenuado: #475569;
+
+  --color-borde: #64748b;
+  --color-borde-suave: #cbd5e1;
+  --color-error: #b91c1c;
+  --color-sobre-error: #ffffff;
+  --color-exito: #15803d;
+  --color-foco: #1e1b4b;
+
+  --sombra-tarjeta: 0 1px 3px rgb(15 23 42 / 12%);
+}
+
+/**
+ * Escala tipográfica del emparejamiento «Modern Dark Cinema»: una sola familia
+ * (Inter) con el peso y el interletrado haciendo la jerarquía. El cuerpo nunca
+ * baja de 16px (prioridad 6 de la skill) y la altura de línea es 1,5.
+ */
+:root {
+  --fuente: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --texto-display: 700 2.5rem/1.1 var(--fuente);
+  --texto-titulo: 600 2rem/1.2 var(--fuente);
+  --texto-subtitulo: 600 1.5rem/1.3 var(--fuente);
+  --texto-encabezado: 600 1.125rem/1.4 var(--fuente);
+  --texto-cuerpo: 400 1rem/1.5 var(--fuente);
+  --texto-menor: 400 0.875rem/1.5 var(--fuente);
+
+  --interletrado-display: -0.03em;
+  --interletrado-titulo: -0.015em;
+  --interletrado-etiqueta: 0.075em;
+
+  /* Escala de espaciado de la skill, densidad estándar. */
+  --espacio-1: 0.25rem;
+  --espacio-2: 0.5rem;
+  --espacio-3: 0.75rem;
+  --espacio-4: 1rem;
+  --espacio-5: 1.5rem;
+  --espacio-6: 2rem;
+  --espacio-7: 3rem;
+
+  --radio: 0.5rem;
+  --radio-chico: 0.25rem;
+
+  /* Prioridad 2 de la skill, innegociable por `CLAUDE.md` §8. */
+  --objetivo-tactil-minimo: 44px;
+
+  /* Prioridad 7: el movimiento dura entre 150 y 300 ms y siempre significa algo. */
+  --transicion: 180ms ease;
+}
+
+/* Prioridad 7 de la skill: quien pidió menos movimiento no recibe ninguno. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transicion: 0ms;
+  }
+}

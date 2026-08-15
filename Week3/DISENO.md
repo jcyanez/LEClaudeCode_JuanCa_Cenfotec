@@ -25,7 +25,7 @@ no forman ciclos:
 
 ```
 Entrada     → Operadores, Cartelera, Ocupación, Venta, Salidas
-Reloj       → Venta, Salidas
+Reloj       → Venta, Salidas, Avisos
 Salidas     → Venta, Cartelera, Avisos
 Venta       → Cartelera, Ocupación, Avisos
 Cartelera   → Ocupación
@@ -206,6 +206,11 @@ nadie.
 - Cada 10 minutos, pedirle a Venta que barra los vencidos. Venta borra las reservas vencidas de su
   propia tabla y le pide a Ocupación que borre las filas vencidas de la suya. **El Reloj nunca
   toca la tabla de ocupación**, ni directamente ni por atajo.
+- Cada 10 minutos, pedirle a Avisos que procese los correos pendientes de su cola. Sin esto ningún
+  aviso saldría nunca: `encolar` solo escribe en la cola y nunca falla (`RNF-5`), y el envío real
+  ocurre en este paso. El Reloj no sabe qué dice ningún correo ni a quién va. *(Agregado durante la
+  construcción, en T17, con aprobación del usuario: el diseño original no lo listaba y sin él la
+  cola quedaba sin vaciar.)*
 - El día 1 de cada mes, pedirle a Salidas el reporte del mes cerrado y su envío (`RN-47`).
 
 **Qué promete a quien lo usa**: nada. **No decide nada y no contiene ninguna regla**: solo llama.
@@ -488,11 +493,18 @@ cine sigue vendiendo — el reparto que quiere `RNF-3`.
 | Lenguaje y marco del servicio | TypeScript full-stack / Python + Django / C# + ASP.NET Core | **TypeScript**: Node.js con Fastify en el servidor; React con `@carbon/react` en la PWA | Un solo lenguaje en todo el proyecto, tipos compartidos entre dominio y pantallas, y librería oficial de Carbon para React (decisión de UI de `CLAUDE.md` §8). Decidido por el usuario en T0 |
 | Motor de base de datos | PostgreSQL / SQLite / MySQL-MariaDB | **SQLite en modo WAL** | Cero instalación y respaldo en un archivo, acorde a un solo cine. Cumple transacciones y unicidad (`RNF-4`). Se acepta la escritura serializada: las transacciones son cortas y `RNF-1` es sobre todo lectura por sondeo. Decidido por el usuario en T0 |
 | Mecanismo de tareas programadas | Planificador embebido / cron del SO / cola con Redis | **Planificador embebido** (node-cron) en el mismo proceso | Un solo despliegue (decisión mayor 1); si el Reloj se cae, el cine sigue vendiendo (decisión mayor 4). Decidido por el usuario en T0 |
+| Proveedor de correo saliente | SMTP genérico / API de un proveedor (SendGrid, Resend) / servidor propio | **SMTP genérico vía Nodemailer**, con credenciales por variables de entorno | Sirve con cualquier proveedor sin atarse a ninguno, incluido el correo que el cine ya tenga. Queda detrás de la interfaz de un solo método de Avisos, así que cambiarlo no toca a quien encola. Decidido por el usuario en T14 |
+| Forma de instalación en el teléfono | Web común / PWA instalable / aplicación nativa | **PWA instalable**, con `manifest` y service worker que precachea solo el cascarón | Se instala desde el teléfono sin tienda ni desarrollo nativo. No reintroduce alcance: **no hay venta offline** — el service worker nunca precachea rutas `/api` y una caída se asume como pérdida (`RNF-3`). Decidido por el usuario el 11/08 |
+| Mapa de butacas en pantalla angosta | 12 butacas por fila con desplazamiento lateral / sala reducida a escala | **Butacas a tamaño real (44×44 px como mínimo); la fila se desplaza de lado si no entra** | Reducir la sala a escala bajaría el objetivo táctil por debajo de 44×44 px en la Sala 1, que tiene 12 butacas por fila, y ese mínimo es de cumplimiento obligatorio. Se prefiere desplazar antes que achicar. Decidido al construir T19 |
+| Sistema visual de las pantallas | Librería de Carbon como dependencia / Carbon solo como inspiración / **sistema propio guiado por la skill `ui-ux-pro-max`** | **Sistema propio de tokens y componentes**, derivado de la entrada `Theater/Cinema` de la skill: «Dark Mode (OLED) + Motion-Driven», paleta «dramatic dark + spotlight gold» y tipografía Inter | Carbon es un sistema de productividad empresarial: sirve para las pantallas de trabajo, pero no para la cara que ve quien compra una entrada de cine. La skill tiene una recomendación específica para salas de cine, y un conjunto propio y pequeño de componentes evita arrastrar una librería entera por seis controles. **Cambio de tecnología decidido por el usuario el 15/08**, revierte la decisión del 11/08. Migración por etapas: la web pública ya no usa Carbon; taquilla, puerta y administración siguen con él hasta la etapa 2 |
+| Temas de color | Uno solo para todo el sistema / uno por público | **Dos temas sobre los mismos tokens**: oscuro cinematográfico para el comprador, claro y funcional para taquilla y puerta | La skill trata a los dos públicos como productos distintos (`Theater/Cinema` frente a `Productivity Tool`). Quien cobra efectivo con luz de sala necesita leer rápido, no ambiente. Los dos temas verificados con contraste WCAG par por par; el borde y el anillo de foco de la paleta original se ajustaron por no llegar al mínimo (ver `entrada-cliente/src/estilos/tokens.scss`) |
+| Moneda y formato de precio en pantalla | Colón con decimales / colón sin decimales / mostrar céntimos | **Colón sin decimales, miles separados con espacio** (`₡8 000`); la categoría de miércoles se rotula **«MIÉRCOLES ½ PRECIO»** | Es como se dicen los precios en la fila de la taquilla. Los montos se guardan en enteros de céntimos: el formato es solo de presentación. Decidido por el usuario en T19 |
 
 ## Decisiones dejadas abiertas
 
 | Qué no se decidió | Quién lo decide y cuándo |
 |---|---|
-| Proveedor de correo saliente | El usuario, a más tardar en la tarea T14. El componente Avisos lo aísla detrás de una interfaz de un solo método |
-| Cómo se dibuja el mapa en una pantalla angosta: 12 butacas por fila con desplazamiento lateral, o la sala reducida a escala | Quien implemente, al construir la pantalla pública. La distribución de las salas ya es un dato fijo (`RN-1`, `RN-2`); lo que queda abierto es solo cómo se muestra |
 | Cuántos operadores hay de cada puesto y cómo se dan de alta | La dueña, al poner el sistema en marcha |
+
+*Resueltas durante la construcción y movidas a «Otras decisiones»: el proveedor de correo saliente
+(T14) y cómo se dibuja el mapa en una pantalla angosta (T19).*

@@ -4,9 +4,74 @@
 > (paso obligatorio de la fase de verificación, `CLAUDE.md` §4). El detalle de cada tarea —
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
-**Última actualización:** 15 de agosto de 2026 · Sesión 15 — **T22 cerrada: el plan T0–T22 está
-completo.**
+**Última actualización:** 15 de agosto de 2026 · Sesión 15 — **T22 cerrada (el plan T0–T22 está
+completo)**, **cambio de sistema visual: etapa 1 de 2**, y **entregables del Caso práctico 4
+completos**.
 **Tarea en curso:** ninguna. **No queda ninguna tarea del plan.**
+
+## Entregables del Caso práctico 4 — revisados contra la consigna (15/08)
+
+| Lo que pide la consigna | Estado |
+|---|---|
+| `PLAN.md` con todas las piezas y **la evidencia anotada en las cerradas** | Hecho: las 23 tareas llevan su bloque `> **Evidencia**` con el comando corrido y su resultado |
+| Código: **al menos tres** piezas cerradas, en el orden del plan | 23 de 23 cerradas (T0–T22) |
+| `README.md`: cómo correr la app, cómo recrear los datos de prueba y las dependencias con enlace a su repositorio oficial | Hecho, y **ensayado desde cero**: base nueva → `npm run semilla` → `npm run servidor` → 22 funciones en venta y los tres PIN respondiendo 200 |
+| `ESPECIFICACION.md` y `DISENO.md` actualizados donde la construcción los corrigió | `DISENO.md`: Reloj (tercer trabajo + grafo `Reloj → Venta, Salidas, Avisos`), seis decisiones nuevas y limpieza de las abiertas. `ESPECIFICACION.md` **no requirió correcciones** |
+| El commit que agrega `PLAN.md` precede a los de construcción | Cumple: `62ca13b` (T0) va antes de `e6b0fff` (T1) |
+| La app arranca siguiendo el `README.md` | Verificado de punta a punta el 15/08 |
+
+**Faltaba lo más básico y no se había notado:** no existía `README.md` ni forma de recrear los datos
+de prueba. `principal.ts` siembra solo las salas —a propósito, porque la cartelera la carga la
+dueña—, así que cualquiera que clonara el repositorio veía una cartelera vacía y no podía llegar al
+mapa de butacas, que es justo lo que la dueña pidió ver. Se resolvió con `npm run semilla`
+(`src/semilla/semilla.ts`), idempotente y con fechas calculadas desde hoy, nunca fijas.
+
+**Hallazgo menor anotado, sin cambiar:** la columna `credencial` de `operador` no tiene restricción
+`UNIQUE`, así que nada impide dos operadores con el mismo PIN —`identificar` devolvería el primero—.
+La semilla lo evita consultando antes de insertar. Arreglarlo de raíz pide una migración; no había
+ninguna `RN-` que lo exigiera.
+
+## Cambio de sistema visual (decisión del usuario, 15/08) — etapa 1 de 2
+
+El usuario decidió **dejar de usar `@carbon/react` y tomar como fuente de diseño la skill
+`ui-ux-pro-max`**. Esto revierte la decisión del 11/08 registrada en `CLAUDE.md` §8 (Carbon), que
+**queda pendiente de actualizar** junto con `DISENO.md`.
+
+**Qué dice la skill para este producto** (su entrada `Theater/Cinema`, consultada leyendo los CSV
+de `data/` porque el `search.py` sigue sin poder correr: no hay Python en este equipo, igual que en
+T18): estilo «Dark Mode (OLED) + Motion-Driven», paleta «dramatic dark + spotlight gold» y el
+emparejamiento tipográfico «Modern Dark Cinema» (Inter en toda la escala).
+
+**Dos temas sobre los mismos tokens, decidido con el usuario:** la web pública va en el oscuro
+cinematográfico, y taquilla y puerta en claro y funcional —lo que la propia skill recomienda para
+`Productivity Tool`—, porque quien cobra efectivo necesita leer rápido, no ambiente.
+
+**Dos ajustes sobre los valores de la base de datos, por accesibilidad** (prioridad 1 de la skill,
+innegociable por `CLAUDE.md` §8), documentados en `tokens.scss` y verificados calculando el
+contraste WCAG de cada par: el borde venía `#4338CA` con **2,39:1** —insuficiente para el contorno
+de una butaca— y subió a `#6366F1` (**3,80:1**); el anillo de foco venía `#1E1B4B`, invisible sobre
+el fondo oscuro, y pasó al dorado `#CA8A04` (**6,42:1**).
+
+**Terminado en la etapa 1 (web pública, T19):** `tokens.scss`, `publico.scss`, un conjunto propio y
+mínimo de componentes (`componentes/base/`: Boton, CampoDeTexto, Tarjeta, TarjetaEnlace, Aviso,
+Cargando) y las tres pantallas del comprador —`Cartelera`, `Funcion`, `FormularioContacto`— ya sin
+Carbon. El mapa de butacas se re-tematizó con los tokens propios, así que ahora es literalmente el
+mismo componente en las dos caras del sistema. **Se conservan intactas** las decisiones de
+accesibilidad de T19/T20: 44×44 px reales, fila que se desplaza en vez de achicar, y cada estado
+distinguido por trazo y relleno además de por color.
+
+**Defecto real encontrado y corregido en `Funcion.tsx`** (era de T19, lo destaparon las pruebas
+nuevas): había un solo estado de error para dos cosas distintas, así que **el sondeo del mapa
+borraba el mensaje de un rechazo apenas respondía** —en la red real el aviso duraba unos 200 ms—,
+contra la tabla de errores de `DISENO.md`. Ahora hay `errorDeCarga` y `error` separados. La prueba
+de regresión se verificó en rojo antes de darla por buena.
+
+**Nuevo:** `Publico.prueba.tsx`, 7 pruebas de componente de la cartelera y del flujo
+bloqueo → pago → número, que T19 había dejado sin cubrir. Cliente: **22 pruebas** (antes 15).
+
+**Pendiente — etapa 2:** sacar Carbon de taquilla, puerta y administración (14 archivos), con el
+tema `.tema-operacion` que ya está definido y verificado. Hasta entonces `@carbon/react` sigue
+instalado y `App.tsx` envuelve esas rutas en su `Theme`.
 **Siguiente paso:** ya no hay tareas de construcción. Queda abierto solo el trámite de documentación
 —registrar en `DISENO.md`, sección por sección con aprobación del usuario, las decisiones que ese
 documento dejaba abiertas y se tomaron durante la construcción (ver «Pendiente de registrar» más

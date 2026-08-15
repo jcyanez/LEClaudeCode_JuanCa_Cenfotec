@@ -1,6 +1,6 @@
-import { Button, Stack, TextInput, Tile } from '@carbon/react'
 import { useState, type FormEvent } from 'react'
 import type { Contacto } from '../api/cliente.js'
+import { Boton, CampoDeTexto, Tarjeta } from './base/index.js'
 
 interface FormularioContactoProps {
   titulo: string
@@ -30,44 +30,45 @@ export function FormularioContacto({
   const listo = nombre.trim() !== '' && correo.trim() !== '' && telefono.trim() !== ''
 
   return (
-    <Tile>
-      <form onSubmit={alEnviar}>
-        <Stack gap={5}>
-          <h3>{titulo}</h3>
-          <TextInput
-            id="contacto-nombre"
-            labelText="Nombre"
-            value={nombre}
-            onChange={(evento) => setNombre(evento.target.value)}
-            disabled={enviando}
-          />
-          <TextInput
-            id="contacto-correo"
-            type="email"
-            labelText="Correo"
-            helperText="Ahí te llega el número de compra"
-            value={correo}
-            onChange={(evento) => setCorreo(evento.target.value)}
-            disabled={enviando}
-          />
-          <TextInput
-            id="contacto-telefono"
-            type="tel"
-            labelText="Teléfono"
-            value={telefono}
-            onChange={(evento) => setTelefono(evento.target.value)}
-            disabled={enviando}
-          />
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <Button type="submit" disabled={!listo || enviando}>
-              {enviando ? 'Un momento…' : textoConfirmar}
-            </Button>
-            <Button kind="secondary" type="button" disabled={enviando} onClick={onCancelar}>
-              Cancelar
-            </Button>
-          </div>
-        </Stack>
+    <Tarjeta>
+      <form onSubmit={alEnviar} className="formulario-contacto">
+        <h3 className="formulario-contacto__titulo">{titulo}</h3>
+        <CampoDeTexto
+          id="contacto-nombre"
+          etiqueta="Nombre"
+          value={nombre}
+          onChange={(evento) => setNombre(evento.target.value)}
+          disabled={enviando}
+          autoComplete="name"
+        />
+        <CampoDeTexto
+          id="contacto-correo"
+          etiqueta="Correo"
+          type="email"
+          ayuda="Ahí te llega el número de compra"
+          value={correo}
+          onChange={(evento) => setCorreo(evento.target.value)}
+          disabled={enviando}
+          autoComplete="email"
+        />
+        <CampoDeTexto
+          id="contacto-telefono"
+          etiqueta="Teléfono"
+          type="tel"
+          value={telefono}
+          onChange={(evento) => setTelefono(evento.target.value)}
+          disabled={enviando}
+          autoComplete="tel"
+        />
+        <div className="formulario-contacto__acciones">
+          <Boton type="submit" disabled={!listo || enviando}>
+            {enviando ? 'Un momento…' : textoConfirmar}
+          </Boton>
+          <Boton variante="secundario" disabled={enviando} onClick={onCancelar}>
+            Cancelar
+          </Boton>
+        </div>
       </form>
-    </Tile>
+    </Tarjeta>
   )
 }
