@@ -137,8 +137,6 @@ Todas se eligieron en T0 y están registradas con su razón en [`DISENO.md`](DIS
 |---|---|---|
 | `react`, `react-dom` | Interfaz | https://github.com/facebook/react |
 | `react-router-dom` | Rutas de las pantallas | https://github.com/remix-run/react-router |
-| `@carbon/react` | Componentes de taquilla, puerta y administración | https://github.com/carbon-design-system/carbon |
-| `@ibm/plex` | Tipografía de Carbon | https://github.com/IBM/plex |
 | `vite` | Servidor de desarrollo y empaquetado | https://github.com/vitejs/vite |
 | `@vitejs/plugin-react` | Soporte de React en Vite | https://github.com/vitejs/vite-plugin-react |
 | `vite-plugin-pwa` | `manifest` y service worker de la PWA | https://github.com/vite-pwa/vite-plugin-pwa |
@@ -151,8 +149,10 @@ Todas se eligieron en T0 y están registradas con su razón en [`DISENO.md`](DIS
 código: la garantía de no doble venta (`RNF-4`) se apoya en una transacción sincrónica y en la
 restricción de unicidad `(función, butaca)`, así que cambiar de cliente obliga a revisar cada
 operación que toca butacas. `nodemailer` está aislado detrás de una interfaz de un solo método
-(`EnviarCorreo`), así que se reemplaza sin que nadie más se entere. `@carbon/react` está en
-migración: las pantallas del comprador ya no lo usan (ver `STATUS.md`).
+(`EnviarCorreo`), así que se reemplaza sin que nadie más se entere. La interfaz **no depende de
+ninguna librería de componentes**: el sistema visual es propio (`src/componentes/base/` y
+`src/estilos/tokens.scss`), derivado de la skill `ui-ux-pro-max`, así que no hay nada que se rompa
+si un sistema de diseño de terceros cambia de versión o de rumbo.
 
 ## Estructura
 

@@ -1,4 +1,3 @@
-import { Theme } from '@carbon/react'
 import { useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { Administracion } from './paginas/Administracion.js'
@@ -23,14 +22,10 @@ function esRutaPublica(ruta: string): boolean {
  * y las pantallas de trabajo el claro funcional que esa misma skill recomienda
  * para herramientas de productividad. Quien cobra efectivo necesita leer
  * rápido, no ambiente.
- *
- * Las pantallas internas todavía usan `@carbon/react` (etapa 2 del cambio de
- * sistema visual), así que siguen envueltas en su `Theme`.
  */
 export default function App() {
   const { pathname } = useLocation()
-  const publica = esRutaPublica(pathname)
-  const tema = publica ? 'tema-cine' : 'tema-operacion'
+  const tema = esRutaPublica(pathname) ? 'tema-cine' : 'tema-operacion'
 
   // El tema vive en el `body` para que el fondo cubra la pantalla entera,
   // incluido el rebote al desplazarse, y no solo la caja del contenido.
@@ -39,7 +34,7 @@ export default function App() {
     return () => document.body.classList.remove(tema)
   }, [tema])
 
-  const contenido = (
+  return (
     <main className="lienzo">
       <Routes>
         <Route path="/" element={<Cartelera />} />
@@ -50,7 +45,4 @@ export default function App() {
       </Routes>
     </main>
   )
-
-  if (publica) return contenido
-  return <Theme theme="g10">{contenido}</Theme>
 }

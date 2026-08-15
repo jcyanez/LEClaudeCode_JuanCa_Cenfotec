@@ -56,7 +56,9 @@ describe('VentaEnTaquilla: una categoría de precio por butaca (T20, RF-12)', ()
     await waitFor(() =>
       expect(api.venderEnTaquilla).toHaveBeenCalledWith(1, [{ butacaId: 1, categoria: 'estudiante' }]),
     )
-    expect(await screen.findByText(/número PQR456/)).toBeInTheDocument()
+    // El número queda a la vista para dictárselo a quien compró (RN-25).
+    expect(await screen.findByText('PQR456')).toBeInTheDocument()
+    expect(screen.getByText('Compra registrada')).toBeInTheDocument()
   })
 
   it('en una función de miércoles no ofrece elegir categoría: solo existe miércoles (RN-14, CA-3)', async () => {

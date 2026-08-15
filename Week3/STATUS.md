@@ -69,9 +69,33 @@ de regresión se verificó en rojo antes de darla por buena.
 **Nuevo:** `Publico.prueba.tsx`, 7 pruebas de componente de la cartelera y del flujo
 bloqueo → pago → número, que T19 había dejado sin cubrir. Cliente: **22 pruebas** (antes 15).
 
-**Pendiente — etapa 2:** sacar Carbon de taquilla, puerta y administración (14 archivos), con el
-tema `.tema-operacion` que ya está definido y verificado. Hasta entonces `@carbon/react` sigue
-instalado y `App.tsx` envuelve esas rutas en su `Theme`.
+**Etapa 2 terminada (15/08): `@carbon/react` y `@ibm/plex` ya no son dependencias del proyecto.**
+Las pantallas de trabajo se rehicieron con dos estilos más de la skill —**Swiss Modernism 2.0**
+(retícula de 12 columnas, unidad de 8 px, un solo acento, declara WCAG AAA) y **Data-Dense
+Dashboard** (relleno de 12 px, filas de 36 px, encabezados fijos)—, no solo repintadas:
+
+- **Puerta**: el veredicto ocupa siete de las doce columnas y se lee a un metro —fondo, marca y
+  motivo del rechazo—, porque se opera de pie y con gente esperando. `Enter` valida, `Esc` limpia.
+- **Taquilla**: dos columnas con el mapa a la izquierda y el **panel de cobro fijo** a la derecha,
+  que no se pierde de vista al recorrer 120 butacas. `Enter` cobra, `Esc` suelta la selección.
+- **Administración**: dos columnas —lo que se carga una vez a la izquierda, las funciones de la
+  semana a la derecha—, con tablas densas de encabezado fijo y una barra de ocupación detrás del
+  número (el número sigue ahí: la barra nunca es la única señal).
+- **Siete componentes nuevos** (`Pestanas`, `Selector`, `Modal`, `AreaDeTexto`, `CampoNumerico`,
+  `CampoDeFecha`, `Etiqueta`). Las pestañas reponen el patrón ARIA completo que traía Carbon
+  —`tablist`/`tab`/`tabpanel`, flechas, Inicio y Fin—, porque una pestaña a medias es una trampa de
+  teclado. El modal usa el `<dialog>` nativo: foco atrapado, `Esc` y fondo inerte sin código propio.
+- **Cifras tabulares** en montos, números de compra y horas, para que las columnas de dinero
+  alineen dígito con dígito.
+
+**Lo que se ganó, medido:** el cliente pasó de **927 módulos a 52**, el precache de la PWA de
+**1.503 KiB a 302 KiB** (−80 %) y el `build` de ~5 s a **0,55 s**. Además se pudo quitar el
+`cssMinify: false` que hubo que poner en T18 por un `@position-try` del SCSS de Carbon que el
+minificador no entendía: sin Carbon, el CSS vuelve a minificarse.
+
+**Verificado corriendo**, no solo compilando: sesión de taquilla → mapa de 120 butacas → venta
+(`6KS4J3`, ₡8 000) → cierre de caja → validación en puerta → la segunda validación rechazada con
+«ya se validaron a las 14:09». Cliente: **22 pruebas**; servidor: **251**, intactas.
 **Siguiente paso:** ya no hay tareas de construcción. Queda abierto solo el trámite de documentación
 —registrar en `DISENO.md`, sección por sección con aprobación del usuario, las decisiones que ese
 documento dejaba abiertas y se tomaron durante la construcción (ver «Pendiente de registrar» más

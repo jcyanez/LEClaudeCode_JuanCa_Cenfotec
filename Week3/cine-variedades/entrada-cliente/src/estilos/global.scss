@@ -1,14 +1,5 @@
-// Carbon emite sus @font-face con rutas al estilo webpack (`~@ibm/plex/...`)
-// que Vite no resuelve, así que se apagan acá y las fuentes se cargan
-// aparte (index.html) para que `npm run dev`/`build` no dependan de ese
-// alias roto.
-//
-// Carbon sigue presente **solo** para las pantallas de taquilla, puerta y
-// administración (etapa 2 del cambio de sistema visual). Las del comprador ya
-// no lo usan: se pintan con los tokens propios de `tokens.scss`, derivados de
-// la skill `ui-ux-pro-max` (`CLAUDE.md` §8).
-@use '@carbon/styles/scss/config' with ($css--font-face: false);
-@use '@carbon/react';
+// El sistema visual es propio: tokens derivados de la skill `ui-ux-pro-max`
+// (`CLAUDE.md` §8). Ya no queda nada de `@carbon/react` en el proyecto.
 @use './tokens.scss';
 @use './publico.scss';
 
@@ -24,6 +15,8 @@ body {
 
 .lienzo {
   padding: var(--espacio-5) var(--espacio-4);
+  max-width: 84rem;
+  margin-inline: auto;
 }
 
 /* La categoría miércoles a mitad de precio (RN-13), como etiqueta.

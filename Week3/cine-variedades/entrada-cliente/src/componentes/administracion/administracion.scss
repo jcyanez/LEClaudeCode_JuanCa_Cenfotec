@@ -1,0 +1,118 @@
+/**
+ * Las pantallas de la dueña. Mismo lenguaje que taquilla —Swiss Modernism 2.0
+ * sobre densidad de Data-Dense Dashboard—, pero acá el trabajo es leer tablas
+ * y llenar formularios, no despachar una fila: por eso mandan las tarjetas de
+ * indicador y las tablas con encabezado fijo, y no hay panel pegado al borde.
+ */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-5);
+  max-width: 64rem;
+}
+
+.panel__titulo {
+  margin: 0 0 var(--espacio-3);
+  font: var(--texto-encabezado);
+}
+
+.panel__nota {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+/* Barra de filtros: los campos y su botón en una línea, y bajan solos cuando
+   no entran (prioridad 5). */
+.panel__barra {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+}
+
+.panel__barra .campo {
+  min-width: 10rem;
+}
+
+.panel__formulario {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--espacio-3);
+  margin-top: var(--espacio-4);
+}
+
+.panel__formulario .campo {
+  min-width: 10rem;
+}
+
+.panel__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--espacio-2);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-3);
+    font: var(--texto-menor);
+  }
+}
+
+/* La ocupación se lee mejor comparada que leída: una barra detrás del número.
+   El número sigue ahí, así que la barra nunca es la única señal (prioridad 1). */
+.barra-ocupacion {
+  display: inline-block;
+  inline-size: 3rem;
+  block-size: 0.4rem;
+  margin-inline-end: var(--espacio-2);
+  border-radius: 999px;
+  background: var(--color-atenuado);
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.barra-ocupacion__relleno {
+  display: block;
+  block-size: 100%;
+  background: var(--color-acento);
+}
+
+/* Bento de la cartelera: la semana a la izquierda y sus funciones a la
+   derecha, que es el orden en que la dueña carga la cartelera. */
+.cartelera-duena {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--espacio-5);
+  align-items: start;
+}
+
+.cartelera-duena__semanas {
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.cartelera-duena__funciones {
+  grid-column: span 8;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  min-width: 0;
+}
+
+@media (max-width: 60rem) {
+  .cartelera-duena {
+    grid-template-columns: 1fr;
+  }
+
+  .cartelera-duena__semanas,
+  .cartelera-duena__funciones {
+    grid-column: 1 / -1;
+  }
+}

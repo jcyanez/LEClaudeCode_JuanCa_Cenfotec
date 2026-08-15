@@ -1,4 +1,4 @@
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@carbon/react'
+import { Pestanas } from '../componentes/base/index.js'
 import { CarteleraDeLaDuena } from '../componentes/administracion/CarteleraDeLaDuena.js'
 import { Consultas } from '../componentes/administracion/Consultas.js'
 import { PreciosYDistribuidor } from '../componentes/administracion/PreciosYDistribuidor.js'
@@ -16,28 +16,15 @@ export function Administracion() {
   return (
     <SesionOperador titulo="Administración">
       {() => (
-        <Tabs>
-          <TabList aria-label="Pantallas de la dueña" contained>
-            <Tab>Cartelera</Tab>
-            <Tab>Precios y distribuidor</Tab>
-            <Tab>Reporte mensual</Tab>
-            <Tab>Consultas</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <CarteleraDeLaDuena />
-            </TabPanel>
-            <TabPanel>
-              <PreciosYDistribuidor />
-            </TabPanel>
-            <TabPanel>
-              <ReporteMensual />
-            </TabPanel>
-            <TabPanel>
-              <Consultas />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+        <Pestanas
+          etiqueta="Pantallas de la dueña"
+          pestanas={[
+            { id: 'cartelera', titulo: 'Cartelera', contenido: <CarteleraDeLaDuena /> },
+            { id: 'precios', titulo: 'Precios y distribuidor', contenido: <PreciosYDistribuidor /> },
+            { id: 'reporte', titulo: 'Reporte mensual', contenido: <ReporteMensual /> },
+            { id: 'consultas', titulo: 'Consultas', contenido: <Consultas /> },
+          ]}
+        />
       )}
     </SesionOperador>
   )

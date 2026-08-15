@@ -1,4 +1,4 @@
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@carbon/react'
+import { Pestanas } from '../componentes/base/index.js'
 import { CierreDeCaja } from '../componentes/taquilla/CierreDeCaja.js'
 import { CompraEnTaquilla } from '../componentes/taquilla/CompraEnTaquilla.js'
 import { ConversionDeReserva } from '../componentes/taquilla/ConversionDeReserva.js'
@@ -17,28 +17,15 @@ export function Taquilla() {
   return (
     <SesionOperador titulo="Taquilla">
       {() => (
-        <Tabs>
-          <TabList aria-label="Trabajos de taquilla" contained>
-            <Tab>Vender</Tab>
-            <Tab>Reservas</Tab>
-            <Tab>Compras</Tab>
-            <Tab>Cierre de caja</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel>
-              <VentaEnTaquilla />
-            </TabPanel>
-            <TabPanel>
-              <ConversionDeReserva />
-            </TabPanel>
-            <TabPanel>
-              <CompraEnTaquilla />
-            </TabPanel>
-            <TabPanel>
-              <CierreDeCaja />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+        <Pestanas
+          etiqueta="Trabajos de taquilla"
+          pestanas={[
+            { id: 'vender', titulo: 'Vender', contenido: <VentaEnTaquilla /> },
+            { id: 'reservas', titulo: 'Reservas', contenido: <ConversionDeReserva /> },
+            { id: 'compras', titulo: 'Compras', contenido: <CompraEnTaquilla /> },
+            { id: 'cierre', titulo: 'Cierre de caja', contenido: <CierreDeCaja /> },
+          ]}
+        />
       )}
     </SesionOperador>
   )

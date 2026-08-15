@@ -1,4 +1,3 @@
-import { Button, InlineNotification, Modal, TextInput, Tile } from '@carbon/react'
 import { useState } from 'react'
 import {
   buscarReserva,
@@ -8,6 +7,8 @@ import {
   type ReservaEnTaquilla,
 } from '../../api/cliente.js'
 import { formatearColones } from '../../utilidades/formato.js'
+import { Aviso, Boton, CampoDeTexto, Modal, Tarjeta } from '../base/index.js'
+import './taquilla.scss'
 
 /**
  * La conversión de una reserva de estudiante, que solo ocurre en taquilla
@@ -73,73 +74,77 @@ export function ConversionDeReserva() {
   }
 
   return (
-    <div>
-      <form onSubmit={buscar} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', maxWidth: '30rem' }}>
-        <TextInput
+    <div className="trabajo">
+      <form onSubmit={buscar} className="trabajo__buscador">
+        <CampoDeTexto
           id="numero-de-reserva"
-          labelText="Número de reserva"
-          helperText="Seis caracteres, como los dicta quien llega."
+          etiqueta="Número de reserva"
+          ayuda="Seis caracteres, como los dicta quien llega."
           autoComplete="off"
+          className="cifra"
           value={numero}
           onChange={(evento) => setNumero(evento.target.value)}
         />
-        <Button type="submit" disabled={numero.trim() === ''}>
+        <Boton type="submit" disabled={numero.trim() === ''}>
           Buscar
-        </Button>
+        </Boton>
       </form>
 
-      {error !== null ? (
-        <div role="alert" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification kind="error" title="No se encontró" subtitle={error} hideCloseButton lowContrast />
-        </div>
-      ) : null}
-
-      {resultado !== null ? (
-        <div role="status" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification kind="success" title="Listo" subtitle={resultado} hideCloseButton />
-        </div>
-      ) : null}
+      {error !== null ? <Aviso tono="error" titulo="No se encontró" detalle={error} /> : null}
+      {resultado !== null ? <Aviso tono="exito" titulo="Listo" detalle={resultado} /> : null}
 
       {reserva !== null ? (
-        <Tile style={{ marginTop: '1.5rem', maxWidth: '40rem' }}>
-          <h2 style={{ fontSize: '1rem' }}>Reserva {reserva.numero}</h2>
-          <dl style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 1rem', margin: '0.75rem 0' }}>
-            <dt>A nombre de</dt>
-            <dd>{reserva.contacto.nombre}</dd>
-            <dt>Butacas</dt>
-            <dd>{reserva.butacaIds.length}</dd>
-            <dt>Vence</dt>
-            <dd>al empezar la función, {reserva.vence.slice(11, 16)}</dd>
+        <Tarjeta>
+          <h2 className="trabajo__titulo">
+            Reserva <span className="cifra">{reserva.numero}</span>
+          </h2>
+          <dl className="ficha">
+            <div>
+              <dt className="ficha__etiqueta">A nombre de</dt>
+              <dd className="ficha__dato">{reserva.contacto.nombre}</dd>
+            </div>
+            <div>
+              <dt className="ficha__etiqueta">Butacas</dt>
+              <dd className="ficha__dato cifra">{reserva.butacaIds.length}</dd>
+            </div>
+            <div>
+              <dt className="ficha__etiqueta">Vence</dt>
+              <dd className="ficha__dato">al empezar, {reserva.vence.slice(11, 16)}</dd>
+            </div>
           </dl>
-          <p style={{ marginBottom: '0.75rem' }}>¿Presentó el carné de estudiante?</p>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <Button disabled={trabajando} onClick={() => convertir(true)}>
+          <p className="trabajo__nota">¿Presentó el carné de estudiante?</p>
+          <div className="trabajo__acciones">
+            <Boton disabled={trabajando} onClick={() => convertir(true)}>
               Sí: cobrar precio de estudiante
-            </Button>
-            <Button kind="tertiary" disabled={trabajando} onClick={() => convertir(false)}>
+            </Boton>
+            <Boton variante="secundario" disabled={trabajando} onClick={() => convertir(false)}>
               No, pero paga general
-            </Button>
-            <Button kind="danger--tertiary" disabled={trabajando} onClick={() => setConfirmarLiberar(true)}>
+            </Boton>
+            <Boton variante="peligro" disabled={trabajando} onClick={() => setConfirmarLiberar(true)}>
               No paga: liberar butacas
-            </Button>
+            </Boton>
           </div>
-        </Tile>
+        </Tarjeta>
       ) : null}
 
       <Modal
-        open={confirmarLiberar}
-        danger
-        modalHeading="Liberar las butacas de la reserva"
-        modalLabel={reserva?.numero ?? ''}
-        primaryButtonText="Liberar butacas"
-        secondaryButtonText="Cancelar"
-        onRequestClose={() => setConfirmarLiberar(false)}
-        onSecondarySubmit={() => setConfirmarLiberar(false)}
-        onRequestSubmit={liberar}
+        titulo={`Liberar las butacas de ${reserva?.numero ?? 'la reserva'}`}
+        abierto={confirmarLiberar}
+        onCerrar={() => setConfirmarLiberar(false)}
+        acciones={
+          <>
+            <Boton variante="secundario" onClick={() => setConfirmarLiberar(false)}>
+              Cancelar
+            </Boton>
+            <Boton variante="peligro" onClick={liberar}>
+              Liberar butacas
+            </Boton>
+          </>
+        }
       >
         <p>
-          Las butacas vuelven a estar libres en el acto y la reserva desaparece sin dejar registro (RN-32, RN-34).
-          Esto no se puede deshacer.
+          Las butacas vuelven a estar libres en el acto y la reserva desaparece sin dejar registro. Esto no se puede
+          deshacer.
         </p>
       </Modal>
     </div>

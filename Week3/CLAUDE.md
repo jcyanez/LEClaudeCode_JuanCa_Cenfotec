@@ -162,8 +162,10 @@ El trabajo de la etapa actual (plan de construcción) se considera terminado cua
   públicos como productos distintos. Los tokens y los ajustes de contraste están en
   `entrada-cliente/src/estilos/tokens.scss`; la decisión, registrada en `DISENO.md`.
 * **Esto reemplaza la decisión del 11/08**, que era usar Carbon Design System de IBM. La migración
-  va **por etapas**: la web pública ya no usa `@carbon/react`; taquilla, puerta y administración
-  siguen con él hasta completarse la etapa 2. Mientras tanto, ambos sistemas conviven a propósito.
+  **está completa**: `@carbon/react` y `@ibm/plex` ya no son dependencias del proyecto. Las
+  pantallas de trabajo —taquilla, puerta y administración— siguen los estilos **Swiss Modernism
+  2.0 + Data-Dense Dashboard** de la misma skill; los componentes propios viven en
+  `entrada-cliente/src/componentes/base/`.
 * **La aplicación se desarrolla como PWA** (Progressive Web App): instalable desde el teléfono,
   con `manifest` y `service worker`. Esto no reintroduce alcance fuera de `ESPECIFICACION.md`
   (sin funcionamiento offline para la venta: una caída se asume como pérdida, `RNF-3`).

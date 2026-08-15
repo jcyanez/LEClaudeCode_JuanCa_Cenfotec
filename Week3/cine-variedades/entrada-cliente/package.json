@@ -11,8 +11,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@carbon/react": "^1.114.0",
-    "@ibm/plex": "^6.4.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

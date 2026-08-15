@@ -4,19 +4,13 @@ import { VitePWA } from 'vite-plugin-pwa'
 // `test` de las pruebas de componentes (T20) ya tipado.
 import { defineConfig } from 'vitest/config'
 
-// Colores del tema Carbon `g10` (@carbon/react), para que el manifest y la
-// barra del navegador combinen con la app (CLAUDE.md §8: Carbon como
-// inspiración de la PWA).
-const FONDO_TEMA_G10 = '#f4f4f4'
-const COLOR_TEMA_G10 = '#0f62fe' // Blue 60, el interactivo primario de Carbon
+// La app instalada abre en la cartelera, que es la cara del comprador: el
+// manifest usa el fondo y el acento del tema oscuro cinematográfico
+// (`tokens.scss`, entrada Theater/Cinema de la skill `ui-ux-pro-max`).
+const FONDO_APP = '#0f0f23'
+const COLOR_APP = '#ca8a04' // el dorado de reflector, único acento del sistema
 
 export default defineConfig({
-  // El minificador de CSS por defecto (lightningcss) todavía no entiende el
-  // `@position-try` que emite el SCSS de @carbon/react, y esta versión de
-  // Vite no trae esbuild instalado como alternativa. Se apaga la
-  // minificación de CSS por ahora; no afecta al cascarón de T18 y puede
-  // revisitarse cuando el ecosistema se ponga al día.
-  build: { cssMinify: false },
   plugins: [
     react(),
     VitePWA({
@@ -28,8 +22,8 @@ export default defineConfig({
         lang: 'es',
         start_url: '/',
         display: 'standalone',
-        background_color: FONDO_TEMA_G10,
-        theme_color: COLOR_TEMA_G10,
+        background_color: FONDO_APP,
+        theme_color: COLOR_APP,
         icons: [
           { src: '/icono.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
           { src: '/icono-mascara.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },

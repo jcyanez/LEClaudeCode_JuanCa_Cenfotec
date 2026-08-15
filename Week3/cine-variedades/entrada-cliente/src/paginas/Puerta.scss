@@ -1,0 +1,209 @@
+/**
+ * La puerta. Es la pantalla más simple del sistema y la que más se mira de
+ * lejos: alguien de pie, con el teléfono en una mano y gente esperando.
+ *
+ * De ahí el reparto de la retícula: el control ocupa cinco columnas y **el
+ * veredicto siete**, porque leer «pasa / no pasa» a un metro importa más que
+ * el formulario que ya se sabe de memoria. Es la asimetría deliberada de
+ * Swiss Modernism 2.0, no un capricho de maqueta.
+ */
+
+.puerta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-5);
+}
+
+.puerta__reticula {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--espacio-5);
+  align-items: stretch;
+}
+
+.puerta__control {
+  grid-column: span 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.puerta__cuando {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+.puerta__formulario {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espacio-3);
+}
+
+.puerta__formulario .campo {
+  flex: 1;
+}
+
+/* El número se dicta en voz alta y se teclea rápido: grande, espaciado y con
+   cifras de ancho fijo para no confundir un carácter con otro (RN-25). */
+.puerta__numero {
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.puerta__atajos {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+
+  kbd {
+    padding: 0.1rem 0.35rem;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-chico);
+    font-family: var(--fuente);
+    font-size: 0.75rem;
+  }
+}
+
+/* ---------- El veredicto ---------- */
+
+.veredicto {
+  grid-column: span 7;
+  min-height: 16rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  padding: var(--espacio-5);
+  border: 2px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+  text-align: center;
+  transition: background-color var(--transicion), border-color var(--transicion);
+}
+
+.veredicto__espera {
+  margin: 0;
+  font: var(--texto-cuerpo);
+  color: var(--color-texto-atenuado);
+}
+
+/* Prioridad 1 (`color-not-only`): el color de fondo no es la única señal —
+   cada veredicto lo dice con todas las letras y con un trazo distinto. */
+.veredicto--pase {
+  background: color-mix(in srgb, var(--color-exito) 12%, transparent);
+  border-color: var(--color-exito);
+  border-style: solid;
+}
+
+.veredicto--alto {
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  border-color: var(--color-error);
+  border-style: dashed;
+}
+
+.veredicto__marca {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 600;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+}
+
+.veredicto--pase .veredicto__marca {
+  color: var(--color-exito);
+}
+
+.veredicto--alto .veredicto__marca {
+  color: var(--color-error);
+}
+
+/* El número, para poder contrastarlo con lo que dicta quien llega. */
+.veredicto__numero {
+  margin: 0;
+  font: var(--texto-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.18em;
+  color: var(--color-texto);
+}
+
+.veredicto__detalle {
+  margin: 0;
+  font: var(--texto-cuerpo);
+  color: var(--color-texto-atenuado);
+}
+
+/* El motivo del rechazo se lee entero y de lejos: es lo que hay que explicarle
+   a quien no puede pasar (tabla de errores de DISENO.md). */
+.veredicto__motivo {
+  margin: 0;
+  font: var(--texto-subtitulo);
+  letter-spacing: var(--interletrado-titulo);
+  color: var(--color-texto);
+  max-width: 24ch;
+}
+
+/* ---------- Búsqueda alternativa ---------- */
+
+.busqueda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-3);
+}
+
+.busqueda__titulo {
+  margin: 0;
+  font: var(--texto-encabezado);
+}
+
+.busqueda__nota {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+.busqueda__formulario {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espacio-3);
+}
+
+.busqueda__formulario .campo {
+  flex: 1;
+  max-width: 24rem;
+}
+
+.busqueda__resultados {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--espacio-2);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-3);
+    font: var(--texto-menor);
+  }
+}
+
+/* En un teléfono la retícula colapsa y el veredicto queda arriba: es lo
+   primero que hay que ver (prioridad 5, sin desplazamiento horizontal). */
+@media (max-width: 48rem) {
+  .puerta__reticula {
+    grid-template-columns: 1fr;
+  }
+
+  .puerta__control,
+  .veredicto {
+    grid-column: 1 / -1;
+  }
+
+  .veredicto {
+    order: -1;
+    min-height: 10rem;
+  }
+}

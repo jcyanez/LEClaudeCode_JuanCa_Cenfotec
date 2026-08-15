@@ -1,6 +1,7 @@
-import { Button, InlineNotification, Loading, TextInput } from '@carbon/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { cerrarSesion, esErrorDeApi, identificarse, type Operador } from '../api/cliente.js'
+import { Boton, CampoDeTexto, Cargando, Tarjeta } from './base/index.js'
+import './SesionOperador.scss'
 
 interface SesionOperadorProps {
   titulo: string
@@ -51,61 +52,54 @@ export function SesionOperador({ titulo, children }: SesionOperadorProps) {
     setOperador(null)
   }
 
-  if (cargando) return <Loading description="Abriendo la pantalla…" withOverlay={false} />
+  if (cargando) return <Cargando descripcion="Abriendo la pantalla…" />
 
   if (operador === null) {
     return (
-      <form onSubmit={entrar} style={{ maxWidth: '20rem' }}>
-        <h1>{titulo}</h1>
-        <p style={{ marginBottom: '1rem' }}>Identificate con tu PIN para operar.</p>
-        <TextInput
-          id="pin-operador"
-          name="pin"
-          type="password"
-          labelText="PIN"
-          helperText="El PIN corto que te dio la dueña."
-          inputMode="numeric"
-          autoComplete="off"
-          autoFocus
-          value={pin}
-          invalid={error !== null}
-          invalidText={error ?? ''}
-          onChange={(evento) => setPin(evento.target.value)}
-        />
-        <Button type="submit" disabled={enviando || pin.trim() === ''} style={{ marginTop: '1rem' }}>
-          {enviando ? 'Entrando…' : 'Entrar'}
-        </Button>
-        {error !== null ? (
-          <div role="alert" aria-live="polite" style={{ marginTop: '1rem' }}>
-            <InlineNotification kind="error" title="No se pudo entrar" subtitle={error} hideCloseButton lowContrast />
-          </div>
-        ) : null}
-      </form>
+      <div className="acceso">
+        <Tarjeta className="acceso__caja">
+          <p className="acceso__marca">Cine Variedades</p>
+          <h1 className="acceso__titulo">{titulo}</h1>
+          <form onSubmit={entrar} className="acceso__formulario">
+            <CampoDeTexto
+              id="pin-operador"
+              name="pin"
+              type="password"
+              etiqueta="PIN"
+              ayuda="El PIN corto que te dio la dueña."
+              inputMode="numeric"
+              autoComplete="off"
+              autoFocus
+              value={pin}
+              error={error ?? undefined}
+              onChange={(evento) => setPin(evento.target.value)}
+            />
+            <Boton type="submit" disabled={enviando || pin.trim() === ''}>
+              {enviando ? 'Entrando…' : 'Entrar'}
+            </Boton>
+          </form>
+        </Tarjeta>
+      </div>
     )
   }
 
   return (
     <>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: '1rem',
-          flexWrap: 'wrap',
-          marginBottom: '1rem',
-        }}
-      >
-        <h1 style={{ margin: 0 }}>{titulo}</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span>
-            {operador.nombre} · {operador.puesto}
-          </span>
-          <Button kind="ghost" size="sm" onClick={salir}>
-            Cerrar sesión
-          </Button>
+      <header className="barra">
+        <div className="barra__identidad">
+          <p className="barra__marca">Cine Variedades</p>
+          <h1 className="barra__titulo">{titulo}</h1>
         </div>
-      </div>
+        <div className="barra__operador">
+          <span className="barra__quien">
+            {operador.nombre}
+            <span className="barra__puesto">{operador.puesto}</span>
+          </span>
+          <Boton variante="fantasma" onClick={salir}>
+            Cerrar sesión
+          </Boton>
+        </div>
+      </header>
       {children(operador)}
     </>
   )

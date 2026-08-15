@@ -1,9 +1,8 @@
-import { Button, DatePicker, DatePickerInput, InlineNotification, Tile } from '@carbon/react'
 import { useCallback, useEffect, useState } from 'react'
 import { esErrorDeApi, obtenerCierreDeCaja, type CierreDeCaja as Cierre } from '../../api/cliente.js'
 import { formatearColones } from '../../utilidades/formato.js'
-
-const MONTO: React.CSSProperties = { fontVariantNumeric: 'tabular-nums', textAlign: 'right' }
+import { Aviso, Boton, CampoDeFecha } from '../base/index.js'
+import './taquilla.scss'
 
 /**
  * El cierre de caja de la jornada, en sus dos partes (RN-46, RF-26): la de
@@ -12,14 +11,19 @@ const MONTO: React.CSSProperties = { fontVariantNumeric: 'tabular-nums', textAli
  * lectura: pedirlo dos veces no cambia nada, y como se calcula al vuelo, un
  * número puede moverse si se entrega una devolución después de mirarlo
  * (limitación conocida de DISENO.md).
+ *
+ * Se presenta como tarjetas de indicador (el patrón «KPI cards» de
+ * Data-Dense Dashboard): el efectivo esperado es el único número que alguien
+ * va a comparar contra lo que tiene en la mano, así que va destacado y los
+ * otros dos explican cómo se llegó a él.
  */
 export function CierreDeCaja() {
-  const [jornada, setJornada] = useState<string | undefined>(undefined)
+  const [jornada, setJornada] = useState<string>('')
   const [cierre, setCierre] = useState<Cierre | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const cargar = useCallback(() => {
-    obtenerCierreDeCaja(jornada)
+    obtenerCierreDeCaja(jornada === '' ? undefined : jornada)
       .then((respuesta) => {
         setCierre(respuesta)
         setError(null)
@@ -34,83 +38,54 @@ export function CierreDeCaja() {
   }, [cargar])
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <DatePicker
-          datePickerType="single"
-          dateFormat="Y-m-d"
+    <div className="trabajo">
+      <div className="trabajo__buscador">
+        <CampoDeFecha
+          id="jornada-del-cierre"
+          etiqueta="Jornada"
+          ayuda="Empieza a las 06:00 y termina a las 05:59 del día siguiente."
           value={jornada}
-          onChange={(fechas: Date[]) => {
-            const elegida = fechas[0]
-            if (elegida !== undefined) setJornada(elegida.toISOString().slice(0, 10))
-          }}
-        >
-          <DatePickerInput
-            id="jornada-del-cierre"
-            labelText="Jornada"
-            placeholder="AAAA-MM-DD"
-            helperText="La jornada empieza a las 06:00 y termina a las 05:59 del día siguiente (RN-10)."
-          />
-        </DatePicker>
-        <Button kind="tertiary" onClick={cargar}>
+          onChange={(evento) => setJornada(evento.target.value)}
+        />
+        <Boton variante="secundario" onClick={cargar}>
           Actualizar
-        </Button>
+        </Boton>
       </div>
 
-      {error !== null ? (
-        <div role="alert" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification kind="error" title="No se pudo calcular" subtitle={error} hideCloseButton lowContrast />
-        </div>
-      ) : null}
+      {error !== null ? <Aviso tono="error" titulo="No se pudo calcular" detalle={error} /> : null}
 
       {cierre !== null ? (
-        <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(18rem, 1fr))', marginTop: '1.5rem' }}>
-          <Tile>
-            <h2 style={{ fontSize: '1rem' }}>Ventanilla · jornada {cierre.jornada}</h2>
-            <p style={{ marginBottom: '0.75rem' }}>Esto es lo que hay que contar y entregar.</p>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <caption className="cds--visually-hidden">Cierre de ventanilla de la jornada {cierre.jornada}</caption>
-              <tbody>
-                <tr>
-                  <th scope="row" style={{ textAlign: 'left', fontWeight: 400 }}>
-                    Cobrado en efectivo
-                  </th>
-                  <td style={MONTO}>{formatearColones(cierre.ventanilla.cobrado)}</td>
-                </tr>
-                <tr>
-                  <th scope="row" style={{ textAlign: 'left', fontWeight: 400 }}>
-                    Devoluciones entregadas
-                  </th>
-                  <td style={MONTO}>− {formatearColones(cierre.ventanilla.devuelto)}</td>
-                </tr>
-                <tr>
-                  <th scope="row" style={{ textAlign: 'left', fontWeight: 600, borderTop: '1px solid var(--cds-border-subtle-01, #e0e0e0)' }}>
-                    Efectivo esperado
-                  </th>
-                  <td style={{ ...MONTO, fontWeight: 600, borderTop: '1px solid var(--cds-border-subtle-01, #e0e0e0)' }}>
-                    {formatearColones(cierre.ventanilla.efectivoEsperado)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </Tile>
+        <>
+          <section>
+            <h2 className="trabajo__titulo">Ventanilla · jornada {cierre.jornada}</h2>
+            <p className="trabajo__nota">Esto es lo que hay que contar y entregar.</p>
+            <ul className="cierre__indicadores">
+              <li className="indicador">
+                <p className="indicador__etiqueta">Cobrado en efectivo</p>
+                <p className="indicador__valor">{formatearColones(cierre.ventanilla.cobrado)}</p>
+              </li>
+              <li className="indicador">
+                <p className="indicador__etiqueta">Devoluciones entregadas</p>
+                <p className="indicador__valor">− {formatearColones(cierre.ventanilla.devuelto)}</p>
+              </li>
+              <li className="indicador indicador--destacado">
+                <p className="indicador__etiqueta">Efectivo esperado</p>
+                <p className="indicador__valor">{formatearColones(cierre.ventanilla.efectivoEsperado)}</p>
+              </li>
+            </ul>
+          </section>
 
-          <Tile>
-            <h2 style={{ fontSize: '1rem' }}>Internet · jornada {cierre.jornada}</h2>
-            <p style={{ marginBottom: '0.75rem' }}>Informativo: por este canal no hay efectivo que contar.</p>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <caption className="cds--visually-hidden">Vendido por internet en la jornada {cierre.jornada}</caption>
-              <tbody>
-                <tr>
-                  <th scope="row" style={{ textAlign: 'left', fontWeight: 400 }}>
-                    Vendido por internet
-                  </th>
-                  <td style={MONTO}>{formatearColones(cierre.internet.vendido)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </Tile>
-        </div>
+          <section>
+            <h2 className="trabajo__titulo">Internet · jornada {cierre.jornada}</h2>
+            <p className="trabajo__nota">Informativo: por este canal no hay efectivo que contar.</p>
+            <ul className="cierre__indicadores">
+              <li className="indicador">
+                <p className="indicador__etiqueta">Vendido por internet</p>
+                <p className="indicador__valor">{formatearColones(cierre.internet.vendido)}</p>
+              </li>
+            </ul>
+          </section>
+        </>
       ) : null}
     </div>
   )

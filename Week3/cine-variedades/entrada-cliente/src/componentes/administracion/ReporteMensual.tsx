@@ -1,9 +1,8 @@
-import { Button, InlineNotification, Tag, TextInput, Tile } from '@carbon/react'
 import { useCallback, useEffect, useState } from 'react'
 import { enviarReporte, esErrorDeApi, obtenerReporte, type ReporteDelMes } from '../../api/cliente.js'
 import { formatearColones } from '../../utilidades/formato.js'
-
-const NUMERO: React.CSSProperties = { fontVariantNumeric: 'tabular-nums', textAlign: 'right' }
+import { Aviso, Boton, CampoDeTexto, Etiqueta, Tarjeta } from '../base/index.js'
+import './administracion.scss'
 
 function mesAnterior(): string {
   const hoy = new Date()
@@ -58,100 +57,109 @@ export function ReporteMensual() {
   const totalMonto = reporte?.detalle.reduce((suma, f) => suma + f.montoVendido, 0) ?? 0
 
   return (
-    <div style={{ display: 'grid', gap: '1.5rem' }}>
-      <div style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <TextInput
+    <div className="panel">
+      <div className="panel__barra">
+        <CampoDeTexto
           id="mes-del-reporte"
-          labelText="Mes"
+          etiqueta="Mes"
           placeholder="AAAA-MM"
+          className="cifra"
           value={mes}
           onChange={(evento) => setMes(evento.target.value)}
         />
-        <Button kind="tertiary" onClick={cargar}>
+        <Boton variante="secundario" onClick={cargar}>
           Ver reporte
-        </Button>
-        <Button disabled={enviando || reporte?.destinatario == null} onClick={reenviar}>
+        </Boton>
+        <Boton disabled={enviando || reporte?.destinatario == null} onClick={reenviar}>
           {enviando ? 'Enviando…' : 'Enviar al distribuidor'}
-        </Button>
+        </Boton>
       </div>
 
       {reporte?.destinatario == null ? (
-        <InlineNotification
-          kind="warning"
-          title="Falta el correo del distribuidor"
-          subtitle="Sin dirección no hay a quién mandarle el reporte (RF-29). Se configura en Precios y distribuidor."
-          hideCloseButton
-          lowContrast
+        <Aviso
+          tono="advertencia"
+          titulo="Falta el correo del distribuidor"
+          detalle="Sin dirección no hay a quién mandarle el reporte. Se configura en Precios y distribuidor."
         />
       ) : null}
 
-      {error !== null ? (
-        <div role="alert" aria-live="polite">
-          <InlineNotification kind="error" title="No se pudo" subtitle={error} hideCloseButton />
-        </div>
-      ) : null}
-      {aviso !== null ? (
-        <div role="status" aria-live="polite">
-          <InlineNotification kind="success" title="Envío" subtitle={aviso} onCloseButtonClick={() => setAviso(null)} />
-        </div>
-      ) : null}
+      {error !== null ? <Aviso tono="error" titulo="No se pudo" detalle={error} /> : null}
+      {aviso !== null ? <Aviso tono="exito" titulo="Envío" detalle={aviso} /> : null}
 
       {reporte !== null ? (
         <>
-          <Tile>
-            <h2 style={{ fontSize: '1rem' }}>
-              {reporte.mes} · {totalEntradas} entradas · {formatearColones(totalMonto)}
-            </h2>
-            {reporte.detalle.length === 0 ? (
-              <p>No hubo funciones programadas en ese mes.</p>
-            ) : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '0.75rem' }}>
-                <caption className="cds--visually-hidden">Detalle función por función de {reporte.mes}</caption>
+          <section>
+            <ul className="cierre__indicadores">
+              <li className="indicador">
+                <p className="indicador__etiqueta">Mes</p>
+                <p className="indicador__valor">{reporte.mes}</p>
+              </li>
+              <li className="indicador">
+                <p className="indicador__etiqueta">Entradas</p>
+                <p className="indicador__valor">{totalEntradas}</p>
+              </li>
+              <li className="indicador indicador--destacado">
+                <p className="indicador__etiqueta">Vendido</p>
+                <p className="indicador__valor">{formatearColones(totalMonto)}</p>
+              </li>
+            </ul>
+          </section>
+
+          {reporte.detalle.length === 0 ? (
+            <p className="panel__nota">No hubo funciones programadas en ese mes.</p>
+          ) : (
+            <div className="tabla-caja">
+              <table className="tabla">
+                <caption className="solo-lectores">Detalle función por función de {reporte.mes}</caption>
                 <thead>
                   <tr>
-                    <th scope="col" style={{ textAlign: 'left' }}>Fecha</th>
-                    <th scope="col" style={{ textAlign: 'left' }}>Hora</th>
-                    <th scope="col" style={{ textAlign: 'left' }}>Sala</th>
-                    <th scope="col" style={{ textAlign: 'left' }}>Película</th>
-                    <th scope="col" style={{ textAlign: 'right' }}>Entradas</th>
-                    <th scope="col" style={{ textAlign: 'right' }}>Monto</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Hora</th>
+                    <th scope="col">Sala</th>
+                    <th scope="col">Película</th>
+                    <th scope="col" className="numero">
+                      Entradas
+                    </th>
+                    <th scope="col" className="numero">
+                      Monto
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {reporte.detalle.map((funcion) => (
                     <tr key={funcion.funcionId}>
                       <td>
-                        {funcion.fecha} {funcion.cancelada ? <Tag type="red">Cancelada</Tag> : null}
+                        <span className="cifra">{funcion.fecha}</span>{' '}
+                        {funcion.cancelada ? <Etiqueta tono="alerta">Cancelada</Etiqueta> : null}
                       </td>
-                      <td>{funcion.horaInicio}</td>
+                      <td className="cifra">{funcion.horaInicio}</td>
                       <td>{funcion.sala}</td>
                       <td>{funcion.pelicula}</td>
-                      <td style={NUMERO}>{funcion.entradasVendidas}</td>
-                      <td style={NUMERO}>{formatearColones(funcion.montoVendido)}</td>
+                      <td className="numero">{funcion.entradasVendidas}</td>
+                      <td className="numero">{formatearColones(funcion.montoVendido)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            )}
-          </Tile>
+            </div>
+          )}
 
-          <Tile>
-            <h2 style={{ fontSize: '1rem' }}>Envíos de este mes</h2>
+          <Tarjeta>
+            <h2 className="panel__titulo">Envíos de este mes</h2>
             {reporte.envios.length === 0 ? (
-              <p>Todavía no se intentó enviar el reporte de {reporte.mes}.</p>
+              <p className="panel__nota">Todavía no se intentó enviar el reporte de {reporte.mes}.</p>
             ) : (
-              <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: '0.5rem', marginTop: '0.75rem' }}>
+              <ul className="panel__lista">
                 {reporte.envios.map((envio) => (
-                  <li key={envio.instante} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                    <Tag type={envio.resultado === 'enviado' ? 'green' : 'red'}>{envio.resultado}</Tag>
-                    <span>
-                      {envio.instante.replace('T', ' ')} · {envio.destinatario}
-                    </span>
+                  <li key={envio.instante}>
+                    <Etiqueta tono={envio.resultado === 'enviado' ? 'exito' : 'alerta'}>{envio.resultado}</Etiqueta>
+                    <span className="cifra">{envio.instante.replace('T', ' ')}</span>
+                    <span>{envio.destinatario}</span>
                   </li>
                 ))}
               </ul>
             )}
-          </Tile>
+          </Tarjeta>
         </>
       ) : null}
     </div>

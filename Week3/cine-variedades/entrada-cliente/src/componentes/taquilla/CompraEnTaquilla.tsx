@@ -1,4 +1,3 @@
-import { Button, InlineNotification, Modal, Tag, TextArea, TextInput, Tile } from '@carbon/react'
 import { useState } from 'react'
 import {
   anularCompra,
@@ -8,11 +7,16 @@ import {
   type CompraCompleta,
 } from '../../api/cliente.js'
 import { formatearColones } from '../../utilidades/formato.js'
+import { AreaDeTexto, Aviso, Boton, CampoDeTexto, Etiqueta, Modal, Tarjeta } from '../base/index.js'
+import './taquilla.scss'
 
-const ETIQUETA_ESTADO: Record<CompraCompleta['estado'], { texto: string; tipo: 'green' | 'red' | 'purple' }> = {
-  pagada: { texto: 'Pagada', tipo: 'green' },
-  anulada: { texto: 'Anulada', tipo: 'red' },
-  devuelta: { texto: 'Devuelta', tipo: 'purple' },
+const ETIQUETA_ESTADO: Record<
+  CompraCompleta['estado'],
+  { texto: string; tono: 'exito' | 'alerta' | 'aviso' }
+> = {
+  pagada: { texto: 'Pagada', tono: 'exito' },
+  anulada: { texto: 'Anulada', tono: 'alerta' },
+  devuelta: { texto: 'Devuelta', tono: 'aviso' },
 }
 
 /**
@@ -68,9 +72,7 @@ export function CompraEnTaquilla() {
     try {
       const actualizada = await marcarDevolucionEntregada(compra.numero)
       setCompra(actualizada)
-      setResultado(
-        `Devolución entregada en efectivo. Se descuenta del cierre de caja de la jornada de hoy (RN-44).`,
-      )
+      setResultado('Devolución entregada en efectivo. Se descuenta del cierre de caja de la jornada de hoy.')
     } catch (error) {
       setError(esErrorDeApi(error) ? error.mensaje : 'No pudimos marcar la devolución')
     } finally {
@@ -81,105 +83,110 @@ export function CompraEnTaquilla() {
   const yaUsada = compra?.entradas.some((entrada) => entrada.usadaInstante !== null) ?? false
 
   return (
-    <div>
-      <form onSubmit={buscar} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', maxWidth: '30rem' }}>
-        <TextInput
+    <div className="trabajo">
+      <form onSubmit={buscar} className="trabajo__buscador">
+        <CampoDeTexto
           id="numero-de-compra"
-          labelText="Número de compra"
-          helperText="Seis caracteres, como está en el correo o en la pantalla."
+          etiqueta="Número de compra"
+          ayuda="Seis caracteres, como está en el correo o en la pantalla."
           autoComplete="off"
+          className="cifra"
           value={numero}
           onChange={(evento) => setNumero(evento.target.value)}
         />
-        <Button type="submit" disabled={numero.trim() === ''}>
+        <Boton type="submit" disabled={numero.trim() === ''}>
           Buscar
-        </Button>
+        </Boton>
       </form>
 
-      {error !== null ? (
-        <div role="alert" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification kind="error" title="No se pudo" subtitle={error} hideCloseButton lowContrast />
-        </div>
-      ) : null}
-
-      {resultado !== null ? (
-        <div role="status" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification kind="success" title="Listo" subtitle={resultado} hideCloseButton />
-        </div>
-      ) : null}
+      {error !== null ? <Aviso tono="error" titulo="No se pudo" detalle={error} /> : null}
+      {resultado !== null ? <Aviso tono="exito" titulo="Listo" detalle={resultado} /> : null}
 
       {compra !== null ? (
-        <Tile style={{ marginTop: '1.5rem', maxWidth: '40rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <h2 style={{ fontSize: '1rem', margin: 0 }}>Compra {compra.numero}</h2>
-            <Tag type={ETIQUETA_ESTADO[compra.estado].tipo}>{ETIQUETA_ESTADO[compra.estado].texto}</Tag>
-            <Tag type="outline">{compra.canal === 'taquilla' ? 'Taquilla' : 'Internet'}</Tag>
+        <Tarjeta>
+          <div className="trabajo__acciones">
+            <h2 className="trabajo__titulo">
+              Compra <span className="cifra">{compra.numero}</span>
+            </h2>
+            <Etiqueta tono={ETIQUETA_ESTADO[compra.estado].tono}>{ETIQUETA_ESTADO[compra.estado].texto}</Etiqueta>
+            <Etiqueta>{compra.canal === 'taquilla' ? 'Taquilla' : 'Internet'}</Etiqueta>
           </div>
-          <dl style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.25rem 1rem', margin: '0.75rem 0' }}>
-            <dt>Entradas</dt>
-            <dd>{compra.entradas.length}</dd>
-            <dt>Monto</dt>
-            <dd style={{ fontVariantNumeric: 'tabular-nums' }}>{formatearColones(compra.montoTotal)}</dd>
-            <dt>Jornada</dt>
-            <dd>{compra.jornada}</dd>
+
+          <dl className="ficha">
+            <div>
+              <dt className="ficha__etiqueta">Entradas</dt>
+              <dd className="ficha__dato cifra">{compra.entradas.length}</dd>
+            </div>
+            <div>
+              <dt className="ficha__etiqueta">Monto</dt>
+              <dd className="ficha__dato cifra">{formatearColones(compra.montoTotal)}</dd>
+            </div>
+            <div>
+              <dt className="ficha__etiqueta">Jornada</dt>
+              <dd className="ficha__dato cifra">{compra.jornada}</dd>
+            </div>
           </dl>
 
           {yaUsada ? (
-            <InlineNotification
-              kind="info"
-              title="Ya se validó en la puerta"
-              subtitle="Una compra con entradas usadas no se anula (RN-39). Si hace falta, se cancela la función."
-              hideCloseButton
-              lowContrast
+            <Aviso
+              tono="informacion"
+              titulo="Ya se validó en la puerta"
+              detalle="Una compra con entradas usadas no se anula. Si hace falta, se cancela la función."
             />
           ) : null}
 
           {compra.estado === 'pagada' && !yaUsada ? (
             <>
-              <TextArea
+              <AreaDeTexto
                 id="motivo-de-anulacion"
-                labelText="Motivo de la anulación"
-                helperText="Queda registrado con tu nombre y la hora (REG-4)."
-                rows={2}
+                etiqueta="Motivo de la anulación"
+                ayuda="Queda registrado con tu nombre y la hora."
                 value={motivo}
                 onChange={(evento) => setMotivo(evento.target.value)}
               />
-              <Button
-                kind="danger"
-                style={{ marginTop: '1rem' }}
-                disabled={trabajando || motivo.trim() === ''}
-                onClick={() => setConfirmarAnular(true)}
-              >
-                Anular compra
-              </Button>
+              <div className="trabajo__acciones">
+                <Boton
+                  variante="peligro"
+                  disabled={trabajando || motivo.trim() === ''}
+                  onClick={() => setConfirmarAnular(true)}
+                >
+                  Anular compra
+                </Boton>
+              </div>
             </>
           ) : null}
 
           {compra.estado !== 'pagada' && compra.canal === 'taquilla' ? (
-            <Button kind="tertiary" disabled={trabajando} onClick={entregarDevolucion}>
-              Marcar devolución entregada en efectivo
-            </Button>
+            <div className="trabajo__acciones">
+              <Boton variante="secundario" disabled={trabajando} onClick={entregarDevolucion}>
+                Marcar devolución entregada en efectivo
+              </Boton>
+            </div>
           ) : null}
 
           {compra.estado !== 'pagada' && compra.canal === 'internet' ? (
-            <p>
+            <p className="trabajo__nota">
               La devolución de una compra por internet vuelve por el mismo medio de pago: no hay efectivo que
-              entregar (RN-45).
+              entregar.
             </p>
           ) : null}
-        </Tile>
+        </Tarjeta>
       ) : null}
 
       <Modal
-        open={confirmarAnular}
-        danger
-        modalHeading="Anular la compra"
-        modalLabel={compra?.numero ?? ''}
-        primaryButtonText="Anular compra"
-        secondaryButtonText="Cancelar"
-        onRequestClose={() => setConfirmarAnular(false)}
-        onSecondarySubmit={() => setConfirmarAnular(false)}
-        onRequestSubmit={anular}
+        titulo={`Anular la compra ${compra?.numero ?? ''}`}
+        abierto={confirmarAnular}
+        onCerrar={() => setConfirmarAnular(false)}
+        acciones={
+          <>
+            <Boton variante="secundario" onClick={() => setConfirmarAnular(false)}>
+              Cancelar
+            </Boton>
+            <Boton variante="peligro" onClick={anular}>
+              Anular compra
+            </Boton>
+          </>
+        }
       >
         <p>
           Las butacas vuelven a estar libres y queda registrado quién anuló, cuándo y por qué. Esto no se puede

@@ -1,0 +1,94 @@
+/**
+ * La barra de identidad de las pantallas de trabajo y la pantalla de acceso
+ * por PIN. Sigue Swiss Modernism 2.0: la marca en versalitas pequeñas, el
+ * título grande y con interletrado ajustado, una regla horizontal que ordena,
+ * y ninguna decoración que no cumpla una función.
+ */
+
+.barra {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--espacio-4);
+  padding-bottom: var(--espacio-3);
+  margin-bottom: var(--espacio-5);
+  border-bottom: 2px solid var(--color-texto);
+}
+
+.barra__marca {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-acento);
+}
+
+.barra__titulo {
+  margin: 0;
+  font: var(--texto-titulo);
+  letter-spacing: var(--interletrado-titulo);
+}
+
+.barra__operador {
+  display: flex;
+  align-items: center;
+  gap: var(--espacio-3);
+}
+
+/* Quién está operando se lee de un vistazo: en la ventanilla cambia de
+   persona en segundos y cada operación queda a su nombre (RN-54). */
+.barra__quien {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font: var(--texto-cuerpo);
+  font-weight: 500;
+}
+
+.barra__puesto {
+  font: var(--texto-menor);
+  font-size: 0.7rem;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+}
+
+/* ---------- Acceso por PIN ---------- */
+
+.acceso {
+  min-height: 70dvh;
+  display: grid;
+  place-items: center;
+}
+
+.acceso__caja {
+  width: min(22rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+}
+
+.acceso__marca {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-acento);
+}
+
+.acceso__titulo {
+  margin: 0 0 var(--espacio-4);
+  font: var(--texto-titulo);
+  letter-spacing: var(--interletrado-titulo);
+}
+
+.acceso__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}

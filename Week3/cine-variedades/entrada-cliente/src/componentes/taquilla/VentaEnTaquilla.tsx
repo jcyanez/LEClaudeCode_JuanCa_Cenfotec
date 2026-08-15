@@ -1,4 +1,3 @@
-import { Button, InlineNotification, Select, SelectItem, Tile } from '@carbon/react'
 import { useCallback, useEffect, useState } from 'react'
 import {
   esErrorDeApi,
@@ -11,7 +10,9 @@ import {
   type MapaDeTaquilla,
 } from '../../api/cliente.js'
 import { ETIQUETA_MIERCOLES, formatearColones, formatearFecha } from '../../utilidades/formato.js'
+import { Aviso, Boton, Selector } from '../base/index.js'
 import { MapaDeButacas, type ButacaDibujable } from '../MapaDeButacas.js'
+import './taquilla.scss'
 
 const INTERVALO_SONDEO_MS = 3000
 
@@ -21,6 +22,10 @@ const INTERVALO_SONDEO_MS = 3000
  * de miércoles no se pregunta nada: la única categoría es miércoles (RN-14,
  * CA-3). Las butacas pasan de libres a vendidas sin bloqueo intermedio
  * (RN-20); eso lo resuelve el servidor.
+ *
+ * El mapa manda a la izquierda y el cobro queda fijo a la derecha, siguiendo
+ * el desplazamiento: en una sala de 120 butacas, el total y el botón de cobrar
+ * tienen que estar a la vista sin volver a subir.
  */
 export function VentaEnTaquilla() {
   const [funciones, setFunciones] = useState<FuncionEnCartelera[]>([])
@@ -87,7 +92,7 @@ export function VentaEnTaquilla() {
 
   const total = elegidas.reduce((suma, butaca) => suma + precioDe(butaca.categoria), 0)
 
-  async function cobrar() {
+  const cobrar = useCallback(async () => {
     if (funcionId === null) return
     setCobrando(true)
     setError(null)
@@ -101,110 +106,137 @@ export function VentaEnTaquilla() {
       setCobrando(false)
       cargarMapa()
     }
-  }
+  }, [funcionId, elegidas, cargarMapa])
+
+  /**
+   * Atajos de la ventanilla: `Enter` cobra lo que hay elegido y `Esc` suelta la
+   * selección. Quien atiende no debería tener que soltar el teclado para
+   * despachar una fila. No se disparan mientras se escribe en un campo.
+   */
+  useEffect(() => {
+    function alTeclear(evento: KeyboardEvent) {
+      const enUnCampo = evento.target instanceof HTMLElement && ['INPUT', 'SELECT', 'TEXTAREA'].includes(evento.target.tagName)
+      if (evento.key === 'Escape') {
+        setElegidas([])
+        setConsultada(null)
+        return
+      }
+      if (evento.key === 'Enter' && !enUnCampo && elegidas.length > 0 && !cobrando) {
+        evento.preventDefault()
+        void cobrar()
+      }
+    }
+    window.addEventListener('keydown', alTeclear)
+    return () => window.removeEventListener('keydown', alTeclear)
+  }, [cobrar, elegidas.length, cobrando])
 
   const etiquetaDe = (butacaId: number): string =>
     datos?.mapa.find((butaca) => butaca.butacaId === butacaId)?.etiqueta ?? String(butacaId)
 
   return (
-    <div>
-      <Select
-        id="funcion-de-taquilla"
-        labelText="Función"
-        value={funcionId ?? ''}
-        onChange={(evento) => setFuncionId(Number(evento.target.value))}
-      >
-        {funciones.length === 0 ? <SelectItem value="" text="No hay funciones en venta" /> : null}
-        {funciones.map((funcion) => (
-          <SelectItem
-            key={funcion.funcionId}
-            value={funcion.funcionId}
-            text={`${funcion.pelicula} · ${funcion.sala} · ${formatearFecha(funcion.fecha)} ${funcion.horaInicio}`}
-          />
-        ))}
-      </Select>
+    <div className="venta">
+      <section className="venta__mapa">
+        <Selector
+          id="funcion-de-taquilla"
+          etiqueta="Función"
+          value={funcionId ?? ''}
+          onChange={(evento) => setFuncionId(Number(evento.target.value))}
+        >
+          {funciones.length === 0 ? <option value="">No hay funciones en venta</option> : null}
+          {funciones.map((funcion) => (
+            <option key={funcion.funcionId} value={funcion.funcionId}>
+              {funcion.pelicula} · {funcion.sala} · {formatearFecha(funcion.fecha)} {funcion.horaInicio}
+            </option>
+          ))}
+        </Selector>
 
-      {error !== null ? (
-        <div role="alert" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification kind="error" title="No se pudo continuar" subtitle={error} hideCloseButton lowContrast />
-        </div>
-      ) : null}
+        {error !== null ? <Aviso tono="error" titulo="No se pudo continuar" detalle={error} /> : null}
 
-      {confirmada !== null ? (
-        <div role="status" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification
-            kind="success"
-            title={`Compra registrada · número ${confirmada.numero}`}
-            subtitle={`Cobrar ${formatearColones(confirmada.montoTotal)}. Dictale el número a quien compró.`}
-            hideCloseButton
-          />
-        </div>
-      ) : null}
+        {datos !== null ? (
+          <>
+            {esMiercoles ? <p className="etiqueta-miercoles">{ETIQUETA_MIERCOLES}</p> : null}
+            <MapaDeButacas
+              butacas={datos.mapa}
+              butacasPorFila={datos.funcion.butacasPorFila}
+              seleccionadas={new Set(elegidas.map((butaca) => butaca.butacaId))}
+              onCambiarSeleccion={alternarButaca}
+              onConsultarOcupada={setConsultada}
+            />
+          </>
+        ) : null}
 
-      {datos !== null ? (
-        <div style={{ marginTop: '1.5rem' }}>
-          {esMiercoles ? <p className="etiqueta-miercoles">{ETIQUETA_MIERCOLES}</p> : null}
-          <MapaDeButacas
-            butacas={datos.mapa}
-            butacasPorFila={datos.funcion.butacasPorFila}
-            seleccionadas={new Set(elegidas.map((butaca) => butaca.butacaId))}
-            onCambiarSeleccion={alternarButaca}
-            onConsultarOcupada={setConsultada}
-          />
-        </div>
-      ) : null}
-
-      {consultada !== null ? (
-        <div role="status" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification
-            kind="info"
-            title={`Butaca ${consultada.etiqueta} · ${consultada.estado}`}
-            subtitle={
+        {consultada !== null ? (
+          <Aviso
+            tono="informacion"
+            titulo={`Butaca ${consultada.etiqueta} · ${consultada.estado}`}
+            detalle={
               consultada.numero != null
                 ? `Número ${consultada.numero}. Buscalo en Reservas o en Compras.`
                 : 'Alguien la está eligiendo por internet; se libera sola si no completa la compra.'
             }
-            onCloseButtonClick={() => setConsultada(null)}
-          />
-        </div>
-      ) : null}
+          >
+            <Boton variante="fantasma" onClick={() => setConsultada(null)}>
+              Entendido
+            </Boton>
+          </Aviso>
+        ) : null}
+      </section>
 
-      {elegidas.length > 0 ? (
-        <Tile style={{ marginTop: '1.5rem' }}>
-          <h2 style={{ fontSize: '1rem', marginBottom: '0.75rem' }}>
-            {elegidas.length} butaca{elegidas.length > 1 ? 's' : ''} · {formatearColones(total)}
-          </h2>
-          {esMiercoles ? (
-            <p style={{ marginBottom: '0.75rem' }}>
-              En miércoles toda entrada va a la mitad del precio general y no se pide carné (RN-14).
+      {/* El panel de cobro: fijo, siempre a la vista mientras se elige. */}
+      <aside className="venta__panel" aria-label="Cobro">
+        {confirmada !== null ? (
+          <div className="cobrado" role="status">
+            <p className="cobrado__marca">Compra registrada</p>
+            <p className="cobrado__numero">{confirmada.numero}</p>
+            <p className="cobrado__detalle">
+              Cobrar <span className="cifra">{formatearColones(confirmada.montoTotal)}</span> y dictarle el número a
+              quien compró.
             </p>
-          ) : (
-            <ul style={{ display: 'grid', gap: '0.75rem', listStyle: 'none', padding: 0, margin: 0 }}>
-              {elegidas.map((butaca) => (
-                <li key={butaca.butacaId} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem' }}>
-                  <Select
-                    id={`categoria-${butaca.butacaId}`}
-                    labelText={`Butaca ${etiquetaDe(butaca.butacaId)}`}
-                    value={butaca.categoria}
-                    onChange={(evento) =>
-                      cambiarCategoria(butaca.butacaId, evento.target.value as CategoriaPrecio)
-                    }
-                  >
-                    <SelectItem value="general" text={`General · ${formatearColones(precioDe('general'))}`} />
-                    <SelectItem
-                      value="estudiante"
-                      text={`Estudiante (con carné) · ${formatearColones(precioDe('estudiante'))}`}
-                    />
-                  </Select>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Button style={{ marginTop: '1rem' }} disabled={cobrando} onClick={cobrar}>
-            {cobrando ? 'Registrando…' : `Cobrar ${formatearColones(total)} y registrar`}
-          </Button>
-        </Tile>
-      ) : null}
+          </div>
+        ) : null}
+
+        {elegidas.length === 0 ? (
+          <p className="venta__vacio">Elegí butacas en el mapa para cobrar.</p>
+        ) : (
+          <>
+            <p className="venta__resumen">
+              {elegidas.length} butaca{elegidas.length > 1 ? 's' : ''}
+              <span className="venta__total cifra">{formatearColones(total)}</span>
+            </p>
+
+            {esMiercoles ? (
+              <p className="venta__nota">
+                En miércoles toda entrada va a la mitad del precio general y no se pide carné.
+              </p>
+            ) : (
+              <ul className="venta__categorias">
+                {elegidas.map((butaca) => (
+                  <li key={butaca.butacaId}>
+                    <Selector
+                      id={`categoria-${butaca.butacaId}`}
+                      etiqueta={`Butaca ${etiquetaDe(butaca.butacaId)}`}
+                      value={butaca.categoria}
+                      onChange={(evento) => cambiarCategoria(butaca.butacaId, evento.target.value as CategoriaPrecio)}
+                    >
+                      <option value="general">General · {formatearColones(precioDe('general'))}</option>
+                      <option value="estudiante">
+                        Estudiante (con carné) · {formatearColones(precioDe('estudiante'))}
+                      </option>
+                    </Selector>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <Boton disabled={cobrando} onClick={cobrar}>
+              {cobrando ? 'Registrando…' : `Cobrar ${formatearColones(total)} y registrar`}
+            </Boton>
+            <p className="venta__atajos">
+              <kbd>Enter</kbd> cobra · <kbd>Esc</kbd> suelta la selección
+            </p>
+          </>
+        )}
+      </aside>
     </div>
   )
 }

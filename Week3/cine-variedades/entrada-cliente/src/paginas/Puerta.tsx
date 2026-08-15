@@ -1,4 +1,3 @@
-import { Button, InlineNotification, Select, SelectItem, Tag, TextInput, Tile } from '@carbon/react'
 import { useEffect, useState } from 'react'
 import {
   buscarComprasPorContacto,
@@ -8,8 +7,10 @@ import {
   type CompraCompleta,
   type FuncionDeJornada,
 } from '../api/cliente.js'
+import { Aviso, Boton, CampoDeTexto, Etiqueta, Selector, Tarjeta } from '../componentes/base/index.js'
 import { SesionOperador } from '../componentes/SesionOperador.js'
 import { formatearFecha } from '../utilidades/formato.js'
+import './Puerta.scss'
 
 /**
  * La puerta (T21): se identifica una compra por su número (RN-35), se marcan
@@ -18,6 +19,10 @@ import { formatearFecha } from '../utilidades/formato.js'
  * función cancelada, compra anulada— (RF-20, tabla de errores de DISENO.md).
  * Si el número está mal dictado, se busca por nombre o correo antes de
  * rechazar a nadie (RF-18).
+ *
+ * Se usa de pie, con gente esperando: por eso el veredicto ocupa la pantalla
+ * entera y se lee a un metro de distancia, y por eso `Enter` valida y `Esc`
+ * limpia sin soltar el teclado.
  */
 function PantallaDePuerta() {
   const [funciones, setFunciones] = useState<FuncionDeJornada[]>([])
@@ -40,6 +45,14 @@ function PantallaDePuerta() {
         setError(esErrorDeApi(error) ? error.mensaje : 'No pudimos cargar las funciones de la jornada'),
       )
   }, [])
+
+  function limpiar() {
+    setNumero('')
+    setValidada(null)
+    setError(null)
+    setOfrecerBusqueda(false)
+    setEncontradas(null)
+  }
 
   async function validar(evento: React.FormEvent) {
     evento.preventDefault()
@@ -72,115 +85,135 @@ function PantallaDePuerta() {
   }
 
   const funcionElegida = funciones.find((funcion) => funcion.funcionId === funcionId)
+  const hayVeredicto = validada !== null || error !== null
 
   return (
-    <div style={{ maxWidth: '40rem' }}>
-      <Select
-        id="funcion-de-puerta"
-        labelText="Función que se está recibiendo"
-        helperText="Las de esta jornada: la de las 23:00 sigue siendo de hoy hasta las 06:00 (RN-10)."
-        value={funcionId ?? ''}
-        onChange={(evento) => setFuncionId(Number(evento.target.value))}
-      >
-        {funciones.length === 0 ? <SelectItem value="" text="No hay funciones en esta jornada" /> : null}
-        {funciones.map((funcion) => (
-          <SelectItem
-            key={funcion.funcionId}
-            value={funcion.funcionId}
-            text={`${funcion.horaInicio} · ${funcion.pelicula} · ${funcion.sala}${funcion.cancelada ? ' (cancelada)' : ''}`}
-          />
-        ))}
-      </Select>
+    <div className="puerta">
+      <div className="puerta__reticula">
+        <section className="puerta__control">
+          <Selector
+            id="funcion-de-puerta"
+            etiqueta="Función que se está recibiendo"
+            ayuda="Las de esta jornada: la de las 23:00 sigue siendo de hoy hasta las 06:00."
+            value={funcionId ?? ''}
+            onChange={(evento) => setFuncionId(Number(evento.target.value))}
+          >
+            {funciones.length === 0 ? <option value="">No hay funciones en esta jornada</option> : null}
+            {funciones.map((funcion) => (
+              <option key={funcion.funcionId} value={funcion.funcionId}>
+                {funcion.horaInicio} · {funcion.pelicula} · {funcion.sala}
+                {funcion.cancelada ? ' (cancelada)' : ''}
+              </option>
+            ))}
+          </Selector>
 
-      {funcionElegida?.cancelada ? (
-        <div style={{ marginTop: '1rem' }}>
-          <InlineNotification
-            kind="warning"
-            title="Esta función se canceló"
-            subtitle="Sus compras quedaron devueltas; ninguna entrada se puede validar (RN-41)."
-            hideCloseButton
-            lowContrast
-          />
-        </div>
-      ) : null}
+          {funcionElegida !== undefined ? (
+            <p className="puerta__cuando">
+              {formatearFecha(funcionElegida.fecha)} · {funcionElegida.sala}
+            </p>
+          ) : null}
 
-      <form onSubmit={validar} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', marginTop: '1.5rem' }}>
-        <TextInput
-          id="numero-en-puerta"
-          labelText="Número de compra"
-          helperText="Seis caracteres, como lo dicta quien llega."
-          autoComplete="off"
-          autoFocus
-          value={numero}
-          onChange={(evento) => setNumero(evento.target.value)}
-        />
-        <Button type="submit" disabled={validando || numero.trim() === '' || funcionId === null}>
-          {validando ? 'Validando…' : 'Validar'}
-        </Button>
-      </form>
+          {funcionElegida?.cancelada ? (
+            <Aviso
+              tono="advertencia"
+              titulo="Esta función se canceló"
+              detalle="Sus compras quedaron devueltas; ninguna entrada se puede validar."
+            />
+          ) : null}
 
-      {error !== null ? (
-        <div role="alert" aria-live="assertive" style={{ marginTop: '1rem' }}>
-          <InlineNotification kind="error" title="No se validó" subtitle={error} hideCloseButton />
-        </div>
-      ) : null}
+          <form onSubmit={validar} className="puerta__formulario" onKeyDown={(e) => e.key === 'Escape' && limpiar()}>
+            <CampoDeTexto
+              id="numero-en-puerta"
+              etiqueta="Número de compra"
+              ayuda="Seis caracteres, como lo dicta quien llega."
+              autoComplete="off"
+              autoFocus
+              className="puerta__numero"
+              value={numero}
+              onChange={(evento) => setNumero(evento.target.value)}
+            />
+            <Boton type="submit" disabled={validando || numero.trim() === '' || funcionId === null}>
+              {validando ? 'Validando…' : 'Validar'}
+            </Boton>
+          </form>
 
-      {validada !== null ? (
-        <div role="status" aria-live="polite" style={{ marginTop: '1rem' }}>
-          <InlineNotification
-            kind="success"
-            title={`Puede pasar · ${validada.entradas.length} entrada${validada.entradas.length > 1 ? 's' : ''}`}
-            subtitle={`Compra ${validada.numero}. Butacas marcadas como usadas.`}
-            hideCloseButton
-          />
-        </div>
-      ) : null}
+          <p className="puerta__atajos">
+            <kbd>Enter</kbd> valida · <kbd>Esc</kbd> limpia
+          </p>
+        </section>
+
+        {/* El veredicto: lo único que quien recibe necesita ver desde lejos. */}
+        <section
+          className={[
+            'veredicto',
+            validada !== null ? 'veredicto--pase' : '',
+            error !== null ? 'veredicto--alto' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          role={error !== null ? 'alert' : 'status'}
+          aria-live={error !== null ? 'assertive' : 'polite'}
+        >
+          {validada !== null ? (
+            <>
+              <p className="veredicto__marca">Puede pasar</p>
+              <p className="veredicto__numero">{validada.numero}</p>
+              <p className="veredicto__detalle">
+                {validada.entradas.length} entrada{validada.entradas.length > 1 ? 's' : ''} · marcadas como usadas
+              </p>
+            </>
+          ) : null}
+
+          {error !== null ? (
+            <>
+              <p className="veredicto__marca">No pasa</p>
+              <p className="veredicto__motivo">{error}</p>
+            </>
+          ) : null}
+
+          {!hayVeredicto ? <p className="veredicto__espera">Esperando un número…</p> : null}
+        </section>
+      </div>
 
       {ofrecerBusqueda ? (
-        <Tile style={{ marginTop: '1.5rem' }}>
-          <h2 style={{ fontSize: '1rem' }}>Buscar por nombre o correo</h2>
-          <p style={{ marginBottom: '0.75rem' }}>
-            Antes de rechazar a alguien, buscá su compra por el nombre o el correo con que la hizo (RF-18).
+        <Tarjeta className="busqueda">
+          <h2 className="busqueda__titulo">Buscar por nombre o correo</h2>
+          <p className="busqueda__nota">
+            Antes de rechazar a alguien, buscá su compra por el nombre o el correo con que la hizo.
           </p>
-          <form onSubmit={buscar} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem' }}>
-            <TextInput
+          <form onSubmit={buscar} className="busqueda__formulario">
+            <CampoDeTexto
               id="contacto-en-puerta"
-              labelText="Nombre o correo"
+              etiqueta="Nombre o correo"
               autoComplete="off"
               value={contacto}
               onChange={(evento) => setContacto(evento.target.value)}
             />
-            <Button type="submit" kind="tertiary" disabled={contacto.trim() === ''}>
+            <Boton variante="secundario" type="submit" disabled={contacto.trim() === ''}>
               Buscar
-            </Button>
+            </Boton>
           </form>
 
           {encontradas !== null ? (
             encontradas.length === 0 ? (
-              <p style={{ marginTop: '1rem' }}>No hay ninguna compra a ese nombre ni a ese correo.</p>
+              <p className="busqueda__nota">No hay ninguna compra a ese nombre ni a ese correo.</p>
             ) : (
-              <ul style={{ marginTop: '1rem', listStyle: 'none', padding: 0, display: 'grid', gap: '0.5rem' }}>
+              <ul className="busqueda__resultados">
                 {encontradas.map((compra) => (
-                  <li key={compra.numero} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <Button kind="ghost" size="sm" onClick={() => setNumero(compra.numero)}>
-                      {compra.numero}
-                    </Button>
+                  <li key={compra.numero}>
+                    <Boton variante="fantasma" onClick={() => setNumero(compra.numero)}>
+                      <span className="cifra">{compra.numero}</span>
+                    </Boton>
                     <span>
                       {compra.entradas.length} entrada{compra.entradas.length > 1 ? 's' : ''}
                     </span>
-                    <Tag type={compra.estado === 'pagada' ? 'green' : 'red'}>{compra.estado}</Tag>
+                    <Etiqueta tono={compra.estado === 'pagada' ? 'exito' : 'alerta'}>{compra.estado}</Etiqueta>
                   </li>
                 ))}
               </ul>
             )
           ) : null}
-        </Tile>
-      ) : null}
-
-      {funcionElegida !== undefined ? (
-        <p style={{ marginTop: '1.5rem', color: 'var(--cds-text-secondary)' }}>
-          {formatearFecha(funcionElegida.fecha)} · {funcionElegida.sala}
-        </p>
+        </Tarjeta>
       ) : null}
     </div>
   )

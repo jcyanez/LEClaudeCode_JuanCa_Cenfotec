@@ -1,14 +1,3 @@
-import {
-  Button,
-  InlineNotification,
-  Modal,
-  NumberInput,
-  Select,
-  SelectItem,
-  Tag,
-  TextInput,
-  Tile,
-} from '@carbon/react'
 import { useCallback, useEffect, useState } from 'react'
 import {
   abrirVentaDeSemana,
@@ -26,6 +15,18 @@ import {
   type SemanaCargada,
 } from '../../api/cliente.js'
 import { formatearFecha } from '../../utilidades/formato.js'
+import {
+  Aviso,
+  Boton,
+  CampoDeFecha,
+  CampoDeTexto,
+  CampoNumerico,
+  Etiqueta,
+  Modal,
+  Selector,
+  Tarjeta,
+} from '../base/index.js'
+import './administracion.scss'
 
 const SALAS = [
   { id: 1, nombre: 'Sala 1' },
@@ -39,6 +40,10 @@ const SALAS = [
  * muestra el mensaje que devuelve, que dice con cuál choca y la primera hora
  * posible (RF-3, CA-7). Cancelar una función devuelve todas sus compras de
  * una sola vez (RF-23) y por eso pide confirmación y motivo.
+ *
+ * Se reparte en dos columnas siguiendo el orden real del trabajo: a la
+ * izquierda lo que se carga una vez —películas y semanas—, a la derecha las
+ * funciones de la semana elegida, que es donde se pasa el rato.
  */
 export function CarteleraDeLaDuena() {
   const [peliculas, setPeliculas] = useState<Pelicula[]>([])
@@ -168,191 +173,199 @@ export function CarteleraDeLaDuena() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1.5rem' }}>
-      {error !== null ? (
-        <div role="alert" aria-live="polite">
-          <InlineNotification kind="error" title="No se pudo" subtitle={error} hideCloseButton />
-        </div>
-      ) : null}
-      {aviso !== null ? (
-        <div role="status" aria-live="polite">
-          <InlineNotification kind="success" title="Listo" subtitle={aviso} onCloseButtonClick={() => setAviso(null)} />
-        </div>
-      ) : null}
+    <div className="panel">
+      {error !== null ? <Aviso tono="error" titulo="No se pudo" detalle={error} /> : null}
+      {aviso !== null ? <Aviso tono="exito" titulo="Listo" detalle={aviso} /> : null}
 
-      <Tile>
-        <h2 style={{ fontSize: '1rem' }}>Películas</h2>
-        <form onSubmit={agregarPelicula} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <TextInput
-            id="titulo-pelicula"
-            labelText="Título"
-            value={titulo}
-            onChange={(evento) => setTitulo(evento.target.value)}
-          />
-          <NumberInput
-            id="duracion-pelicula"
-            label="Duración (minutos)"
-            min={1}
-            value={duracion}
-            onChange={(_evento, estado) => setDuracion(Number(estado.value))}
-          />
-          <Button type="submit" disabled={titulo.trim() === ''}>
-            Registrar película
-          </Button>
-        </form>
-        <ul style={{ marginTop: '1rem', listStyle: 'none', padding: 0 }}>
-          {peliculas.map((pelicula) => (
-            <li key={pelicula.id}>
-              {pelicula.titulo} · {pelicula.duracionMinutos} min
-            </li>
-          ))}
-        </ul>
-      </Tile>
-
-      <Tile>
-        <h2 style={{ fontSize: '1rem' }}>Semanas de cartelera</h2>
-        <form onSubmit={agregarSemana} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <TextInput
-            id="jueves-semana"
-            labelText="Jueves en que empieza"
-            placeholder="AAAA-MM-DD"
-            helperText="Una semana va de jueves a miércoles (RN-3); solo la en curso y la siguiente (RN-8)."
-            value={juevesInicio}
-            onChange={(evento) => setJuevesInicio(evento.target.value)}
-          />
-          <Button type="submit" disabled={juevesInicio.trim() === ''}>
-            Cargar semana
-          </Button>
-        </form>
-        <ul style={{ marginTop: '1rem', listStyle: 'none', padding: 0, display: 'grid', gap: '0.5rem' }}>
-          {semanas.map((semana) => (
-            <li key={semana.semanaId} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <Button
-                kind={semana.semanaId === semanaId ? 'tertiary' : 'ghost'}
-                size="sm"
-                onClick={() => setSemanaId(semana.semanaId)}
-              >
-                Jueves {semana.juevesInicio}
-              </Button>
-              <span>
-                {semana.funciones} función{semana.funciones === 1 ? '' : 'es'}
-              </span>
-              {semana.abiertaAVenta ? (
-                <Tag type="green">En venta</Tag>
-              ) : (
-                <Button size="sm" onClick={() => abrirVenta(semana)}>
-                  Dar por cargada y abrir la venta
-                </Button>
-              )}
-            </li>
-          ))}
-        </ul>
-      </Tile>
-
-      {semanaId !== null ? (
-        <Tile>
-          <h2 style={{ fontSize: '1rem' }}>Funciones de la semana</h2>
-          <form onSubmit={agregarFuncion} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <Select
-              id="pelicula-de-funcion"
-              labelText="Película"
-              value={nueva.peliculaId}
-              onChange={(evento) => setNueva({ ...nueva, peliculaId: Number(evento.target.value) })}
-            >
-              <SelectItem value={0} text="Elegí una película" />
+      <div className="cartelera-duena">
+        <div className="cartelera-duena__semanas">
+          <Tarjeta>
+            <h2 className="panel__titulo">Películas</h2>
+            <form onSubmit={agregarPelicula} className="panel__formulario">
+              <CampoDeTexto
+                id="titulo-pelicula"
+                etiqueta="Título"
+                value={titulo}
+                onChange={(evento) => setTitulo(evento.target.value)}
+              />
+              <CampoNumerico
+                id="duracion-pelicula"
+                etiqueta="Duración (min)"
+                min={1}
+                value={duracion}
+                onChange={(evento) => setDuracion(Number(evento.target.value))}
+              />
+              <Boton type="submit" disabled={titulo.trim() === ''}>
+                Registrar
+              </Boton>
+            </form>
+            <ul className="panel__lista">
               {peliculas.map((pelicula) => (
-                <SelectItem key={pelicula.id} value={pelicula.id} text={pelicula.titulo} />
+                <li key={pelicula.id}>
+                  <span>{pelicula.titulo}</span>
+                  <span className="cifra">{pelicula.duracionMinutos} min</span>
+                </li>
               ))}
-            </Select>
-            <Select
-              id="sala-de-funcion"
-              labelText="Sala"
-              value={nueva.salaId}
-              onChange={(evento) => setNueva({ ...nueva, salaId: Number(evento.target.value) })}
-            >
-              {SALAS.map((sala) => (
-                <SelectItem key={sala.id} value={sala.id} text={sala.nombre} />
-              ))}
-            </Select>
-            <TextInput
-              id="fecha-de-funcion"
-              labelText="Fecha"
-              placeholder="AAAA-MM-DD"
-              value={nueva.fecha}
-              onChange={(evento) => setNueva({ ...nueva, fecha: evento.target.value })}
-            />
-            <TextInput
-              id="hora-de-funcion"
-              labelText="Hora de inicio"
-              placeholder="HH:MM"
-              value={nueva.horaInicio}
-              onChange={(evento) => setNueva({ ...nueva, horaInicio: evento.target.value })}
-            />
-            <Button type="submit" disabled={nueva.peliculaId === 0 || nueva.fecha.trim() === ''}>
-              Programar función
-            </Button>
-          </form>
+            </ul>
+          </Tarjeta>
 
-          <table style={{ width: '100%', marginTop: '1rem', borderCollapse: 'collapse' }}>
-            <caption className="cds--visually-hidden">Funciones de la semana elegida</caption>
-            <thead>
-              <tr>
-                <th scope="col" style={{ textAlign: 'left' }}>Fecha</th>
-                <th scope="col" style={{ textAlign: 'left' }}>Hora</th>
-                <th scope="col" style={{ textAlign: 'left' }}>Película</th>
-                <th scope="col" style={{ textAlign: 'left' }}>Sala</th>
-                <th scope="col" style={{ textAlign: 'left' }}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {funciones.map((funcion) => (
-                <tr key={funcion.funcionId}>
-                  <td>{formatearFecha(funcion.fecha)}</td>
-                  <td>{funcion.horaInicio}</td>
-                  <td>{funcion.pelicula}</td>
-                  <td>{funcion.sala}</td>
-                  <td style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap' }}>
-                    {funcion.cancelada ? (
-                      <Tag type="red">Cancelada</Tag>
-                    ) : (
-                      <>
-                        <Button kind="ghost" size="sm" onClick={() => quitar(funcion)}>
-                          Eliminar
-                        </Button>
-                        <Button kind="danger--ghost" size="sm" onClick={() => setACancelar(funcion)}>
-                          Cancelar función
-                        </Button>
-                      </>
-                    )}
-                  </td>
-                </tr>
+          <Tarjeta>
+            <h2 className="panel__titulo">Semanas de cartelera</h2>
+            <form onSubmit={agregarSemana} className="panel__formulario">
+              <CampoDeFecha
+                id="jueves-semana"
+                etiqueta="Jueves en que empieza"
+                ayuda="De jueves a miércoles; solo la en curso y la siguiente."
+                value={juevesInicio}
+                onChange={(evento) => setJuevesInicio(evento.target.value)}
+              />
+              <Boton type="submit" disabled={juevesInicio.trim() === ''}>
+                Cargar semana
+              </Boton>
+            </form>
+            <ul className="panel__lista">
+              {semanas.map((semana) => (
+                <li key={semana.semanaId}>
+                  <Boton
+                    variante={semana.semanaId === semanaId ? 'secundario' : 'fantasma'}
+                    onClick={() => setSemanaId(semana.semanaId)}
+                  >
+                    Jueves <span className="cifra">{semana.juevesInicio}</span>
+                  </Boton>
+                  <span className="cifra">
+                    {semana.funciones} función{semana.funciones === 1 ? '' : 'es'}
+                  </span>
+                  {semana.abiertaAVenta ? (
+                    <Etiqueta tono="exito">En venta</Etiqueta>
+                  ) : (
+                    <Boton onClick={() => abrirVenta(semana)}>Abrir la venta</Boton>
+                  )}
+                </li>
               ))}
-            </tbody>
-          </table>
-        </Tile>
-      ) : null}
+            </ul>
+          </Tarjeta>
+        </div>
+
+        <div className="cartelera-duena__funciones">
+          {semanaId !== null ? (
+            <Tarjeta>
+              <h2 className="panel__titulo">Funciones de la semana</h2>
+              <form onSubmit={agregarFuncion} className="panel__formulario">
+                <Selector
+                  id="pelicula-de-funcion"
+                  etiqueta="Película"
+                  value={nueva.peliculaId}
+                  onChange={(evento) => setNueva({ ...nueva, peliculaId: Number(evento.target.value) })}
+                >
+                  <option value={0}>Elegí una película</option>
+                  {peliculas.map((pelicula) => (
+                    <option key={pelicula.id} value={pelicula.id}>
+                      {pelicula.titulo}
+                    </option>
+                  ))}
+                </Selector>
+                <Selector
+                  id="sala-de-funcion"
+                  etiqueta="Sala"
+                  value={nueva.salaId}
+                  onChange={(evento) => setNueva({ ...nueva, salaId: Number(evento.target.value) })}
+                >
+                  {SALAS.map((sala) => (
+                    <option key={sala.id} value={sala.id}>
+                      {sala.nombre}
+                    </option>
+                  ))}
+                </Selector>
+                <CampoDeFecha
+                  id="fecha-de-funcion"
+                  etiqueta="Fecha"
+                  value={nueva.fecha}
+                  onChange={(evento) => setNueva({ ...nueva, fecha: evento.target.value })}
+                />
+                <CampoDeTexto
+                  id="hora-de-funcion"
+                  etiqueta="Hora de inicio"
+                  type="time"
+                  className="cifra"
+                  value={nueva.horaInicio}
+                  onChange={(evento) => setNueva({ ...nueva, horaInicio: evento.target.value })}
+                />
+                <Boton type="submit" disabled={nueva.peliculaId === 0 || nueva.fecha.trim() === ''}>
+                  Programar función
+                </Boton>
+              </form>
+
+              <div className="tabla-caja">
+                <table className="tabla">
+                  <caption className="solo-lectores">Funciones de la semana elegida</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Fecha</th>
+                      <th scope="col">Hora</th>
+                      <th scope="col">Película</th>
+                      <th scope="col">Sala</th>
+                      <th scope="col">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {funciones.map((funcion) => (
+                      <tr key={funcion.funcionId}>
+                        <td>{formatearFecha(funcion.fecha)}</td>
+                        <td className="cifra">{funcion.horaInicio}</td>
+                        <td>{funcion.pelicula}</td>
+                        <td>{funcion.sala}</td>
+                        <td>
+                          {funcion.cancelada ? (
+                            <Etiqueta tono="alerta">Cancelada</Etiqueta>
+                          ) : (
+                            <span className="trabajo__acciones">
+                              <Boton variante="fantasma" onClick={() => quitar(funcion)}>
+                                Eliminar
+                              </Boton>
+                              <Boton variante="peligro" onClick={() => setACancelar(funcion)}>
+                                Cancelar función
+                              </Boton>
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Tarjeta>
+          ) : null}
+        </div>
+      </div>
 
       <Modal
-        open={aCancelar !== null}
-        danger
-        modalHeading="Cancelar la función"
-        modalLabel={aCancelar === null ? '' : `${aCancelar.pelicula} · ${aCancelar.fecha} ${aCancelar.horaInicio}`}
-        primaryButtonText="Cancelar la función"
-        secondaryButtonText="Volver"
-        primaryButtonDisabled={motivo.trim() === ''}
-        onRequestClose={() => setACancelar(null)}
-        onSecondarySubmit={() => setACancelar(null)}
-        onRequestSubmit={cancelar}
+        titulo="Cancelar la función"
+        abierto={aCancelar !== null}
+        onCerrar={() => setACancelar(null)}
+        acciones={
+          <>
+            <Boton variante="secundario" onClick={() => setACancelar(null)}>
+              Volver
+            </Boton>
+            <Boton variante="peligro" disabled={motivo.trim() === ''} onClick={cancelar}>
+              Cancelar la función
+            </Boton>
+          </>
+        }
       >
-        <p style={{ marginBottom: '1rem' }}>
+        {aCancelar !== null ? (
+          <p className="panel__nota">
+            {aCancelar.pelicula} · {aCancelar.fecha} {aCancelar.horaInicio}
+          </p>
+        ) : null}
+        <p>
           Todas sus compras quedan devueltas de una sola vez, hayan pasado por la puerta o no, y se le avisa por
-          correo a quien compró por internet (RN-41, RF-24). Solo se puede hasta el final de la jornada de la
-          función (RN-42).
+          correo a quien compró por internet. Solo se puede hasta el final de la jornada de la función.
         </p>
-        <TextInput
+        <CampoDeTexto
           id="motivo-de-cancelacion"
-          labelText="Motivo"
-          helperText="Queda registrado con tu nombre y la hora (REG-4)."
+          etiqueta="Motivo"
+          ayuda="Queda registrado con tu nombre y la hora."
           value={motivo}
           onChange={(evento) => setMotivo(evento.target.value)}
         />

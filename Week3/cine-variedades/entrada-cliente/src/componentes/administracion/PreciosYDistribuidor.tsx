@@ -1,4 +1,3 @@
-import { Button, InlineNotification, NumberInput, TextInput, Tile } from '@carbon/react'
 import { useEffect, useState } from 'react'
 import {
   esErrorDeApi,
@@ -9,6 +8,8 @@ import {
   type PreciosVigentes,
 } from '../../api/cliente.js'
 import { formatearColones } from '../../utilidades/formato.js'
+import { Aviso, Boton, CampoDeFecha, CampoDeTexto, CampoNumerico, Tarjeta } from '../base/index.js'
+import './administracion.scss'
 
 /**
  * Los dos ajustes que mantiene la dueña: el precio general y el de estudiante
@@ -61,68 +62,74 @@ export function PreciosYDistribuidor() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1.5rem', maxWidth: '40rem' }}>
-      {error !== null ? (
-        <div role="alert" aria-live="polite">
-          <InlineNotification kind="error" title="No se pudo" subtitle={error} hideCloseButton />
-        </div>
-      ) : null}
-      {aviso !== null ? (
-        <div role="status" aria-live="polite">
-          <InlineNotification kind="success" title="Listo" subtitle={aviso} onCloseButtonClick={() => setAviso(null)} />
-        </div>
-      ) : null}
+    <div className="panel">
+      {error !== null ? <Aviso tono="error" titulo="No se pudo" detalle={error} /> : null}
+      {aviso !== null ? <Aviso tono="exito" titulo="Listo" detalle={aviso} /> : null}
 
-      <Tile>
-        <h2 style={{ fontSize: '1rem' }}>Precios</h2>
-        <p style={{ marginBottom: '0.75rem' }}>
-          {vigentes === null
-            ? 'Todavía no hay precios fijados.'
-            : `Vigentes desde el ${vigentes.desde}: general ${formatearColones(vigentes.general)}, estudiante ${formatearColones(vigentes.estudiante)}. Miércoles: ${formatearColones(Math.round(vigentes.general / 2))}.`}
-        </p>
-        <form onSubmit={guardarPrecios} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <NumberInput
+      <Tarjeta>
+        <h2 className="panel__titulo">Precios</h2>
+        {vigentes === null ? (
+          <p className="panel__nota">Todavía no hay precios fijados.</p>
+        ) : (
+          <ul className="cierre__indicadores">
+            <li className="indicador">
+              <p className="indicador__etiqueta">General</p>
+              <p className="indicador__valor">{formatearColones(vigentes.general)}</p>
+            </li>
+            <li className="indicador">
+              <p className="indicador__etiqueta">Estudiante</p>
+              <p className="indicador__valor">{formatearColones(vigentes.estudiante)}</p>
+            </li>
+            <li className="indicador indicador--destacado">
+              <p className="indicador__etiqueta">Miércoles (mitad)</p>
+              <p className="indicador__valor">{formatearColones(Math.round(vigentes.general / 2))}</p>
+            </li>
+          </ul>
+        )}
+        {vigentes !== null ? <p className="panel__nota">Vigentes desde el {vigentes.desde}.</p> : null}
+
+        <form onSubmit={guardarPrecios} className="panel__formulario">
+          <CampoNumerico
             id="precio-general"
-            label="Precio general"
+            etiqueta="Precio general"
             min={1}
             value={general}
-            onChange={(_evento, estado) => setGeneral(Number(estado.value))}
+            onChange={(evento) => setGeneral(Number(evento.target.value))}
           />
-          <NumberInput
+          <CampoNumerico
             id="precio-estudiante"
-            label="Precio de estudiante"
+            etiqueta="Precio de estudiante"
             min={1}
             value={estudiante}
-            onChange={(_evento, estado) => setEstudiante(Number(estado.value))}
+            onChange={(evento) => setEstudiante(Number(evento.target.value))}
           />
-          <TextInput
+          <CampoDeFecha
             id="precios-desde"
-            labelText="Rigen desde"
-            placeholder="AAAA-MM-DD"
-            helperText="El precio de una entrada se decide por la fecha de la función (RN-15)."
+            etiqueta="Rigen desde"
+            ayuda="El precio de una entrada se decide por la fecha de la función."
             value={desde}
             onChange={(evento) => setDesde(evento.target.value)}
           />
-          <Button type="submit">Fijar precios</Button>
+          <Boton type="submit">Fijar precios</Boton>
         </form>
-      </Tile>
+      </Tarjeta>
 
-      <Tile>
-        <h2 style={{ fontSize: '1rem' }}>Correo del distribuidor</h2>
-        <form onSubmit={guardarCorreo} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <TextInput
+      <Tarjeta>
+        <h2 className="panel__titulo">Correo del distribuidor</h2>
+        <form onSubmit={guardarCorreo} className="panel__formulario">
+          <CampoDeTexto
             id="correo-distribuidor"
-            labelText="Dirección"
+            etiqueta="Dirección"
             type="email"
-            helperText="A esta dirección sale el reporte el día 1 de cada mes (RN-47)."
+            ayuda="A esta dirección sale el reporte el día 1 de cada mes."
             value={correo}
             onChange={(evento) => setCorreo(evento.target.value)}
           />
-          <Button type="submit" disabled={correo.trim() === ''}>
+          <Boton type="submit" disabled={correo.trim() === ''}>
             Guardar
-          </Button>
+          </Boton>
         </form>
-      </Tile>
+      </Tarjeta>
     </div>
   )
 }

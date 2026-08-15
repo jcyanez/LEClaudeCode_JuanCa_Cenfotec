@@ -1,12 +1,15 @@
 /**
- * Los componentes base propios que reemplazan a los de `@carbon/react` en la
- * web pública. Todos se pintan con los tokens de `tokens.scss`, así que la
- * misma pieza sirve en el tema del comprador y en el de operación sin cambiar
- * una línea.
+ * El sistema de componentes propio, ya sin `@carbon/react`.
  *
- * Nada acá es decorativo por sí solo: cada regla responde a una prioridad de
- * la skill `ui-ux-pro-max` —objetivo táctil, foco visible, jerarquía, estado
- * de carga— y así está anotada.
+ * Las pantallas de trabajo siguen dos estilos de la skill `ui-ux-pro-max` que
+ * se complementan: **Swiss Modernism 2.0** —retícula estricta de 12 columnas,
+ * espaciado matemático sobre una unidad de 8 px, tipografía Inter y **un solo
+ * acento**— y **Data-Dense Dashboard** —relleno de 12 px, filas de 36 px,
+ * encabezados fijos y tablas que se desplazan dentro de su caja—. El primero
+ * pone el carácter; el segundo, la densidad que una ventanilla necesita.
+ *
+ * Cada regla responde a una prioridad de la skill —objetivo táctil, foco
+ * visible, jerarquía— y así está anotada. Nada es decorativo por sí solo.
  */
 
 /* ---------- Botón ---------- */
@@ -67,7 +70,17 @@
   background: var(--color-atenuado);
 }
 
-/* ---------- Campo de texto ---------- */
+/* Para lo que no se deshace: anular una compra, cancelar una función. */
+.boton--peligro {
+  background: var(--color-error);
+  color: var(--color-sobre-error);
+}
+
+.boton--peligro:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 85%, black);
+}
+
+/* ---------- Campos ---------- */
 
 .campo {
   display: flex;
@@ -104,7 +117,28 @@
   opacity: 0.6;
 }
 
-/* Prioridad 8: el texto de ayuda y el error viven junto al campo, no arriba de todo. */
+.campo__control--area {
+  min-height: calc(var(--objetivo-tactil-minimo) * 2);
+  resize: vertical;
+  font: var(--texto-cuerpo);
+}
+
+.campo__control--numero {
+  font-variant-numeric: tabular-nums;
+}
+
+.campo__control--selector {
+  appearance: none;
+  padding-inline-end: var(--espacio-6);
+  /* La flecha va en el fondo para no depender de un icono externo. */
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 1.1rem) 55%, calc(100% - 0.75rem) 55%;
+  background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+  background-repeat: no-repeat;
+}
+
+/* Prioridad 8: la ayuda y el error viven junto al campo, no arriba de todo. */
 .campo__ayuda {
   font: var(--texto-menor);
   color: var(--color-texto-atenuado);
@@ -131,7 +165,6 @@
   box-shadow: var(--sombra-tarjeta);
 }
 
-/* Una tarjeta que además es un enlace: toda la superficie es el objetivo. */
 .tarjeta--enlace {
   display: block;
   text-decoration: none;
@@ -185,6 +218,11 @@
   border-left-color: var(--color-acento);
 }
 
+.aviso--advertencia {
+  border-left-color: var(--color-acento);
+  border-left-style: dashed;
+}
+
 /* ---------- Cargando ---------- */
 
 .cargando {
@@ -214,5 +252,215 @@
 @media (prefers-reduced-motion: reduce) {
   .cargando__marca {
     animation: none;
+  }
+}
+
+/* ---------- Etiqueta de estado ---------- */
+
+.etiqueta {
+  display: inline-block;
+  padding: 0.1rem var(--espacio-2);
+  border: 1px solid currentColor;
+  border-radius: var(--radio-chico);
+  font: var(--texto-menor);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+}
+
+.etiqueta--neutra {
+  color: var(--color-texto-atenuado);
+}
+
+.etiqueta--exito {
+  color: var(--color-exito);
+}
+
+.etiqueta--alerta {
+  color: var(--color-error);
+}
+
+.etiqueta--aviso {
+  color: var(--color-acento);
+}
+
+/* ---------- Pestañas ---------- */
+
+.pestanas__lista {
+  display: flex;
+  gap: var(--espacio-1);
+  border-bottom: 1px solid var(--color-borde-suave);
+  overflow-x: auto;
+}
+
+.pestanas__pestana {
+  min-height: var(--objetivo-tactil-minimo);
+  padding: var(--espacio-2) var(--espacio-4);
+  border: none;
+  /* El subrayado del acento marca la activa; el peso de la letra la refuerza,
+     para no depender solo del color (prioridad 1). */
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--color-texto-atenuado);
+  font: var(--texto-cuerpo);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--transicion), border-color var(--transicion);
+}
+
+.pestanas__pestana:hover {
+  color: var(--color-texto);
+}
+
+.pestanas__pestana:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: -2px;
+}
+
+.pestanas__pestana--activa {
+  border-bottom-color: var(--color-acento);
+  color: var(--color-texto);
+  font-weight: 600;
+}
+
+.pestanas__panel {
+  padding-block: var(--espacio-5);
+}
+
+.pestanas__panel:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 4px;
+}
+
+/* ---------- Modal ---------- */
+
+.modal {
+  padding: 0;
+  border: none;
+  border-radius: var(--radio);
+  background: transparent;
+  color: var(--color-texto);
+  max-width: min(32rem, calc(100vw - 2rem));
+}
+
+.modal::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.modal__caja {
+  padding: var(--espacio-5);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+  background: var(--color-tarjeta);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.modal__titulo {
+  margin: 0;
+  font: var(--texto-subtitulo);
+  letter-spacing: var(--interletrado-titulo);
+}
+
+.modal__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+}
+
+.modal__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+  justify-content: flex-end;
+}
+
+/* ---------- Tabla densa (Data-Dense Dashboard) ---------- */
+
+/* Guía «Table Handling» de la skill: la tabla se desplaza dentro de su caja,
+   nunca rompe el ancho de la página. */
+.tabla-caja {
+  overflow-x: auto;
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--texto-menor);
+}
+
+.tabla th,
+.tabla td {
+  padding: var(--espacio-2) var(--espacio-3);
+  text-align: left;
+  border-bottom: 1px solid var(--color-borde-suave);
+  white-space: nowrap;
+}
+
+/* Encabezado fijo al desplazar filas largas. */
+.tabla thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-atenuado);
+  color: var(--color-texto);
+  font-weight: 600;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.tabla tbody tr:hover {
+  background: var(--color-atenuado);
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Los montos y los números de compra van a la derecha y con cifras de ancho
+   fijo, para que las columnas de dinero alineen dígito con dígito. */
+.tabla .numero,
+.cifra {
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla .numero {
+  text-align: right;
+}
+
+/* Visible solo para lectores de pantalla: reemplaza a `cds--visually-hidden`
+   de Carbon. Lo usan los `caption` de las tablas, que dan el contexto que la
+   vista transmite con su encabezado (prioridad 1). */
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Retícula de 12 columnas (Swiss Modernism 2.0) ---------- */
+
+.reticula {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--espacio-4);
+}
+
+/* En pantallas angostas la retícula colapsa a una sola columna: prioridad 5,
+   sin anchos fijos ni desplazamiento horizontal de la página. */
+@media (max-width: 48rem) {
+  .reticula {
+    grid-template-columns: 1fr;
   }
 }

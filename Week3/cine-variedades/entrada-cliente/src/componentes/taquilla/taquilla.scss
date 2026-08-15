@@ -1,0 +1,250 @@
+/**
+ * Las pantallas de taquilla. Densidad de Data-Dense Dashboard sobre la
+ * retícula asimétrica de Swiss Modernism 2.0: el mapa ocupa ocho columnas y el
+ * cobro cuatro, y el panel de cobro **queda fijo** mientras se eligen butacas.
+ * En una sala de 120 asientos, el total y el botón no pueden quedar debajo del
+ * mapa: se despacha una fila de gente sin volver a subir la página.
+ */
+
+.venta {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--espacio-5);
+  align-items: start;
+}
+
+.venta__mapa {
+  grid-column: span 8;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  min-width: 0; /* deja que el mapa se desplace dentro de su caja */
+}
+
+.venta__panel {
+  grid-column: span 4;
+  position: sticky;
+  top: var(--espacio-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  padding: var(--espacio-4);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+  background: var(--color-tarjeta);
+}
+
+.venta__vacio {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+/* El total es el dato que más se mira de esta pantalla: va grande, en el
+   acento y con cifras de ancho fijo. */
+.venta__resumen {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espacio-3);
+  margin: 0;
+  padding-bottom: var(--espacio-3);
+  border-bottom: 1px solid var(--color-borde-suave);
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+.venta__total {
+  font: var(--texto-subtitulo);
+  letter-spacing: var(--interletrado-titulo);
+  color: var(--color-acento);
+}
+
+.venta__nota {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+.venta__categorias {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--espacio-3);
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.venta__atajos {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+
+  kbd {
+    padding: 0.1rem 0.35rem;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-chico);
+    font-family: var(--fuente);
+    font-size: 0.75rem;
+  }
+}
+
+/* ---------- Compra registrada ---------- */
+
+.cobrado {
+  padding: var(--espacio-3);
+  border: 2px solid var(--color-exito);
+  border-radius: var(--radio-chico);
+  background: color-mix(in srgb, var(--color-exito) 10%, transparent);
+  text-align: center;
+}
+
+.cobrado__marca {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 600;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-exito);
+}
+
+/* El número hay que dictarlo en voz alta (RN-25): grande y espaciado. */
+.cobrado__numero {
+  margin: var(--espacio-1) 0;
+  font: var(--texto-titulo);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.16em;
+  color: var(--color-texto);
+}
+
+.cobrado__detalle {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+/* ---------- Trabajos con un número de por medio ---------- */
+
+.trabajo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-4);
+  max-width: 46rem;
+}
+
+.trabajo__titulo {
+  margin: 0;
+  font: var(--texto-encabezado);
+}
+
+.trabajo__nota {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+.trabajo__buscador {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--espacio-3);
+}
+
+.trabajo__buscador .campo {
+  flex: 1;
+  max-width: 18rem;
+}
+
+.trabajo__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+/* Ficha de datos: etiqueta arriba en versalitas, dato abajo. Es la forma más
+   rápida de leer «qué función, cuántas butacas, a nombre de quién». */
+.ficha {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--espacio-3);
+  margin: 0;
+}
+
+.ficha__etiqueta {
+  margin: 0;
+  font: var(--texto-menor);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+}
+
+.ficha__dato {
+  margin: 0;
+  font: var(--texto-cuerpo);
+  font-weight: 500;
+}
+
+/* ---------- Cierre de caja ---------- */
+
+/* Tarjetas de indicador (KPI) de Data-Dense Dashboard: pocas, grandes y
+   comparables de un vistazo. */
+.cierre__indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--espacio-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indicador {
+  padding: var(--espacio-3);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio-chico);
+  background: var(--color-tarjeta);
+}
+
+.indicador--destacado {
+  border-color: var(--color-acento);
+  border-width: 2px;
+}
+
+.indicador__etiqueta {
+  margin: 0;
+  font: var(--texto-menor);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+}
+
+.indicador__valor {
+  margin: var(--espacio-1) 0 0;
+  font: var(--texto-subtitulo);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--interletrado-titulo);
+}
+
+.indicador--destacado .indicador__valor {
+  color: var(--color-acento);
+}
+
+/* En pantalla angosta el panel deja de ser fijo y baja: en un teléfono no hay
+   dos columnas que valgan (prioridad 5). */
+@media (max-width: 60rem) {
+  .venta {
+    grid-template-columns: 1fr;
+  }
+
+  .venta__mapa,
+  .venta__panel {
+    grid-column: 1 / -1;
+  }
+
+  .venta__panel {
+    position: static;
+  }
+}

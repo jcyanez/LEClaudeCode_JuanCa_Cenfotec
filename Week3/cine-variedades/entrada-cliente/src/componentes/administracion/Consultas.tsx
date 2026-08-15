@@ -1,4 +1,3 @@
-import { Button, InlineNotification, TextInput, Tile } from '@carbon/react'
 import { useState } from 'react'
 import {
   consultarCategorias,
@@ -8,8 +7,8 @@ import {
   type OcupacionDeFuncion,
 } from '../../api/cliente.js'
 import { formatearColones } from '../../utilidades/formato.js'
-
-const NUMERO: React.CSSProperties = { fontVariantNumeric: 'tabular-nums', textAlign: 'right' }
+import { Aviso, Boton, CampoDeFecha } from '../base/index.js'
+import './administracion.scss'
 
 const NOMBRE_CATEGORIA: Record<string, string> = {
   general: 'General',
@@ -53,97 +52,103 @@ export function Consultas() {
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1.5rem' }}>
-      <form onSubmit={consultar} style={{ display: 'flex', alignItems: 'end', gap: '0.75rem', flexWrap: 'wrap' }}>
-        <TextInput
-          id="consulta-desde"
-          labelText="Desde"
-          placeholder="AAAA-MM-DD"
-          value={desde}
-          onChange={(evento) => setDesde(evento.target.value)}
-        />
-        <TextInput
-          id="consulta-hasta"
-          labelText="Hasta"
-          placeholder="AAAA-MM-DD"
-          value={hasta}
-          onChange={(evento) => setHasta(evento.target.value)}
-        />
-        <Button type="submit">Consultar</Button>
+    <div className="panel">
+      <form onSubmit={consultar} className="panel__barra">
+        <CampoDeFecha id="consulta-desde" etiqueta="Desde" value={desde} onChange={(e) => setDesde(e.target.value)} />
+        <CampoDeFecha id="consulta-hasta" etiqueta="Hasta" value={hasta} onChange={(e) => setHasta(e.target.value)} />
+        <Boton type="submit">Consultar</Boton>
       </form>
 
-      {error !== null ? (
-        <div role="alert" aria-live="polite">
-          <InlineNotification kind="error" title="No se pudo" subtitle={error} hideCloseButton />
-        </div>
-      ) : null}
+      {error !== null ? <Aviso tono="error" titulo="No se pudo" detalle={error} /> : null}
 
       {ocupacion !== null ? (
-        <Tile>
-          <h2 style={{ fontSize: '1rem' }}>Ocupación por función</h2>
+        <section>
+          <h2 className="panel__titulo">Ocupación por función</h2>
           {ocupacion.length === 0 ? (
-            <p>No hay funciones en ese período.</p>
+            <p className="panel__nota">No hay funciones en ese período.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '0.75rem' }}>
-              <caption className="cds--visually-hidden">
-                Entradas vendidas sobre butacas de la sala, por función
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col" style={{ textAlign: 'left' }}>Fecha</th>
-                  <th scope="col" style={{ textAlign: 'left' }}>Hora</th>
-                  <th scope="col" style={{ textAlign: 'left' }}>Película</th>
-                  <th scope="col" style={{ textAlign: 'right' }}>Vendidas</th>
-                  <th scope="col" style={{ textAlign: 'right' }}>Butacas</th>
-                  <th scope="col" style={{ textAlign: 'right' }}>Ocupación</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ocupacion.map((funcion) => (
-                  <tr key={funcion.funcionId}>
-                    <td>{funcion.fecha}</td>
-                    <td>{funcion.horaInicio}</td>
-                    <td>{funcion.pelicula}</td>
-                    <td style={NUMERO}>{funcion.entradasVendidas}</td>
-                    <td style={NUMERO}>{funcion.butacas}</td>
-                    <td style={NUMERO}>{Math.round(funcion.ocupacion * 100)} %</td>
+            <div className="tabla-caja">
+              <table className="tabla">
+                <caption className="solo-lectores">Entradas vendidas sobre butacas de la sala, por función</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Hora</th>
+                    <th scope="col">Película</th>
+                    <th scope="col" className="numero">
+                      Vendidas
+                    </th>
+                    <th scope="col" className="numero">
+                      Butacas
+                    </th>
+                    <th scope="col" className="numero">
+                      Ocupación
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {ocupacion.map((funcion) => (
+                    <tr key={funcion.funcionId}>
+                      <td className="cifra">{funcion.fecha}</td>
+                      <td className="cifra">{funcion.horaInicio}</td>
+                      <td>{funcion.pelicula}</td>
+                      <td className="numero">{funcion.entradasVendidas}</td>
+                      <td className="numero">{funcion.butacas}</td>
+                      <td className="numero">
+                        {/* La barra da la comparación de un vistazo; el número
+                            queda igual para quien no distingue la barra. */}
+                        <span className="barra-ocupacion">
+                          <span
+                            className="barra-ocupacion__relleno"
+                            style={{ inlineSize: `${Math.round(funcion.ocupacion * 100)}%` }}
+                          />
+                        </span>
+                        {Math.round(funcion.ocupacion * 100)} %
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Tile>
+        </section>
       ) : null}
 
       {categorias !== null ? (
-        <Tile>
-          <h2 style={{ fontSize: '1rem' }}>Entradas por categoría y canal</h2>
+        <section>
+          <h2 className="panel__titulo">Entradas por categoría y canal</h2>
           {categorias.length === 0 ? (
-            <p>No hubo entradas en ese período.</p>
+            <p className="panel__nota">No hubo entradas en ese período.</p>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '0.75rem' }}>
-              <caption className="cds--visually-hidden">Entradas y monto por categoría de precio y por canal</caption>
-              <thead>
-                <tr>
-                  <th scope="col" style={{ textAlign: 'left' }}>Categoría</th>
-                  <th scope="col" style={{ textAlign: 'left' }}>Canal</th>
-                  <th scope="col" style={{ textAlign: 'right' }}>Entradas</th>
-                  <th scope="col" style={{ textAlign: 'right' }}>Monto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {categorias.map((fila) => (
-                  <tr key={`${fila.categoria}-${fila.canal}`}>
-                    <td>{NOMBRE_CATEGORIA[fila.categoria] ?? fila.categoria}</td>
-                    <td>{fila.canal === 'taquilla' ? 'Taquilla' : 'Internet'}</td>
-                    <td style={NUMERO}>{fila.entradas}</td>
-                    <td style={NUMERO}>{formatearColones(fila.monto)}</td>
+            <div className="tabla-caja">
+              <table className="tabla">
+                <caption className="solo-lectores">Entradas y monto por categoría de precio y por canal</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Categoría</th>
+                    <th scope="col">Canal</th>
+                    <th scope="col" className="numero">
+                      Entradas
+                    </th>
+                    <th scope="col" className="numero">
+                      Monto
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {categorias.map((fila) => (
+                    <tr key={`${fila.categoria}-${fila.canal}`}>
+                      <td>{NOMBRE_CATEGORIA[fila.categoria] ?? fila.categoria}</td>
+                      <td>{fila.canal === 'taquilla' ? 'Taquilla' : 'Internet'}</td>
+                      <td className="numero">{fila.entradas}</td>
+                      <td className="numero">{formatearColones(fila.monto)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Tile>
+        </section>
       ) : null}
     </div>
   )
