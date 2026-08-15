@@ -64,6 +64,12 @@ se deja constancia del descartado.
   accesibilidad, ni las de visión reducida, ni ninguna otra categoría. Se adopta esta decisión
   porque nadie mencionó que existan; si las hubiera, deja de valer y pasa a ser una regla del
   negocio.
+- **Póster y género de la película como datos del sistema.** Una película es título y duración
+  (`RN-4`) y nada más: el sistema no guarda imagen ni género, no los pide al cargar la cartelera
+  (`RF-1`) y no puede filtrar ni agrupar por género. Las pantallas del comprador **sí muestran** un
+  póster y un género, pero salen de una tabla fija en la interfaz, no de la base; cómo y por qué
+  está en `DISENO.md`. Una película cargada por la dueña aparece en la cartelera sin póster, y el
+  sistema lo resuelve mostrándolo como tal.
 - Precios distintos por película, por sala o por horario.
 - Límite de butacas por compra.
 - Venta con la función ya empezada, por cualquiera de los dos canales.

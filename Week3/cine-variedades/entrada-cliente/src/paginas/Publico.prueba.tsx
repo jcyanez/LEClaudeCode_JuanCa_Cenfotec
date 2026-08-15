@@ -128,7 +128,13 @@ describe('Cartelera pública (RF-8)', () => {
     expect(screen.getByRole('link', { name: /Elegir butacas/ })).toHaveAttribute('href', '/funciones/7')
   })
 
-  it('agrupa la película una sola vez y ofrece sus horarios del día elegido (RF-9)', async () => {
+  /**
+   * El recorrido de la tarjeta: el cartel se toca, recién ahí aparecen los
+   * horarios de esa película, y cada uno lleva a sus butacas. Los horarios
+   * arrancan ocultos a propósito, así que lo primero que se comprueba es que
+   * no estén.
+   */
+  it('los horarios aparecen al tocar el cartel, y cada uno lleva a su función (RF-9)', async () => {
     // Dos funciones de la misma película el mismo día: una tarjeta, dos horarios.
     api.obtenerCartelera.mockResolvedValue([VIERNES, { ...VIERNES, funcionId: 8, horaInicio: '21:30' }])
     renderCartelera()
@@ -136,9 +142,29 @@ describe('Cartelera pública (RF-8)', () => {
     const tarjetas = await screen.findAllByRole('heading', { level: 3, name: 'La ventana indiscreta' })
     expect(tarjetas).toHaveLength(1)
 
+    // Cerrada: ni horarios ni instrucción.
+    expect(screen.queryByRole('link', { name: /19:00/ })).not.toBeInTheDocument()
+    const disparador = screen.getByRole('button', { name: 'Ver horarios de La ventana indiscreta' })
+    expect(disparador).toHaveAttribute('aria-expanded', 'false')
+
+    await userEvent.click(disparador)
+
+    expect(disparador).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Elegí una función')).toBeInTheDocument()
     const horarios = screen.getAllByRole('link', { name: /La ventana indiscreta, \d\d:\d\d, Sala 1/ })
     expect(horarios.map((enlace) => enlace.textContent)).toEqual(['19:00', '21:30'])
     expect(horarios.map((enlace) => enlace.getAttribute('href'))).toEqual(['/funciones/7', '/funciones/8'])
+  })
+
+  it('volver a tocar el cartel esconde los horarios', async () => {
+    renderCartelera()
+
+    const disparador = await screen.findByRole('button', { name: /Ver horarios de/ })
+    await userEvent.click(disparador)
+    expect(screen.getByRole('link', { name: /19:00/ })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /Ocultar horarios de/ }))
+    expect(screen.queryByRole('link', { name: /19:00/ })).not.toBeInTheDocument()
   })
 
   it('elegir otro día muestra sus funciones y esconde las de los demás', async () => {
@@ -174,6 +200,7 @@ describe('Cartelera pública (RF-8)', () => {
 
     await screen.findAllByRole('heading', { level: 3, name: 'La ventana indiscreta' })
     await userEvent.selectOptions(screen.getByLabelText('Sala'), 'Sala 2')
+    await userEvent.click(screen.getByRole('button', { name: /Ver horarios de/ }))
 
     const horarios = screen.getAllByRole('link', { name: /Sala 2/ })
     expect(horarios).toHaveLength(1)
@@ -205,7 +232,9 @@ describe('Cartelera pública (RF-8)', () => {
     const tarjeta = within(await screen.findByRole('article'))
     expect(tarjeta.getByText('Sin póster')).toBeInTheDocument()
     expect(tarjeta.queryByRole('img')).not.toBeInTheDocument()
-    // La función sigue siendo comprable: lo que falta es la imagen, no el dato.
+    // La función sigue siendo comprable: lo que falta es la imagen, no el dato,
+    // y el respaldo sigue siendo el disparador de los horarios.
+    await userEvent.click(tarjeta.getByRole('button', { name: /Ver horarios de/ }))
     expect(tarjeta.getByRole('link', { name: /19:00/ })).toHaveAttribute('href', '/funciones/7')
   })
 

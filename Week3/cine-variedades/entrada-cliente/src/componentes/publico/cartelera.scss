@@ -141,16 +141,26 @@
 
 /* ---------- Función destacada ---------- */
 
+/* El panel de la función destacada. El alto mínimo evita que quede achatado
+   cuando la página es ancha: sin él, el póster de la derecha se recortaba a una
+   franja y perdía toda la fuerza. */
 .destacada {
   position: relative;
   overflow: hidden;
-  margin-bottom: var(--espacio-6);
-  padding: var(--espacio-7) var(--espacio-5);
+  min-height: 24rem;
+  display: flex;
+  align-items: center;
+  margin-bottom: var(--espacio-4);
+  padding: var(--espacio-6) var(--espacio-5);
   border: 1px solid var(--color-borde-suave);
   border-radius: var(--radio);
   background:
     radial-gradient(120% 140% at 12% 0%, var(--color-secundario) 0%, transparent 55%),
     var(--color-tarjeta);
+
+  @media (min-width: 64rem) {
+    padding: var(--espacio-7);
+  }
 }
 
 /* El haz del proyector: decorativo, detrás del texto y sin capturar el ratón.
@@ -170,11 +180,13 @@
    donde vive el texto. El degradado no es decoración — es lo que sostiene el
    contraste del título y de la llamada a la acción sobre una imagen que no
    controlamos. */
+/* Poco más de la mitad del panel, con tope: en una pantalla ancha el póster
+   crece con ella hasta donde sigue equilibrando el texto, y no más. */
 .destacada__cartel {
   position: absolute;
   inset-block: 0;
   right: 0;
-  width: min(62%, 34rem);
+  width: min(58%, 44rem);
   pointer-events: none;
 }
 
@@ -241,11 +253,14 @@
   color: var(--color-acento);
 }
 
+/* Escala fluida: el título manda en cualquier ancho sin romper la caja. El
+   techo bajó de 3,5 a 3 rem — con la página ancha, 3,5 rem lo volvía un cartel
+   que aplastaba todo lo demás. Sigue siendo, por lejos, lo más grande de la
+   pantalla, que es lo único que tiene que seguir siendo cierto. */
 .destacada__titulo {
   margin: 0;
-  /* Escala fluida: el título manda en cualquier ancho sin romper la caja. */
   font: var(--texto-display);
-  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-size: clamp(2rem, 4.5vw, 3rem);
   letter-spacing: var(--interletrado-display);
   color: var(--color-texto);
   text-wrap: balance;
@@ -394,7 +409,13 @@
  * quepan sino de que se vean. `auto-fill` metía cinco columnas en una pantalla
  * ancha y dejaba los carteles del tamaño de una estampilla.
  *
- * 375 px → 1 · 768 px → 2 · 1024 px → 3 · 1440 px → 4
+ * 375 px → 1 · 768 px → 2 · 1024 px y más → 3
+ *
+ * **Se topa en tres, no en cuatro.** El cine programa tres películas, así que
+ * una cuarta columna solo agregaba un hueco al final de la fila y achicaba los
+ * carteles de 430 a 320 px. Tres llenan la fila exacta y dan el cartel más
+ * grande que entra. Si algún día hay más películas, la cuarta columna vuelve
+ * cambiando este bloque y nada más.
  */
 .rejilla {
   list-style: none;
@@ -410,10 +431,7 @@
 
   @media (min-width: 64rem) {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (min-width: 90rem) {
-    grid-template-columns: repeat(4, 1fr);
+    gap: var(--espacio-6);
   }
 }
 
@@ -440,10 +458,23 @@
   }
 }
 
+/* El cartel es el disparador de los horarios, así que es un botón de verdad y
+   no un `div` con un `onClick`: llega con el tabulador, se activa con Enter y
+   con la barra, y anuncia si está abierto. Acá solo se le quitan los estilos
+   propios del botón. */
 .pelicula__cartel {
   position: relative;
+  display: block;
+  width: 100%;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: 0;
   background: var(--color-atenuado);
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
 }
 
 /* El póster crece un poco bajo el puntero, recortado por la caja de arriba.
@@ -452,45 +483,84 @@
   transition: transform 250ms ease;
 }
 
-.pelicula:hover .pelicula__cartel .poster {
+/* También con el foco del teclado: quien tabula recibe la misma señal de que
+   el cartel es accionable que quien pasa el ratón. */
+.pelicula__cartel:hover .poster,
+.pelicula__cartel:focus-visible .poster {
   transform: scale(1.03);
 }
 
-/* El velo y su rótulo son un adorno del puntero: no capturan el ratón y no los
-   ve un lector de pantalla. Los horarios de abajo siempre están, que es lo que
-   hace que esto pueda ser solo un adorno. */
+/* Velo de refuerzo: oscurece el cartel bajo el puntero para que el rótulo de
+   abajo destaque. Decorativo y sin capturar el ratón — el clic es del botón. */
 .pelicula__velo {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: var(--espacio-5);
-  background: linear-gradient(
-    to top,
-    color-mix(in srgb, var(--color-fondo) 88%, transparent) 0%,
-    transparent 55%
-  );
+  background: color-mix(in srgb, var(--color-fondo) 35%, transparent);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transicion);
 }
 
-.pelicula:hover .pelicula__velo {
+.pelicula__cartel:hover .pelicula__velo,
+.pelicula__cartel:focus-visible .pelicula__velo {
   opacity: 1;
 }
 
-.pelicula__velo-texto {
-  padding: var(--espacio-2) var(--espacio-4);
-  border: 1px solid var(--color-acento);
-  border-radius: var(--radio-chico);
-  background: color-mix(in srgb, var(--color-fondo) 70%, transparent);
+/**
+ * El rótulo del disparador. **Se ve siempre**, no solo bajo el puntero: en un
+ * teléfono no hay puntero, y un cartel que no anuncia que se puede tocar es una
+ * caja muda.
+ *
+ * Va pegado al borde inferior, sobre la zona de créditos del cartel, que es la
+ * parte que ninguna de las tres imágenes usa para el título. Ocupa los 44 px
+ * del objetivo táctil aunque el botón entero ya sea mucho más grande.
+ */
+.pelicula__llamada {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  min-height: var(--objetivo-tactil-minimo);
+  padding: var(--espacio-2) var(--espacio-3);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-fondo) 92%, transparent) 0%,
+    color-mix(in srgb, var(--color-fondo) 70%, transparent) 60%,
+    transparent 100%
+  );
   color: var(--color-acento);
   font: var(--texto-menor);
   font-weight: 600;
+  font-size: 0.72rem;
   letter-spacing: var(--interletrado-etiqueta);
   text-transform: uppercase;
-  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.pelicula__chevron {
+  width: 1rem;
+  height: 1rem;
+  transition: transform var(--transicion);
+}
+
+.pelicula--abierta .pelicula__chevron {
+  transform: rotate(180deg);
+}
+
+/* Abierta, la tarjeta se marca en dorado tenue: se ve de un vistazo cuál de
+   las tres está desplegada. */
+.pelicula--abierta {
+  border-color: color-mix(in srgb, var(--color-acento) 55%, transparent);
+}
+
+.pelicula__instruccion {
+  margin: 0 0 var(--espacio-3);
+  font: var(--texto-menor);
+  font-weight: 600;
+  color: var(--color-texto-tarjeta);
 }
 
 /* La insignia de miércoles va sobre el cartel, arriba a la izquierda, como una
@@ -537,19 +607,9 @@
 }
 
 .pelicula__horarios {
-  margin-top: auto;
+  margin-top: var(--espacio-2);
   padding-top: var(--espacio-3);
   border-top: 1px solid var(--color-borde-suave);
-}
-
-.pelicula__rotulo {
-  margin: 0 0 var(--espacio-2);
-  font: var(--texto-menor);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: var(--interletrado-etiqueta);
-  text-transform: uppercase;
-  color: var(--color-texto-atenuado);
 }
 
 .pelicula__lista {
@@ -644,9 +704,15 @@
   }
 
   .pelicula__cartel .poster,
-  .pelicula:hover .pelicula__cartel .poster {
+  .pelicula__cartel .poster,
+  .pelicula__cartel:hover .poster,
+  .pelicula__cartel:focus-visible .poster {
     transition: none;
     transform: none;
+  }
+
+  .pelicula__chevron {
+    transition: none;
   }
 
   .destacada__accion:hover .icono {

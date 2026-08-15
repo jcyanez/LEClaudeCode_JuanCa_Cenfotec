@@ -3,7 +3,7 @@
  * probarla sola: agrupar, filtrar y rotular.
  *
  * El cambio de fondo respecto de T19 es **agrupar por película**. Antes cada
- * función era una tarjeta, así que «Ventana indiscreta» aparecía cuatro
+ * función era una tarjeta, así que «Ventanada indiscreta» aparecía cuatro
  * veces el mismo día. Eso es la forma de la tabla, no la de la decisión: quien
  * entra elige primero qué ver y después a qué hora. Una tarjeta por película,
  * con sus horarios como botones, es la misma información en el orden en que se

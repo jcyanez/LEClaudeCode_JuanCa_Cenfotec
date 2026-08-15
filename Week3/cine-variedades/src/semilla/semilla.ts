@@ -45,7 +45,7 @@ const PRECIO_ESTUDIANTE = 5000
  * agrupar por género, y no debería aparentar que sí.
  */
 const PELICULAS: Array<{ titulo: string; duracionMinutos: number }> = [
-  { titulo: 'Ventana indiscreta', duracionMinutos: 112 },
+  { titulo: 'Ventanada indiscreta', duracionMinutos: 112 },
   { titulo: 'El resplandor', duracionMinutos: 146 },
   { titulo: 'Tiempos modernos', duracionMinutos: 87 },
 ]
@@ -62,8 +62,8 @@ const PELICULAS: Array<{ titulo: string; duracionMinutos: number }> = [
 const PROGRAMACION_DIARIA: Array<{ salaId: number; horaInicio: string; titulo: string }> = [
   // Sala 1, 120 butacas.
   { salaId: 1, horaInicio: '15:00', titulo: 'Tiempos modernos' }, //      87 min → 16:27
-  { salaId: 1, horaInicio: '17:00', titulo: 'Ventana indiscreta' }, // 33 min de margen; 112 min → 18:52
-  { salaId: 1, horaInicio: '19:30', titulo: 'Ventana indiscreta' }, // 38 min de margen; 112 min → 21:22
+  { salaId: 1, horaInicio: '17:00', titulo: 'Ventanada indiscreta' }, // 33 min de margen; 112 min → 18:52
+  { salaId: 1, horaInicio: '19:30', titulo: 'Ventanada indiscreta' }, // 38 min de margen; 112 min → 21:22
   // Sala 2, 60 butacas.
   { salaId: 2, horaInicio: '15:30', titulo: 'Tiempos modernos' }, //      87 min → 16:57
   { salaId: 2, horaInicio: '17:30', titulo: 'El resplandor' }, //         33 min de margen; 146 min → 19:56

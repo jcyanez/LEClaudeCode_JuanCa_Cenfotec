@@ -11,10 +11,12 @@
  * paso siguiente es elegir butacas, y conviene que se pueda abrir en otra
  * pestaña, copiar y compartir como cualquier dirección.
  */
+import { useId, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ETIQUETA_MIERCOLES } from '../../utilidades/formato.js'
 import type { PeliculaEnCartelera } from './agrupar.js'
 import { textoDePrecios } from './agrupar.js'
+import { IconoChevron } from './iconos.js'
 import { Poster } from './Poster.js'
 import { fichaDe } from './posters.js'
 import './cartelera.scss'
@@ -49,23 +51,47 @@ interface TarjetaDePeliculaProps {
   pelicula: PeliculaEnCartelera
 }
 
+/**
+ * El recorrido de la tarjeta es en tres pasos: **el cartel se toca, aparecen
+ * los horarios de esa película, se elige uno y eso lleva a las butacas.**
+ *
+ * Los horarios arrancan ocultos a propósito. Antes estaban siempre a la vista y
+ * el cartel mostraba un rótulo «Ver horarios» que no llevaba a ninguna parte:
+ * prometía algo que ya había pasado. Ahora el rótulo hace lo que dice.
+ *
+ * El costo está asumido: es **un toque más** para llegar a comprar. Se compensa
+ * con que la función más próxima sigue teniendo su camino directo desde el
+ * encabezado de la página, que es el que la mayoría va a usar.
+ *
+ * El disparador es el cartel entero, y es **un botón de verdad**: se opera con
+ * teclado, anuncia si está abierto o cerrado con `aria-expanded`, y dice de qué
+ * película se trata. Su rótulo se ve siempre, no solo al pasar el puntero — en
+ * un teléfono no hay puntero, y un cartel que no se anuncia es una caja muda.
+ */
 export function TarjetaDePelicula({ pelicula }: TarjetaDePeliculaProps) {
+  const [abierta, setAbierta] = useState(false)
+  const idHorarios = useId()
   const primera = pelicula.funciones[0]
   const ficha = fichaDe(pelicula.pelicula)
 
   return (
-    <article className="pelicula">
-      {/* El velo y su rótulo son puramente visuales: aparecen con el puntero y
-          no dicen nada que no esté ya abajo, en botones que siempre se ven. Si
-          fueran la única forma de llegar a los horarios, quien navega con
-          teclado o con el dedo se quedaría afuera. */}
-      <div className="pelicula__cartel">
+    <article className={abierta ? 'pelicula pelicula--abierta' : 'pelicula'}>
+      <button
+        type="button"
+        className="pelicula__cartel"
+        aria-expanded={abierta}
+        aria-controls={idHorarios}
+        aria-label={`${abierta ? 'Ocultar' : 'Ver'} horarios de ${pelicula.pelicula}`}
+        onClick={() => setAbierta((estaba) => !estaba)}
+      >
         <Poster titulo={pelicula.pelicula} />
-        <div className="pelicula__velo" aria-hidden="true">
-          <span className="pelicula__velo-texto">Ver horarios</span>
-        </div>
+        <span className="pelicula__velo" aria-hidden="true" />
+        <span className="pelicula__llamada" aria-hidden="true">
+          {abierta ? 'Ocultar horarios' : 'Ver horarios'}
+          <IconoChevron className="pelicula__chevron" />
+        </span>
         {pelicula.esMiercoles ? <InsigniaPromocion /> : null}
-      </div>
+      </button>
 
       <div className="pelicula__cuerpo">
         <h3 className="pelicula__titulo">{pelicula.pelicula}</h3>
@@ -82,8 +108,11 @@ export function TarjetaDePelicula({ pelicula }: TarjetaDePeliculaProps) {
 
         {primera === undefined ? null : <p className="pelicula__precios">{textoDePrecios(primera)}</p>}
 
-        <div className="pelicula__horarios">
-          <h4 className="pelicula__rotulo">Horarios</h4>
+        {/* `hidden` y no una clase con `display:none`: así los horarios salen
+            también del árbol de accesibilidad y del orden de tabulación, en vez
+            de quedar invisibles pero alcanzables con el teclado. */}
+        <div className="pelicula__horarios" id={idHorarios} hidden={!abierta}>
+          <p className="pelicula__instruccion">Elegí una función</p>
           <ul className="pelicula__lista">
             {pelicula.funciones.map((funcion) => (
               <li key={funcion.funcionId}>

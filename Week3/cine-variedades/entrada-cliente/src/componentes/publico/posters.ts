@@ -34,7 +34,7 @@ export interface FichaDePelicula {
 const FICHAS: Record<string, FichaDePelicula> = {
   'Tiempos modernos': { poster: '/cartelera/tiempos-modernos', genero: 'Comedia' },
   'El resplandor': { poster: '/cartelera/el-resplandor', genero: 'Ciencia ficción' },
-  'Ventana indiscreta': { poster: '/cartelera/ventana-indiscreta', genero: 'Terror · Suspenso' },
+  'Ventanada indiscreta': { poster: '/cartelera/ventanada-indiscreta', genero: 'Terror · Suspenso' },
 }
 
 /** La ficha de una película, o `null` si no tiene. Nunca lanza. */

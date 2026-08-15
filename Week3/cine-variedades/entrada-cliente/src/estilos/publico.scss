@@ -8,12 +8,27 @@
  * persona vino a hacer.
  */
 
+/**
+ * 60 rem es el ancho de lectura de la pantalla de una función: título, datos y
+ * mapa de butacas, que no gana nada con estirarse.
+ */
 .pagina {
   max-width: 60rem;
   margin-inline: auto;
   display: flex;
   flex-direction: column;
   gap: var(--espacio-5);
+}
+
+/**
+ * La cartelera no es una pantalla de lectura sino una galería de carteles, y
+ * con 60 rem quedaba encerrada: los pósteres del tamaño de una estampilla y
+ * media pantalla vacía a la derecha, además desalineada con el encabezado y el
+ * pie, que sí usan 84 rem. Acá se iguala a esos dos.
+ */
+.pagina--galeria {
+  max-width: 84rem;
+  gap: var(--espacio-4);
 }
 
 .pagina__encabezado {

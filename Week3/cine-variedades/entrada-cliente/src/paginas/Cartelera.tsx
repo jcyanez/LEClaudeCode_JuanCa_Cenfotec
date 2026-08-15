@@ -51,7 +51,7 @@ export function Cartelera() {
 
   if (funciones.length === 0) {
     return (
-      <div className="pagina">
+      <div className="pagina pagina--galeria">
         <h1 className="pagina__titulo">Cartelera</h1>
         <Aviso
           tono="informacion"
@@ -73,7 +73,7 @@ export function Cartelera() {
   const diaVisible = fechaElegida === null ? '' : etiquetaDeDia(fechaElegida, hoy).accesible
 
   return (
-    <div className="pagina">
+    <div className="pagina pagina--galeria">
       {destacada === null ? null : <FuncionDestacada funcion={destacada} />}
 
       <div className="filtros">

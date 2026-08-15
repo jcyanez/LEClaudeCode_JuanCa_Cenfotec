@@ -1,46 +1,37 @@
 # Cine Variedades — sistema de venta de entradas
 
 Prototipo funcional del sistema de venta de entradas de un cine de dos salas: cartelera y compra por
-internet con selección de butaca desde el teléfono, taquilla sobre el mismo mapa, y validación en la
-puerta.
+internet con selección de butaca desde el teléfono, taquilla sobre el mismo mapa de butacas, y
+validación en la puerta.
 
-El encargo original está en [`PROMPT.md`](PROMPT.md); qué debe hacer el sistema, en
-[`ESPECIFICACION.md`](ESPECIFICACION.md); qué forma tiene la solución, en [`DISENO.md`](DISENO.md);
-el plan por piezas con la evidencia de cada una, en [`PLAN.md`](PLAN.md); el estado al día, en
-[`STATUS.md`](STATUS.md), y la verificación final contra los criterios de aceptación, en
-[`VERIFICACION.md`](VERIFICACION.md).
+**Caso práctico 4 · SINT-732 · Juan Carlos Yáñez.** Continúa el Caso práctico 3, en el mismo
+repositorio.
 
-## Requisitos
+---
 
-- **Node.js 22 o superior** (se desarrolló con 22.22). No hace falta nada más: la base de datos es
-  un archivo y el planificador corre dentro del mismo proceso.
+## Arranque en cuatro comandos
 
-## Poner a correr la aplicación
-
-Son dos paquetes npm: el servidor con el dominio, y el cliente (PWA). Cada uno se instala por
-separado.
+Hace falta **Node.js 22 o superior** y nada más. La base de datos es un archivo; el planificador
+corre dentro del mismo proceso. No hay Docker, ni servidor de base de datos, ni variables de entorno
+obligatorias.
 
 ```bash
-# 1. Servidor y dominio
-cd cine-variedades
-npm install
+git clone https://github.com/jcyanez/LEClaudeCode_JuanCa_Cenfotec.git
+cd LEClaudeCode_JuanCa_Cenfotec/Week3/cine-variedades
 
-# 2. Datos de prueba (crea el archivo cine-variedades.db)
-npm run semilla
+npm install                            # servidor y dominio
+npm install --prefix entrada-cliente   # cliente PWA
 
-# 3. Servidor: queda escuchando en http://127.0.0.1:3001
-npm run servidor
+npm run semilla                        # crea cine-variedades.db con datos de prueba
+npm run dev                            # levanta servidor y cliente juntos
 ```
 
-En **otra terminal**, el cliente:
+Abrí **<http://localhost:5173>**. `Ctrl+C` baja los dos.
 
-```bash
-cd cine-variedades/entrada-cliente
-npm install
-npm run dev          # http://localhost:5173
-```
+> `npm run dev` arranca los dos paquetes y mezcla su salida con un prefijo de color. Si preferís
+> terminales separadas: `npm run servidor` acá y `npm run dev` dentro de `entrada-cliente`.
 
-Abrí `http://localhost:5173` y vas a ver la cartelera. Las rutas:
+### Las cinco pantallas
 
 | Ruta | Quién la usa | Cómo se entra |
 |---|---|---|
@@ -49,6 +40,65 @@ Abrí `http://localhost:5173` y vas a ver la cartelera. Las rutas:
 | `/taquilla` | Quien atiende la ventanilla | PIN **1234** |
 | `/puerta` | Quien recibe en la puerta | PIN **5678** |
 | `/administracion` | La dueña | PIN **9999** |
+
+### Un recorrido de cinco minutos
+
+1. En `/`, tocá el cartel de una película → aparecen sus horarios → elegí uno.
+2. Elegí dos butacas, completá el contacto y pagá. **Anotá el número de compra.**
+3. Entrá a `/puerta` con el PIN `5678`, dictá ese número y validá las entradas. Probá validarlo dos
+   veces: la segunda dice a qué hora se usaron y qué operador las validó.
+4. Entrá a `/taquilla` con `1234` y probá vender una butaca que ya compraste: no se puede.
+5. En `/administracion` con `9999`, cancelá esa función. Todas sus compras quedan devueltas de una
+   sola vez.
+
+---
+
+## Guía de evaluación
+
+Dónde está cada cosa que pide la consigna, y qué la demuestra.
+
+| Lo que pide la consigna | Dónde está | Cómo se comprueba |
+|---|---|---|
+| `PLAN.md` con las piezas y su comprobación **definida antes** de construir | [`PLAN.md`](PLAN.md) | 23 tareas (T0–T22), cada una con su comprobación y su evidencia fechada |
+| **Al menos tres piezas cerradas** con evidencia anotada | [`PLAN.md`](PLAN.md) | **Las 23 están cerradas**, cada una con el comando que la cerró y su resultado |
+| El commit de `PLAN.md` **precede** a los de construcción | Historial | `git log --oneline --diff-filter=A -- Week3/PLAN.md` → `62ca13b`, anterior a todos los de `T1` a `T22` |
+| Base de datos con **motor real**, no un JSON | SQLite en modo WAL | `cine-variedades/src/base/` — migraciones versionadas y unicidad en el motor |
+| Piezas como **recorridos completos**, de la vista al dato guardado | Fases 1 a 6 de `PLAN.md` | Cada tarea nombra una comprobación observable, no «la capa de datos» |
+| Documentos **al día** con lo que reveló la construcción | [`ESPECIFICACION.md`](ESPECIFICACION.md) · [`DISENO.md`](DISENO.md) | `RN-56`/`RN-57`, `CA-7` a `CA-10`, y las decisiones de póster, agrupado y despliegue de horarios |
+| `README.md` con arranque, datos de prueba y dependencias con su repositorio | Este archivo | Secciones de abajo |
+| Tecnologías **las que el diseño eligió** | [`DISENO.md`](DISENO.md), «Otras decisiones» | Cada cambio de tecnología queda registrado con su razón y su fecha |
+
+### Comprobar sin leer una línea de código
+
+```bash
+cd cine-variedades
+npm test           # 251 pruebas: dominio, rutas HTTP, criterios de aceptación y promesas
+npm run typecheck  # TypeScript estricto, sin errores
+npm run carga      # RNF-1: 200 compradores simultáneos sobre las mismas butacas
+
+npm test --prefix entrada-cliente        # 29 pruebas de componentes, por rol accesible
+npm run typecheck --prefix entrada-cliente
+npm run build --prefix entrada-cliente
+```
+
+`npm run carga` levanta el servidor real contra una base temporal y lanza **200 compradores
+concurrentes sobre las 120 butacas de la Sala 1** —80 chocan por diseño— para comprobar que ninguna
+butaca se vende dos veces (`RNF-4`). Sale con código distinto de cero si alguna comprobación falla.
+
+La verificación final contra los diez criterios de aceptación está en
+[`VERIFICACION.md`](VERIFICACION.md), y el estado al día en [`STATUS.md`](STATUS.md).
+
+### Los documentos, en orden de lectura
+
+1. [`PROMPT.md`](PROMPT.md) — el encargo original. Primer commit del repositorio, nunca modificado.
+2. [`ESPECIFICACION.md`](ESPECIFICACION.md) — qué debe hacer el sistema: reglas de negocio,
+   requisitos funcionales y no funcionales, y diez criterios de aceptación. **Sin preguntas
+   abiertas.**
+3. [`DISENO.md`](DISENO.md) — qué forma tiene la solución: ocho componentes con sus límites y lo que
+   prometen, el modelo de datos, y cuatro decisiones mayores comparadas lado a lado.
+4. [`PLAN.md`](PLAN.md) — el orden de construcción y la evidencia de cada pieza.
+
+---
 
 ## Recrear los datos de prueba
 
@@ -60,7 +110,7 @@ npm run semilla
 Es **idempotente**: correrla dos veces no duplica nada. Crea, si no están:
 
 - Los **tres operadores** con su PIN: dueña `9999`, taquilla `1234`, puerta `5678`.
-- Tres **películas** de repertorio: «Ventana indiscreta» (112 min), «El resplandor» (146 min) y
+- Tres **películas** de repertorio: «Ventanada indiscreta» (112 min), «El resplandor» (146 min) y
   «Tiempos modernos» (87 min). El **género no se guarda** —`Película` es título y duración
   (`RN-4`)—, así que el tono de cada una vive en el título y nada más: el sistema no filtra ni
   agrupa por género.
@@ -70,8 +120,8 @@ Es **idempotente**: correrla dos veces no duplica nada. Crea, si no están:
   | | Sala 1 (120 butacas) | Sala 2 (60 butacas) |
   |---|---|---|
   | | 15:00 Tiempos modernos | 15:30 Tiempos modernos |
-  | | 17:00 Ventana indiscreta | 17:30 El resplandor |
-  | | 19:30 Ventana indiscreta | 20:30 El resplandor |
+  | | 17:00 Ventanada indiscreta | 17:30 El resplandor |
+  | | 19:30 Ventanada indiscreta | 20:30 El resplandor |
 
   Los horarios dejan al menos 20 minutos libres entre el fin de una función y el inicio de la
   siguiente en la misma sala (`RN-6`). No hace falta creerlo: el servidor rechaza la que se pise
@@ -84,7 +134,7 @@ Las fechas se calculan a partir de hoy, nunca fijas: la semana va de jueves a mi
 solo pueden estar cargadas la en curso y la siguiente (`RN-8`), así que una semilla con fechas
 escritas a mano dejaría de servir a los pocos días.
 
-Para **empezar de cero**, borrá el archivo de la base y volvé a sembrar:
+Para **empezar de cero**:
 
 ```bash
 rm cine-variedades.db*      # incluye los archivos -wal y -shm del modo WAL
@@ -93,6 +143,8 @@ npm run semilla
 
 Las salas y sus 180 butacas no las crea la semilla sino el propio servidor al arrancar: son un dato
 fijo del negocio (`RN-1`, `RN-2`), no datos de prueba.
+
+---
 
 ## Variables de entorno
 
@@ -107,24 +159,7 @@ Todas son opcionales; sin ninguna, el sistema funciona.
 
 Las credenciales **nunca** se commitean.
 
-## Pruebas
-
-```bash
-cd cine-variedades
-npm test                # 251 pruebas: dominio, rutas HTTP, criterios de aceptación y promesas
-npm run typecheck       # TypeScript estricto
-npm run carga           # prueba de carga de RNF-1: 200 compradores simultáneos
-
-cd entrada-cliente
-npm test                # 28 pruebas de componentes
-npm run typecheck
-npm run build
-```
-
-`npm run carga` levanta el servidor real contra una base temporal y lanza 200 compradores
-concurrentes sobre las 120 butacas de la Sala 1 —80 chocan por diseño— para comprobar que ninguna
-butaca se vende dos veces (`RNF-4`). Termina con un resumen y sale con código distinto de cero si
-alguna comprobación falla.
+---
 
 ## Dependencias adoptadas
 
@@ -166,9 +201,9 @@ Todas se eligieron en T0 y están registradas con su razón en [`DISENO.md`](DIS
 
 Es la **única** dependencia de terceros que viaja por red con la aplicación corriendo, y conviene
 saberlo por dos razones: en una PWA instalada la tipografía sigue pidiéndose a un dominio ajeno, y
-si ese pedido falla se cae a `system-ui`. Servirla desde el propio proyecto (`@fontsource/inter`)
-la volvería una dependencia npm más y quitaría el pedido externo; **no está hecho**, y queda
-anotado como pendiente.
+si ese pedido falla se cae a `system-ui`. Servirla desde el propio proyecto (`@fontsource/inter`) la
+volvería una dependencia npm más y quitaría el pedido externo; **no está hecho**, y queda anotado
+como pendiente.
 
 **Qué se rompe si alguna desaparece.** `better-sqlite3` es la única difícil de sustituir sin tocar
 código: la garantía de no doble venta (`RNF-4`) se apoya en una transacción sincrónica y en la
@@ -179,84 +214,61 @@ ninguna librería de componentes**: el sistema visual es propio (`src/componente
 `src/estilos/tokens.scss`), derivado de la skill `ui-ux-pro-max`, así que no hay nada que se rompa
 si un sistema de diseño de terceros cambia de versión o de rumbo.
 
-## Marca
+### Por qué hay un `.npmrc`
 
-El original es [`LogoCV.png`](LogoCV.png) — 1536 × 1024, 1,6 MB, arte dorado sobre transparencia.
-**Ese archivo no se sirve nunca**: es la fuente de la que salen los derivados que viven en
-`cine-variedades/entrada-cliente/public/`.
+[`cine-variedades/.npmrc`](cine-variedades/.npmrc) trae `ignore-scripts=true`, y hace falta para que
+`npm install` funcione en una máquina limpia. `better-sqlite3` incluye los binarios ya compilados de
+las ocho plataformas dentro del paquete —`win32-x64` entre ellos— y no declara script de
+instalación, pero npm dispara `node-gyp rebuild` por su cuenta al encontrar el `binding.gyp` del
+paquete; esa compilación exige Python y las herramientas de Visual Studio, y sin ellas **el
+`npm install` completo falla** y no llega a instalar ni `tsx` ni `vitest`. Comprobado sobre un clon
+limpio: con esa línea la instalación termina en verde, la semilla corre y pasan las 251 pruebas, sin
+Python ni compilador en la máquina. De paso es la recomendación de seguridad habitual de npm frente
+a los ataques a la cadena de suministro.
 
-| Archivo | Dónde se usa | De dónde sale |
+---
+
+## Marca y pósteres
+
+Los originales pesados **no se sirven nunca**: viven fuera de `public/` y de ellos salen derivados
+livianos. El logo original es [`LogoCV.png`](LogoCV.png) (1,6 MB) y los carteles están en
+[`carteles-originales/`](carteles-originales/) (7,15 MB entre los tres).
+
+| Derivado | Dónde se usa | Peso |
 |---|---|---|
-| `marca-320.webp` · `marca-320.avif` | Encabezado de la cartelera, 1× | Escalado del original |
-| `marca-640.webp` · `marca-640.avif` | Lo mismo, en pantallas 2× | Ídem |
-| `icono-192.png` · `icono-512.png` | Iconos de la PWA (`purpose: any`) | Escudo recortado y aplanado sobre `#0f0f23` |
-| `icono-mascara-512.png` | Icono de la PWA (`purpose: maskable`) | Ídem, con más margen para el recorte circular |
-| `icono-32.png` | Pestaña del navegador | Reducción del de 512 |
-| `apple-touch-icon.png` | Pantalla de inicio en iOS | Ídem, a 180 px |
+| `marca-320/640.webp` · `.avif` | Barra de marca | 28 KB a 1× |
+| `icono-192/512.png`, `icono-mascara-512.png` | Iconos de la PWA | — |
+| `icono-32.png`, `apple-touch-icon.png` | Pestaña del navegador e iOS | — |
+| `cartelera/<pelicula>-320/640.webp` | Carteles de la cartelera | **53 KB entre los tres** a 1× |
 
-Se regeneran con `sharp-cli` por `npx`, **sin agregar ninguna dependencia** al proyecto. Desde
-`Week3/`:
+Se regeneran con `sharp-cli` por `npx`, **sin agregar ninguna dependencia**. Desde `Week3/`:
 
 ```bash
-# Lockup: 320 y 640 px, en WebP y AVIF
-npx --yes sharp-cli@5 -i LogoCV.png -o <destino> -f webp --quality 62 resize 320
-
-# Escudo para los iconos: recorte, fondo de marca, y margen hasta 512 px
-npx --yes sharp-cli@5 -i LogoCV.png -o <destino> -f png \
-  extract 0 448 618 618 -- flatten --background "#0f0f23" -- \
-  resize 360 360 -- extend 76 76 76 76 --background "#0f0f23"
+npx --yes sharp-cli@5 -i carteles-originales/<nombre>.png \
+  -o cine-variedades/entrada-cliente/public/cartelera -f webp --quality 62 resize 320
 ```
 
-**El logo solo aparece en la web pública**, que usa el tema oscuro. En el tema claro de taquilla y
-puerta el dorado sobre blanco no alcanza el 3:1 que la prioridad 1 de `ui-ux-pro-max` exige para un
-elemento gráfico, así que ahí la marca sigue siendo texto. Para usarlo también en esas pantallas
-haría falta una versión pensada para fondo claro, que hoy no existe.
+> Se probó AVIF para los carteles y salía **más pesado que WebP** en los tres. Como el navegador
+> toma la primera fuente que entiende, ofrecerlo primero habría servido el archivo grande. Se
+> descartó: WebP solo.
 
-## Pósteres de la cartelera
+**Agregar un póster nuevo.** El póster y el género no están en la base: viven en un mapa por título
+en el cliente, [`posters.ts`](cine-variedades/entrada-cliente/src/componentes/publico/posters.ts).
+Es deuda asumida a propósito, registrada en `DISENO.md`, y el archivo la explica. Se agrega el
+original, se generan los dos derivados y se suma una línea con el **título exacto** con que la
+película está cargada en la base. Si el título no coincide, la tarjeta muestra «Sin póster» y la
+película se sigue pudiendo comprar: **nunca aparece el icono roto del navegador**, y hay una prueba
+que lo comprueba.
 
-Mismo criterio que la marca: los originales viven en [`carteles-originales/`](carteles-originales/)
-—tres PNG de 1024 × 1536, **7,15 MB entre los tres**— y **no se sirven nunca**. En
-`cine-variedades/entrada-cliente/public/cartelera/` van solo derivados WebP, **53 KB entre los tres
-a 1×**.
-
-> Se probó también AVIF y salía **más pesado que WebP** en las tres imágenes. Como el navegador
-> elige la primera fuente que entiende, ofrecer AVIF primero habría servido el archivo más grande.
-> Se descartó: WebP solo.
-
-### Agregar o reemplazar un póster
-
-El póster y el género **no están en la base de datos**: viven en un mapa por título en el cliente,
-[`src/componentes/publico/posters.ts`](cine-variedades/entrada-cliente/src/componentes/publico/posters.ts).
-Es una deuda asumida a propósito, y el archivo la explica. Son tres pasos:
-
-1. Poné el original en `carteles-originales/<nombre-en-kebab>.png`, en proporción **2:3**.
-2. Generá los dos derivados, desde `Week3/`:
-
-   ```bash
-   npx --yes sharp-cli@5 -i carteles-originales/<nombre>.png \
-     -o cine-variedades/entrada-cliente/public/cartelera -f webp --quality 62 resize 320
-   npx --yes sharp-cli@5 -i carteles-originales/<nombre>.png \
-     -o cine-variedades/entrada-cliente/public/cartelera -f webp --quality 62 resize 640
-   ```
-
-   Renombrá las salidas a `<nombre>-320.webp` y `<nombre>-640.webp`.
-3. Agregá la entrada en `posters.ts`, con el **título exacto** con que la película está cargada en
-   la base:
-
-   ```ts
-   'Ventana indiscreta': { poster: '/cartelera/ventana-indiscreta', genero: 'Terror · Suspenso' },
-   ```
-
-Si el título no coincide, o si el archivo falla al cargar, la tarjeta muestra un respaldo con la
-leyenda «Sin póster» y la película se sigue pudiendo comprar. **Nunca aparece el icono roto del
-navegador**, y hay una prueba que lo comprueba.
+---
 
 ## Estructura
 
 ```
 Week3/
 ├── PROMPT.md ESPECIFICACION.md DISENO.md PLAN.md STATUS.md VERIFICACION.md
-├── LogoCV.png            Original de la marca; no se sirve, solo se derivan activos
+├── LogoCV.png              Original de la marca; no se sirve, solo se derivan activos
+├── carteles-originales/    Originales de los tres carteles; tampoco se sirven
 └── cine-variedades/
     ├── src/
     │   ├── base/          Conexión a SQLite y migraciones
@@ -271,9 +283,24 @@ Week3/
     │   ├── aceptacion/    Los criterios CA- y las promesas de DISENO.md
     │   ├── semilla/       Datos de prueba
     │   └── carga/         Prueba de carga de RNF-1
+    ├── scripts/dev.mjs    Levanta servidor y cliente juntos, sin dependencias
     └── entrada-cliente/   PWA en React
-        └── public/        Activos de marca: lockup e iconos (ver «Marca»)
+        ├── public/        Activos de marca y carteles derivados
+        └── src/componentes/publico/   Cartelera, hero, filtros y tarjetas
 ```
 
-Las dependencias entre componentes van en una sola dirección: Ocupación no conoce a nadie, y nadie
-conoce ni a Entrada ni al Reloj.
+Las dependencias entre componentes van en una sola dirección: **Ocupación no conoce a nadie, y nadie
+conoce ni a Entrada ni al Reloj.** No hay ciclos, así que cada pieza se prueba con la de abajo
+simulada.
+
+---
+
+## Si algo falla
+
+| Síntoma | Causa y arreglo |
+|---|---|
+| `git clone` corta con «Filename too long» en Windows | Límite de 260 caracteres del sistema. Cloná en una ruta corta (`C:\cv`) o activá rutas largas: `git config --global core.longpaths true` |
+| `npm install` falla con `gyp ERR!` | Se perdió el [`.npmrc`](cine-variedades/.npmrc), o se instaló forzando `--ignore-scripts=false`. Ver «Por qué hay un `.npmrc`» |
+| La cartelera dice «No hay funciones en venta» | Falta correr `npm run semilla` |
+| «No pudimos cargar la cartelera» | El servidor no está arriba. `npm run dev` levanta los dos |
+| El puerto 3001 o 5173 está ocupado | `PUERTO=3002 npm run servidor`, o cerrá el proceso que lo tiene tomado |

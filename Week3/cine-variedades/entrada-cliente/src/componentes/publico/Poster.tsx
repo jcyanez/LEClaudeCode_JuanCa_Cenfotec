@@ -49,7 +49,12 @@ export function Poster({ titulo, prioritario = false, className }: Props) {
       className={clases}
       src={`${ficha.poster}-320.webp`}
       srcSet={`${ficha.poster}-320.webp 320w, ${ficha.poster}-640.webp 640w`}
-      sizes="(min-width: 90rem) 20rem, (min-width: 64rem) 22rem, (min-width: 48rem) 45vw, 90vw"
+      /* Cuánto mide el cartel en pantalla, para que el navegador elija bien
+         entre 320 y 640. Tiene que seguir a la rejilla de `cartelera.scss`: a
+         partir de 64 rem son tres columnas dentro de 84 rem, o sea unos 26 rem
+         por cartel. Si acá dijera menos, se serviría la imagen chica estirada
+         y se vería blanda. */
+      sizes="(min-width: 64rem) 26rem, (min-width: 30rem) 45vw, 92vw"
       width={320}
       height={480}
       alt={`Póster de ${titulo}`}

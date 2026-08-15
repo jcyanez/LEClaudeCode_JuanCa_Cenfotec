@@ -61,6 +61,15 @@ export function IconoEntrada({ className }: IconoProps) {
   )
 }
 
+/** Apunta hacia abajo; girado 180° cuando el panel está abierto. */
+export function IconoChevron({ className }: IconoProps) {
+  return (
+    <Svg className={className}>
+      <path d="m6 9 6 6 6-6" />
+    </Svg>
+  )
+}
+
 export function IconoFlecha({ className }: IconoProps) {
   return (
     <Svg className={className}>
