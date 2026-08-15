@@ -5,9 +5,42 @@
 > comportamientos, interfaces, referencias — vive en `PLAN.md`.
 
 **Última actualización:** 15 de agosto de 2026 · Sesión 15 — **T22 cerrada (el plan T0–T22 está
-completo)**, **cambio de sistema visual: etapa 1 de 2**, y **entregables del Caso práctico 4
-completos**.
+completo)**, **cambio de sistema visual terminado (etapas 1 y 2)**, y **entregables del Caso
+práctico 4 completos**.
 **Tarea en curso:** ninguna. **No queda ninguna tarea del plan.**
+
+## Cierre de la sesión 15 (CLI) — el trabajo sigue en VS Code
+
+Todo lo hecho en esta sesión está **commiteado y en GitHub**, con `main` sincronizado con
+`origin/main`. Los procesos de desarrollo quedaron **detenidos**; no hay nada corriendo en segundo
+plano.
+
+**Los tres commits de la sesión, en orden:**
+
+| Commit | Qué trae |
+|---|---|
+| `d05207f` | T22: los diez `CA-`, la carga de 200 usuarios y las tres promesas transversales |
+| `c347192` | Entregables del Caso práctico 4: `README.md`, `npm run semilla`, evidencia en `PLAN.md`, etapa 1 del sistema visual |
+| `3c46efd` | Etapa 2 del sistema visual: fuera Carbon, pantallas de trabajo rehechas |
+
+**Para retomar en VS Code**, todo está en el `README.md`; en corto:
+
+```bash
+cd cine-variedades && npm install && npm run semilla && npm run servidor
+cd cine-variedades/entrada-cliente && npm install && npm run dev    # otra terminal
+```
+
+Cartelera en `http://localhost:5173`; taquilla, puerta y administración con los PIN `1234`, `5678`
+y `9999`. La base de datos (`*.db`) está ignorada por git a propósito: se recrea con `npm run
+semilla`, así que en otra máquina hay que correrla antes de abrir la aplicación.
+
+**Verificación al cerrar:** 251 pruebas en `cine-variedades/`, 22 en `entrada-cliente/`, typecheck
+limpio en los dos paquetes, `build` del cliente en verde y la prueba de carga de `RNF-1` cumpliendo
+sus seis comprobaciones.
+
+**Lo único pendiente, y no es código:** las siete «interpretaciones a revisar» que se fueron
+acumulando desde T6 y que siguen esperando tu decisión (están más abajo, cada una con su razón).
+Ninguna bloquea la entrega.
 
 ## Entregables del Caso práctico 4 — revisados contra la consigna (15/08)
 
