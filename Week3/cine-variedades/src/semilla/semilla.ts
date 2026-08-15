@@ -35,9 +35,39 @@ const DIAS_DE_UNA_SEMANA = 7
 const PRECIO_GENERAL = 8000
 const PRECIO_ESTUDIANTE = 5000
 
+/**
+ * Tres películas de repertorio, de tres tonos distintos, para que la cartelera
+ * no se vea como una lista de lo mismo.
+ *
+ * **El género no se guarda**: `Película` es título y duración (`RN-4`), y no se
+ * agregan campos que la especificación no tiene. Que una sea de terror y otra
+ * de comedia vive en el título y en nada más; el sistema no puede filtrar ni
+ * agrupar por género, y no debería aparentar que sí.
+ */
 const PELICULAS: Array<{ titulo: string; duracionMinutos: number }> = [
-  { titulo: 'La ventana indiscreta', duracionMinutos: 112 },
-  { titulo: 'Cinema Paradiso', duracionMinutos: 155 },
+  { titulo: 'Ventana indiscreta', duracionMinutos: 112 },
+  { titulo: 'El resplandor', duracionMinutos: 146 },
+  { titulo: 'Tiempos modernos', duracionMinutos: 87 },
+]
+
+/**
+ * La programación de un día, igual para toda la semana: **tres funciones por
+ * sala**, que es lo que este cine programa.
+ *
+ * El margen de `RN-6` —20 minutos libres entre el fin de una función y el
+ * inicio de la siguiente en la misma sala— está comprobado acá abajo función
+ * por función. Si alguien mueve una hora, tiene que rehacer la cuenta: el
+ * servidor la va a rechazar igual (`RF-3`), pero es mejor verlo escrito.
+ */
+const PROGRAMACION_DIARIA: Array<{ salaId: number; horaInicio: string; titulo: string }> = [
+  // Sala 1, 120 butacas.
+  { salaId: 1, horaInicio: '15:00', titulo: 'Tiempos modernos' }, //      87 min → 16:27
+  { salaId: 1, horaInicio: '17:00', titulo: 'Ventana indiscreta' }, // 33 min de margen; 112 min → 18:52
+  { salaId: 1, horaInicio: '19:30', titulo: 'Ventana indiscreta' }, // 38 min de margen; 112 min → 21:22
+  // Sala 2, 60 butacas.
+  { salaId: 2, horaInicio: '15:30', titulo: 'Tiempos modernos' }, //      87 min → 16:57
+  { salaId: 2, horaInicio: '17:30', titulo: 'El resplandor' }, //         33 min de margen; 146 min → 19:56
+  { salaId: 2, horaInicio: '20:30', titulo: 'El resplandor' }, //         34 min de margen; 146 min → 22:56
 ]
 
 /** Los tres puestos de `RN-50`, cada uno con un PIN corto para entrar a su pantalla. */
@@ -81,28 +111,25 @@ function sembrarOperadores(bd: Bd): number {
 }
 
 /**
- * Programa una función por día en cada sala, a partir de mañana y hasta que
- * termine la semana. Se salta el día si ya hay una función de esa sala a esa
- * hora, para poder correr la semilla dos veces sin chocar con el margen de 20
- * minutos entre funciones (`RN-6`).
+ * Programa la grilla diaria en las dos salas, a partir de mañana y hasta que
+ * termine la semana. Se salta la función si ya hay una de esa sala a esa hora,
+ * para poder correr la semilla dos veces sin chocar con el margen de 20 minutos
+ * entre funciones (`RN-6`).
  */
-function sembrarFunciones(bd: Bd, semanaId: number, jueves: string, peliculaIds: number[]): number {
+function sembrarFunciones(bd: Bd, semanaId: number, jueves: string, idPorTitulo: Map<string, number>): number {
   const desde = sumarDias(hoy(), 1)
   let creadas = 0
   for (let dia = 0; dia < DIAS_DE_UNA_SEMANA; dia++) {
     const fecha = sumarDias(jueves, dia)
     if (fecha < desde) continue
-    // Sala 1 a las 19:00 y Sala 2 a las 20:00: una por sala y por día, sin choques.
-    const programadas: Array<{ salaId: number; horaInicio: string; peliculaId: number }> = [
-      { salaId: 1, horaInicio: '19:00', peliculaId: peliculaIds[0] as number },
-      { salaId: 2, horaInicio: '20:00', peliculaId: peliculaIds[1] as number },
-    ]
-    for (const funcion of programadas) {
+    for (const funcion of PROGRAMACION_DIARIA) {
       const yaEsta = bd
         .prepare(`SELECT 1 FROM funcion WHERE sala_id = ? AND fecha = ? AND hora_inicio = ?`)
         .get(funcion.salaId, fecha, funcion.horaInicio)
       if (yaEsta !== undefined) continue
-      programarFuncion(bd, { ...funcion, semanaId, fecha })
+      const peliculaId = idPorTitulo.get(funcion.titulo)
+      if (peliculaId === undefined) throw new Error(`La programación nombra una película que no existe: ${funcion.titulo}`)
+      programarFuncion(bd, { salaId: funcion.salaId, horaInicio: funcion.horaInicio, peliculaId, semanaId, fecha })
       creadas++
     }
   }
@@ -127,9 +154,10 @@ export function sembrarDatosDePrueba(bd: Bd): void {
     const yaEsta = peliculas(bd).some((p) => p.titulo === pelicula.titulo)
     if (!yaEsta) registrarPelicula(bd, pelicula.titulo, pelicula.duracionMinutos)
   }
-  const peliculaIds = PELICULAS.map(
-    (pelicula) => peliculas(bd).find((p) => p.titulo === pelicula.titulo)?.id as number,
-  )
+  // Por título y no por posición: la programación nombra la película que va en
+  // cada horario, así que reordenar la lista de arriba no puede cambiar en
+  // silencio qué se proyecta.
+  const idPorTitulo = new Map(peliculas(bd).map((pelicula) => [pelicula.titulo, pelicula.id]))
 
   // Los precios llevan fecha desde: se fijan una sola vez (RN-12, historial de DISENO.md).
   const hayPrecios = bd.prepare(`SELECT 1 FROM precio_vigente LIMIT 1`).get() !== undefined
@@ -141,7 +169,7 @@ export function sembrarDatosDePrueba(bd: Bd): void {
   let funcionesCreadas = 0
   for (const jueves of [juevesEnCurso, juevesSiguiente]) {
     const semanaId = semanaCargada(bd, jueves)
-    funcionesCreadas += sembrarFunciones(bd, semanaId, jueves, peliculaIds)
+    funcionesCreadas += sembrarFunciones(bd, semanaId, jueves, idPorTitulo)
     // La venta se abre acá para que la cartelera tenga algo que mostrar; en la
     // vida real la abre la dueña cuando da la semana por cargada (RN-9, RF-5).
     abrirVenta(bd, semanaId)

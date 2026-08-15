@@ -22,22 +22,12 @@
   gap: var(--espacio-1);
 }
 
-/* La marca del cine: el «spotlight» de la paleta, usado una vez por pantalla
-   para no gastarlo. El arte es dorado sobre transparente, así que cae directo
-   sobre el fondo del tema oscuro sin recuadro ni truco de mezcla.
-   Solo va en la web pública: en el tema claro de taquilla y puerta el dorado
-   sobre blanco no llega al 3:1 que la prioridad 1 de la skill exige para un
-   elemento gráfico, y ahí la marca sigue siendo texto. */
-.pagina__marca {
-  display: block;
-  margin-bottom: var(--espacio-1);
-}
-
-.pagina__marca-imagen {
-  display: block;
-  width: min(18rem, 62vw);
-  height: auto;
-}
+/* La marca ya no vive en la página sino en la barra superior del marco público
+   (`componentes/publico/marco.tsx`), que la muestra en las dos rutas del
+   comprador. El arte es dorado sobre transparente, así que cae directo sobre el
+   fondo del tema oscuro; en el tema claro de taquilla y puerta no se usa,
+   porque el dorado sobre blanco no llega al 3:1 que la prioridad 1 de la skill
+   exige para un elemento gráfico. */
 
 .pagina__titulo {
   margin: 0;

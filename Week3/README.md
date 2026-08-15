@@ -60,11 +60,24 @@ npm run semilla
 Es **idempotente**: correrla dos veces no duplica nada. Crea, si no están:
 
 - Los **tres operadores** con su PIN: dueña `9999`, taquilla `1234`, puerta `5678`.
-- Dos **películas** («La ventana indiscreta», 112 min; «Cinema Paradiso», 155 min).
+- Tres **películas** de repertorio: «Ventana indiscreta» (112 min), «El resplandor» (146 min) y
+  «Tiempos modernos» (87 min). El **género no se guarda** —`Película` es título y duración
+  (`RN-4`)—, así que el tono de cada una vive en el título y nada más: el sistema no filtra ni
+  agrupa por género.
 - La **semana de cartelera en curso y la siguiente**, ambas abiertas a la venta.
-- Una **función por sala y por día** a partir de mañana: Sala 1 a las 19:00 y Sala 2 a las 20:00.
+- **Tres funciones diarias en cada sala**, a partir de mañana:
+
+  | | Sala 1 (120 butacas) | Sala 2 (60 butacas) |
+  |---|---|---|
+  | | 15:00 Tiempos modernos | 15:30 Tiempos modernos |
+  | | 17:00 Ventana indiscreta | 17:30 El resplandor |
+  | | 19:30 Ventana indiscreta | 20:30 El resplandor |
+
+  Los horarios dejan al menos 20 minutos libres entre el fin de una función y el inicio de la
+  siguiente en la misma sala (`RN-6`). No hace falta creerlo: el servidor rechaza la que se pise
+  (`RF-3`), así que si la semilla termina sin error, la grilla cumple.
 - **Precios**: ₡8 000 general y ₡5 000 estudiante. Los miércoles salen a mitad de precio y sin
-  reservas de estudiante (`RN-13`, `RN-14`), así que en la cartelera se ve una función a ₡4 000.
+  reservas de estudiante (`RN-13`, `RN-14`), así que ese día toda la cartelera se ve a ₡4 000.
 - El **correo del distribuidor** para el reporte mensual.
 
 Las fechas se calculan a partir de hoy, nunca fijas: la semana va de jueves a miércoles (`RN-3`) y
@@ -103,7 +116,7 @@ npm run typecheck       # TypeScript estricto
 npm run carga           # prueba de carga de RNF-1: 200 compradores simultáneos
 
 cd entrada-cliente
-npm test                # 22 pruebas de componentes
+npm test                # 28 pruebas de componentes
 npm run typecheck
 npm run build
 ```
@@ -198,6 +211,45 @@ npx --yes sharp-cli@5 -i LogoCV.png -o <destino> -f png \
 puerta el dorado sobre blanco no alcanza el 3:1 que la prioridad 1 de `ui-ux-pro-max` exige para un
 elemento gráfico, así que ahí la marca sigue siendo texto. Para usarlo también en esas pantallas
 haría falta una versión pensada para fondo claro, que hoy no existe.
+
+## Pósteres de la cartelera
+
+Mismo criterio que la marca: los originales viven en [`carteles-originales/`](carteles-originales/)
+—tres PNG de 1024 × 1536, **7,15 MB entre los tres**— y **no se sirven nunca**. En
+`cine-variedades/entrada-cliente/public/cartelera/` van solo derivados WebP, **53 KB entre los tres
+a 1×**.
+
+> Se probó también AVIF y salía **más pesado que WebP** en las tres imágenes. Como el navegador
+> elige la primera fuente que entiende, ofrecer AVIF primero habría servido el archivo más grande.
+> Se descartó: WebP solo.
+
+### Agregar o reemplazar un póster
+
+El póster y el género **no están en la base de datos**: viven en un mapa por título en el cliente,
+[`src/componentes/publico/posters.ts`](cine-variedades/entrada-cliente/src/componentes/publico/posters.ts).
+Es una deuda asumida a propósito, y el archivo la explica. Son tres pasos:
+
+1. Poné el original en `carteles-originales/<nombre-en-kebab>.png`, en proporción **2:3**.
+2. Generá los dos derivados, desde `Week3/`:
+
+   ```bash
+   npx --yes sharp-cli@5 -i carteles-originales/<nombre>.png \
+     -o cine-variedades/entrada-cliente/public/cartelera -f webp --quality 62 resize 320
+   npx --yes sharp-cli@5 -i carteles-originales/<nombre>.png \
+     -o cine-variedades/entrada-cliente/public/cartelera -f webp --quality 62 resize 640
+   ```
+
+   Renombrá las salidas a `<nombre>-320.webp` y `<nombre>-640.webp`.
+3. Agregá la entrada en `posters.ts`, con el **título exacto** con que la película está cargada en
+   la base:
+
+   ```ts
+   'Ventana indiscreta': { poster: '/cartelera/ventana-indiscreta', genero: 'Terror · Suspenso' },
+   ```
+
+Si el título no coincide, o si el archivo falla al cargar, la tarjeta muestra un respaldo con la
+leyenda «Sin póster» y la película se sigue pudiendo comprar. **Nunca aparece el icono roto del
+navegador**, y hay una prueba que lo comprueba.
 
 ## Estructura
 

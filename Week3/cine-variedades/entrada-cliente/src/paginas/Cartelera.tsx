@@ -1,25 +1,46 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { esErrorDeApi, obtenerCartelera, type FuncionEnCartelera } from '../api/cliente.js'
-import { Aviso, Cargando, TarjetaEnlace } from '../componentes/base/index.js'
-import { ETIQUETA_MIERCOLES, formatearColones, formatearFecha } from '../utilidades/formato.js'
+import { Aviso, Cargando } from '../componentes/base/index.js'
+import {
+  agruparPorPelicula,
+  fechaInicial,
+  fechaLocalDeHoy,
+  fechasDisponibles,
+  FiltroDeSala,
+  funcionDestacada,
+  FuncionDestacada,
+  RejillaDePeliculas,
+  salasDisponibles,
+  SelectorDeFecha,
+  TODAS_LAS_SALAS,
+} from '../componentes/publico/index.js'
+import { etiquetaDeDia } from '../componentes/publico/agrupar.js'
 
-function textoDePrecios(funcion: FuncionEnCartelera): string {
-  if (funcion.categoriaBase === 'miercoles') {
-    return `${formatearColones(funcion.precios.miercoles ?? 0)} general`
-  }
-  return `${formatearColones(funcion.precios.general ?? 0)} general · ${formatearColones(funcion.precios.estudiante ?? 0)} estudiante`
-}
-
-/** La cartelera pública: cualquiera la ve sin identificarse (RF-8, RN-55). */
+/**
+ * La cartelera pública: cualquiera la ve sin identificarse (`RF-8`, `RN-55`).
+ *
+ * Se entra por la función más próxima, se elige un día y se ve una tarjeta por
+ * película con sus horarios. Antes era una lista plana de funciones, que es la
+ * forma de la tabla: la misma película aparecía tantas veces como horarios
+ * tuviera. Los datos son exactamente los mismos; lo que cambió es el orden en
+ * que se leen.
+ */
 export function Cartelera() {
   const [funciones, setFunciones] = useState<FuncionEnCartelera[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [fechaElegida, setFechaElegida] = useState<string | null>(null)
+  const [salaElegida, setSalaElegida] = useState<string>(TODAS_LAS_SALAS)
+
+  const hoy = useMemo(() => fechaLocalDeHoy(), [])
 
   useEffect(() => {
     obtenerCartelera()
-      .then(setFunciones)
+      .then((recibidas) => {
+        setFunciones(recibidas)
+        setFechaElegida(fechaInicial(fechasDisponibles(recibidas), hoy))
+      })
       .catch((error: unknown) => setError(esErrorDeApi(error) ? error.mensaje : 'No pudimos cargar la cartelera'))
-  }, [])
+  }, [hoy])
 
   if (error !== null) {
     return <Aviso tono="error" titulo="No se pudo cargar" detalle={error} />
@@ -28,56 +49,56 @@ export function Cartelera() {
     return <Cargando descripcion="Cargando cartelera…" />
   }
 
+  if (funciones.length === 0) {
+    return (
+      <div className="pagina">
+        <h1 className="pagina__titulo">Cartelera</h1>
+        <Aviso
+          tono="informacion"
+          titulo="No hay funciones en venta por ahora"
+          detalle="Volvé a mirar cuando se cargue la semana."
+        />
+      </div>
+    )
+  }
+
+  const fechas = fechasDisponibles(funciones)
+  const salas = salasDisponibles(funciones)
+  const destacada = funcionDestacada(funciones)
+
+  const delDia = funciones.filter((funcion) => funcion.fecha === fechaElegida)
+  const visibles = salaElegida === TODAS_LAS_SALAS ? delDia : delDia.filter((funcion) => funcion.sala === salaElegida)
+  const peliculas = agruparPorPelicula(visibles)
+
+  const diaVisible = fechaElegida === null ? '' : etiquetaDeDia(fechaElegida, hoy).accesible
+
   return (
     <div className="pagina">
-      <header className="pagina__encabezado">
-        {/* La marca aparece una sola vez, acá, que es la puerta de entrada del
-            comprador. El original (1536×1024, 1,6 MB) no se sirve nunca: van
-            derivados WebP y AVIF de 320 y 640 px, y el ancho y el alto
-            declarados evitan el salto de maquetación (prioridad 3 de la skill
-            `ui-ux-pro-max`: image-optimization e image-dimension). */}
-        <picture className="pagina__marca">
-          <source
-            type="image/avif"
-            srcSet="/marca-320.avif 320w, /marca-640.avif 640w"
-            sizes="(min-width: 40rem) 18rem, 62vw"
-          />
-          <source
-            type="image/webp"
-            srcSet="/marca-320.webp 320w, /marca-640.webp 640w"
-            sizes="(min-width: 40rem) 18rem, 62vw"
-          />
-          <img
-            className="pagina__marca-imagen"
-            src="/marca-320.webp"
-            width={320}
-            height={213}
-            alt="Cine Variedades"
-          />
-        </picture>
-        <h1 className="pagina__titulo">Cartelera</h1>
-      </header>
+      {destacada === null ? null : <FuncionDestacada funcion={destacada} />}
 
-      {funciones.length === 0 ? (
-        <Aviso tono="informacion" titulo="No hay funciones en venta por ahora" detalle="Volvé a mirar cuando se cargue la semana." />
-      ) : (
-        <ul className="cartelera">
-          {funciones.map((funcion) => (
-            <li key={funcion.funcionId}>
-              <TarjetaEnlace href={`/funciones/${funcion.funcionId}`}>
-                <h2 className="cartelera__pelicula">{funcion.pelicula}</h2>
-                <p className="cartelera__cuando">
-                  {formatearFecha(funcion.fecha)} · {funcion.horaInicio} · {funcion.sala}
-                </p>
-                {funcion.categoriaBase === 'miercoles' ? (
-                  <p className="etiqueta-miercoles">{ETIQUETA_MIERCOLES}</p>
-                ) : null}
-                <p className="cartelera__precios">{textoDePrecios(funcion)}</p>
-              </TarjetaEnlace>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="filtros">
+        <SelectorDeFecha
+          fechas={fechas}
+          elegida={fechaElegida ?? ''}
+          onElegir={setFechaElegida}
+          hoy={hoy}
+        />
+        <FiltroDeSala salas={salas} elegida={salaElegida} onElegir={setSalaElegida} />
+      </div>
+
+      <section aria-live="polite">
+        <h2 className="seccion__titulo">En cartelera · {diaVisible}</h2>
+
+        {peliculas.length === 0 ? (
+          <Aviso
+            tono="informacion"
+            titulo="No hay funciones con esos filtros"
+            detalle="Probá con otro día o mirá todas las salas."
+          />
+        ) : (
+          <RejillaDePeliculas peliculas={peliculas} />
+        )}
+      </section>
     </div>
   )
 }

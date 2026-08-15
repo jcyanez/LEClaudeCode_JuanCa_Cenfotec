@@ -1,0 +1,655 @@
+/**
+ * Las pantallas del comprador, rediseñadas.
+ *
+ * Sigue la entrada **Theater/Cinema** de `ui-ux-pro-max` —«Dark Mode (OLED) +
+ * Motion-Driven», paleta «dramatic dark + spotlight gold»— sobre los tokens que
+ * ya existen. No hay un solo color ni una sola medida escrita a mano en este
+ * archivo: todo sale de `tokens.scss`, así que el día que cambie la paleta,
+ * cambia acá sola.
+ *
+ * Tres reglas que gobiernan todo lo de abajo:
+ *
+ * 1. **El dorado se gasta una vez por zona.** Es el acento, no un color de
+ *    relleno: encabeza la función destacada, marca el día elegido y pinta la
+ *    llamada a la acción. Si estuviera en todos lados no destacaría nada.
+ * 2. **Ningún estado se transmite solo con color** (prioridad 1). El día
+ *    elegido cambia de peso y de borde además de color, y lo anuncia con
+ *    `aria-pressed`.
+ * 3. **Nada se mueve por decorar** (prioridad 7). El movimiento es de 180 ms,
+ *    va sobre `transform` y `box-shadow` —nunca sobre alto o ancho, que
+ *    reflotan la maquetación— y desaparece entero si se pidió menos
+ *    movimiento.
+ */
+
+.icono {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ---------- Marco: barra de marca y pie ---------- */
+
+.marco-superior {
+  border-bottom: 1px solid var(--color-borde-suave);
+  background: var(--color-fondo);
+}
+
+.marco-superior__interior {
+  max-width: 84rem;
+  margin-inline: auto;
+  padding: var(--espacio-3) var(--espacio-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.marco-superior__marca {
+  display: inline-flex;
+  border-radius: var(--radio-chico);
+  /* Objetivo táctil: el logo es el camino de vuelta a la cartelera. */
+  min-height: var(--objetivo-tactil-minimo);
+  align-items: center;
+}
+
+.marco-superior__logo {
+  display: block;
+  width: 9.5rem;
+  height: auto;
+}
+
+/* El eslogan de la marca. Venía a 0,7 rem —11 px—, por debajo del piso de
+   12 px que la prioridad 6 de la skill marca como límite. Ahora escala con el
+   ancho: nunca baja de 13 px en un teléfono y llega a 17 px en pantalla
+   grande, sin llegar a competir con el logo que tiene al lado. */
+.marco-superior__lema {
+  margin: 0;
+  font: var(--texto-menor);
+  font-size: clamp(0.8125rem, 1.6vw, 1.0625rem);
+  color: var(--color-texto-atenuado);
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+}
+
+.marco-inferior {
+  max-width: 84rem;
+  margin: var(--espacio-7) auto 0;
+  padding: var(--espacio-6) var(--espacio-4) var(--espacio-5);
+  border-top: 1px solid var(--color-borde-suave);
+}
+
+.marco-inferior__promesas {
+  list-style: none;
+  margin: 0 0 var(--espacio-5);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--espacio-5);
+}
+
+.promesa {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--espacio-3);
+  align-items: center;
+}
+
+.promesa__icono {
+  grid-row: 1 / 3;
+  color: var(--color-acento);
+}
+
+.promesa__titulo {
+  font: var(--texto-cuerpo);
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
+.promesa__detalle {
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+/* La línea de cierre: derechos a la izquierda, firma a la derecha, y en un
+   teléfono una debajo de la otra. Va separada de las promesas por una regla,
+   para que se lea como pie y no como una promesa más. */
+.marco-inferior__base {
+  padding-top: var(--espacio-4);
+  border-top: 1px solid var(--color-borde-suave);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espacio-2) var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.marco-inferior__firma,
+.marco-inferior__credito {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+/* El único dorado del pie: la firma. Es el acento, y acá se gasta una vez. */
+.marco-inferior__autor {
+  color: var(--color-acento);
+  font-weight: 600;
+  letter-spacing: var(--interletrado-etiqueta);
+}
+
+/* ---------- Función destacada ---------- */
+
+.destacada {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--espacio-6);
+  padding: var(--espacio-7) var(--espacio-5);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+  background:
+    radial-gradient(120% 140% at 12% 0%, var(--color-secundario) 0%, transparent 55%),
+    var(--color-tarjeta);
+}
+
+/* El haz del proyector: decorativo, detrás del texto y sin capturar el ratón.
+   Solo aparece si la película no tiene póster. */
+.destacada__haz {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: min(60%, 30rem);
+  height: 100%;
+  color: var(--color-acento);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* El póster del hero: ocupa la derecha y se funde hacia la izquierda, que es
+   donde vive el texto. El degradado no es decoración — es lo que sostiene el
+   contraste del título y de la llamada a la acción sobre una imagen que no
+   controlamos. */
+.destacada__cartel {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  width: min(62%, 34rem);
+  pointer-events: none;
+}
+
+.destacada__poster {
+  width: 100%;
+  height: 100%;
+  /* El hero es apaisado y el póster vertical: se recorta, no se deforma. */
+  object-fit: cover;
+  object-position: center 28%;
+  aspect-ratio: auto;
+}
+
+.destacada__velo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-tarjeta) 0%,
+    color-mix(in srgb, var(--color-tarjeta) 94%, transparent) 38%,
+    color-mix(in srgb, var(--color-tarjeta) 55%, transparent) 72%,
+    color-mix(in srgb, var(--color-tarjeta) 18%, transparent) 100%
+  );
+}
+
+/* En un teléfono el póster ocupa el ancho entero detrás del texto, así que el
+   degradado pasa a ser vertical o el título queda ilegible. */
+@media (max-width: 48rem) {
+  .destacada__cartel {
+    width: 100%;
+  }
+
+  .destacada__velo {
+    background: linear-gradient(
+      to top,
+      var(--color-tarjeta) 0%,
+      color-mix(in srgb, var(--color-tarjeta) 92%, transparent) 45%,
+      color-mix(in srgb, var(--color-tarjeta) 45%, transparent) 100%
+    );
+  }
+}
+
+.destacada__genero {
+  margin: 0;
+  font: var(--texto-cuerpo);
+  color: var(--color-texto-atenuado);
+}
+
+.destacada__contenido {
+  position: relative;
+  max-width: 40rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espacio-3);
+}
+
+.destacada__eyebrow {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-acento);
+}
+
+.destacada__titulo {
+  margin: 0;
+  /* Escala fluida: el título manda en cualquier ancho sin romper la caja. */
+  font: var(--texto-display);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  letter-spacing: var(--interletrado-display);
+  color: var(--color-texto);
+  text-wrap: balance;
+}
+
+.destacada__datos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2) var(--espacio-5);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-2);
+    font: var(--texto-cuerpo);
+    color: var(--color-texto-atenuado);
+  }
+}
+
+.destacada__precios {
+  margin: 0;
+  font: var(--texto-encabezado);
+  color: var(--color-texto);
+}
+
+.destacada__accion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espacio-2);
+  min-height: var(--objetivo-tactil-minimo);
+  margin-top: var(--espacio-2);
+  padding: var(--espacio-3) var(--espacio-5);
+  border-radius: var(--radio-chico);
+  background: var(--color-acento);
+  color: var(--color-sobre-acento);
+  font: var(--texto-cuerpo);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--transicion), filter var(--transicion);
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+
+  .icono {
+    transition: transform var(--transicion);
+  }
+
+  &:hover .icono {
+    transform: translateX(3px);
+  }
+}
+
+/* ---------- Barra de filtros ---------- */
+
+.filtros {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: var(--espacio-5);
+  padding-block: var(--espacio-3);
+  background: var(--color-fondo);
+  border-bottom: 1px solid var(--color-borde-suave);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--espacio-4);
+  flex-wrap: wrap;
+}
+
+.dias {
+  display: flex;
+  gap: var(--espacio-2);
+  /* En un teléfono los días se desplazan solos: la página nunca se va de lado
+     (prioridad 5, sin desplazamiento horizontal del cuerpo). */
+  overflow-x: auto;
+  padding-bottom: var(--espacio-1);
+  scrollbar-width: thin;
+}
+
+.dia {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 4.5rem;
+  min-height: var(--objetivo-tactil-minimo);
+  padding: var(--espacio-2) var(--espacio-3);
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio-chico);
+  background: var(--color-tarjeta);
+  color: var(--color-texto-atenuado);
+  font: var(--texto-menor);
+  cursor: pointer;
+  transition: border-color var(--transicion), color var(--transicion), transform var(--transicion);
+
+  &:hover {
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+  }
+}
+
+.dia__principal {
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: capitalize;
+}
+
+.dia__secundaria {
+  font-size: 0.72rem;
+}
+
+/* El día elegido: dorado, borde marcado y letra más pesada. Tres señales, no
+   solo el color. */
+.dia--activo {
+  border-color: var(--color-acento);
+  background: var(--color-atenuado);
+  color: var(--color-acento);
+
+  .dia__principal {
+    font-weight: 700;
+  }
+}
+
+.filtro-sala {
+  min-width: 12rem;
+}
+
+/* ---------- Rejilla de películas ---------- */
+
+.seccion__titulo {
+  margin: 0 0 var(--espacio-4);
+  font: var(--texto-subtitulo);
+  letter-spacing: var(--interletrado-titulo);
+  color: var(--color-texto);
+}
+
+/**
+ * La rejilla de carteles. Las columnas van por puntos de quiebre explícitos y
+ * no por `auto-fill`: con un póster, cuántas entran no es cuestión de que
+ * quepan sino de que se vean. `auto-fill` metía cinco columnas en una pantalla
+ * ancha y dejaba los carteles del tamaño de una estampilla.
+ *
+ * 375 px → 1 · 768 px → 2 · 1024 px → 3 · 1440 px → 4
+ */
+.rejilla {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espacio-5);
+
+  @media (min-width: 30rem) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 64rem) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (min-width: 90rem) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* La tarjeta. El póster manda: ocupa la mayor parte y el texto lo acompaña.
+   El borde en reposo es apenas visible y en hover pasa a dorado tenue — antes
+   se encendía en violeta y competía con la imagen. */
+.pelicula {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+  background: var(--color-tarjeta);
+  box-shadow: var(--sombra-tarjeta);
+  /* Solo `transform` y `box-shadow`: nada que obligue a recalcular la
+     maquetación (prioridad 7, layout-shift-avoid). */
+  transition: transform var(--transicion), box-shadow var(--transicion), border-color var(--transicion);
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--color-acento) 55%, transparent);
+    box-shadow: 0 16px 34px rgb(0 0 0 / 45%);
+  }
+}
+
+.pelicula__cartel {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-atenuado);
+}
+
+/* El póster crece un poco bajo el puntero, recortado por la caja de arriba.
+   250 ms: lo justo para que se note sin que se sienta lento. */
+.pelicula__cartel .poster {
+  transition: transform 250ms ease;
+}
+
+.pelicula:hover .pelicula__cartel .poster {
+  transform: scale(1.03);
+}
+
+/* El velo y su rótulo son un adorno del puntero: no capturan el ratón y no los
+   ve un lector de pantalla. Los horarios de abajo siempre están, que es lo que
+   hace que esto pueda ser solo un adorno. */
+.pelicula__velo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: var(--espacio-5);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--color-fondo) 88%, transparent) 0%,
+    transparent 55%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transicion);
+}
+
+.pelicula:hover .pelicula__velo {
+  opacity: 1;
+}
+
+.pelicula__velo-texto {
+  padding: var(--espacio-2) var(--espacio-4);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-chico);
+  background: color-mix(in srgb, var(--color-fondo) 70%, transparent);
+  color: var(--color-acento);
+  font: var(--texto-menor);
+  font-weight: 600;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+/* La insignia de miércoles va sobre el cartel, arriba a la izquierda, como una
+   faja de cine. */
+.pelicula__cartel .insignia {
+  position: absolute;
+  top: var(--espacio-3);
+  left: var(--espacio-3);
+  background: color-mix(in srgb, var(--color-fondo) 82%, transparent);
+}
+
+.pelicula__cuerpo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espacio-2);
+  padding: var(--espacio-4);
+}
+
+.pelicula__titulo {
+  margin: 0;
+  font: var(--texto-encabezado);
+  font-size: 1.15rem;
+  letter-spacing: var(--interletrado-titulo);
+  color: var(--color-texto-tarjeta);
+  text-wrap: balance;
+}
+
+.pelicula__meta {
+  margin: 0;
+  font: var(--texto-menor);
+  color: var(--color-texto-atenuado);
+}
+
+.pelicula__genero {
+  color: var(--color-texto-tarjeta);
+}
+
+.pelicula__precios {
+  margin: 0;
+  font: var(--texto-menor);
+  font-weight: 500;
+  color: var(--color-texto-tarjeta);
+}
+
+.pelicula__horarios {
+  margin-top: auto;
+  padding-top: var(--espacio-3);
+  border-top: 1px solid var(--color-borde-suave);
+}
+
+.pelicula__rotulo {
+  margin: 0 0 var(--espacio-2);
+  font: var(--texto-menor);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+  color: var(--color-texto-atenuado);
+}
+
+.pelicula__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espacio-2);
+}
+
+.horario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.25rem;
+  min-height: var(--objetivo-tactil-minimo);
+  padding-inline: var(--espacio-3);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-chico);
+  background: transparent;
+  color: var(--color-texto-tarjeta);
+  font: var(--texto-cuerpo);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  transition: background-color var(--transicion), color var(--transicion), border-color var(--transicion);
+
+  /* Dorado tenue en el puntero: marca el objetivo sin apagar la llamada a la
+     acción del hero, que es el único dorado pleno de la pantalla. */
+  &:hover {
+    border-color: var(--color-acento);
+    background: color-mix(in srgb, var(--color-acento) 18%, transparent);
+    color: var(--color-texto-tarjeta);
+  }
+
+  /* El horario de la función que se está mirando, cuando se vuelve desde su
+     pantalla: dorado pleno y texto oscuro, contraste alto. */
+  &[aria-current='page'] {
+    border-color: var(--color-acento);
+    background: var(--color-acento);
+    color: var(--color-sobre-acento);
+  }
+}
+
+/* Respaldo del póster: mismo tamaño que la imagen, para que la tarjeta no
+   cambie de alto según haya o no haya cartel. Nunca el icono roto del
+   navegador. */
+.poster {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+}
+
+.poster--sin-imagen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espacio-2);
+  background: var(--color-atenuado);
+  color: var(--color-texto-atenuado);
+}
+
+.poster__aviso {
+  font: var(--texto-menor);
+  font-size: 0.72rem;
+  letter-spacing: var(--interletrado-etiqueta);
+  text-transform: uppercase;
+}
+
+.insignia {
+  flex: none;
+  padding: var(--espacio-1) var(--espacio-2);
+  border: 1px solid var(--color-acento);
+  border-radius: var(--radio-chico);
+  color: var(--color-acento);
+  font: var(--texto-menor);
+  font-weight: 600;
+  font-size: 0.65rem;
+  letter-spacing: var(--interletrado-etiqueta);
+  white-space: nowrap;
+}
+
+/* ---------- Prioridad 7: quien pidió menos movimiento no recibe ninguno ----------
+   `--transicion` ya vale 0 ms, pero el desplazamiento del hover seguiría
+   ocurriendo de golpe. Acá se anula el desplazamiento en sí. */
+@media (prefers-reduced-motion: reduce) {
+  .pelicula:hover {
+    transform: none;
+  }
+
+  .pelicula__cartel .poster,
+  .pelicula:hover .pelicula__cartel .poster {
+    transition: none;
+    transform: none;
+  }
+
+  .destacada__accion:hover .icono {
+    transform: none;
+  }
+}

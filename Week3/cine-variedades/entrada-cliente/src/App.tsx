@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
+import { Encabezado, PieDePagina } from './componentes/publico/index.js'
 import { Administracion } from './paginas/Administracion.js'
 import { Cartelera } from './paginas/Cartelera.js'
 import { Funcion } from './paginas/Funcion.js'
@@ -34,15 +35,21 @@ export default function App() {
     return () => document.body.classList.remove(tema)
   }, [tema])
 
+  const esPublica = esRutaPublica(pathname)
+
   return (
-    <main className="lienzo">
-      <Routes>
-        <Route path="/" element={<Cartelera />} />
-        <Route path="/funciones/:id" element={<Funcion />} />
-        <Route path="/taquilla" element={<Taquilla />} />
-        <Route path="/puerta" element={<Puerta />} />
-        <Route path="/administracion" element={<Administracion />} />
-      </Routes>
-    </main>
+    <>
+      {esPublica ? <Encabezado /> : null}
+      <main className="lienzo">
+        <Routes>
+          <Route path="/" element={<Cartelera />} />
+          <Route path="/funciones/:id" element={<Funcion />} />
+          <Route path="/taquilla" element={<Taquilla />} />
+          <Route path="/puerta" element={<Puerta />} />
+          <Route path="/administracion" element={<Administracion />} />
+        </Routes>
+      </main>
+      {esPublica ? <PieDePagina /> : null}
+    </>
   )
 }

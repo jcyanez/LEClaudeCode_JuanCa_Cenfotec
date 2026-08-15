@@ -8,10 +8,10 @@
  * la maquetación—, así que estas pruebas sobreviven al próximo cambio de
  * estilos: lo que fijan es qué puede hacer y qué lee la persona.
  */
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Bloqueo, Compra, FuncionEnCartelera, MapaDeFuncion } from '../api/cliente.js'
 
 const api = vi.hoisted(() => ({
@@ -88,44 +88,142 @@ beforeEach(() => {
   api.pagar.mockResolvedValue(COMPRA)
 })
 
+/**
+ * La cartelera se rediseñó: una tarjeta por película con sus horarios, y un
+ * día por vez. Antes cada función era su propia tarjeta, así que la misma
+ * película aparecía repetida. Estas pruebas cambiaron con esa decisión —era un
+ * cambio de estructura, no de estilos— y siguen fijando lo mismo de siempre:
+ * qué lee y qué puede hacer la persona, nunca cómo está maquetado.
+ */
 describe('Cartelera pública (RF-8)', () => {
-  it('lista cada función con su horario y sus precios', async () => {
-    render(
-      <MemoryRouter>
-        <Cartelera />
-      </MemoryRouter>,
-    )
-
-    const titulos = await screen.findAllByRole('heading', { name: 'La ventana indiscreta' })
-    expect(titulos).toHaveLength(2)
-    expect(screen.getAllByText(/₡8 000 general/).length).toBeGreaterThan(0)
-    // Cada función lleva a su propia pantalla (RF-9).
-    const enlaces = screen.getAllByRole('link')
-    expect(enlaces.map((e) => e.getAttribute('href'))).toEqual(['/funciones/7', '/funciones/9'])
+  /**
+   * La cartelera rotula los días respecto de hoy y arranca en el primero que
+   * no pasó, así que sin fijar el reloj estas pruebas cambiarían de resultado
+   * cada día. Se falsea **solo `Date`**: los temporizadores siguen siendo
+   * reales, que es lo que `userEvent` necesita para funcionar.
+   */
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-08-14T12:00:00'))
   })
 
-  it('rotula la función de miércoles a mitad de precio y no ofrece estudiante (RN-13, RN-14)', async () => {
-    render(
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  function renderCartelera() {
+    return render(
       <MemoryRouter>
         <Cartelera />
       </MemoryRouter>,
     )
+  }
 
-    expect(await screen.findByText('MIÉRCOLES ½ PRECIO')).toBeInTheDocument()
-    expect(screen.getByText('₡4 000 general')).toBeInTheDocument()
+  it('encabeza con la función más próxima y ofrece entrar a elegir butacas', async () => {
+    renderCartelera()
+
+    // La destacada es la de fecha y hora más tempranas de toda la cartelera.
+    const destacada = await screen.findByRole('heading', { level: 1, name: 'La ventana indiscreta' })
+    expect(destacada).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Elegir butacas/ })).toHaveAttribute('href', '/funciones/7')
+  })
+
+  it('agrupa la película una sola vez y ofrece sus horarios del día elegido (RF-9)', async () => {
+    // Dos funciones de la misma película el mismo día: una tarjeta, dos horarios.
+    api.obtenerCartelera.mockResolvedValue([VIERNES, { ...VIERNES, funcionId: 8, horaInicio: '21:30' }])
+    renderCartelera()
+
+    const tarjetas = await screen.findAllByRole('heading', { level: 3, name: 'La ventana indiscreta' })
+    expect(tarjetas).toHaveLength(1)
+
+    const horarios = screen.getAllByRole('link', { name: /La ventana indiscreta, \d\d:\d\d, Sala 1/ })
+    expect(horarios.map((enlace) => enlace.textContent)).toEqual(['19:00', '21:30'])
+    expect(horarios.map((enlace) => enlace.getAttribute('href'))).toEqual(['/funciones/7', '/funciones/8'])
+  })
+
+  it('elegir otro día muestra sus funciones y esconde las de los demás', async () => {
+    renderCartelera()
+
+    // Arranca en el día de la función más próxima, así que la del miércoles no está.
+    await screen.findAllByRole('heading', { level: 3, name: 'La ventana indiscreta' })
+    expect(screen.queryByText('MIÉRCOLES ½ PRECIO')).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /19 ago/ }))
+
+    // Al cambiar de día aparece la función de miércoles, a mitad de precio y
+    // sin categoría estudiante (RN-13, RN-14). Se mira dentro de la tarjeta:
+    // el encabezado sigue mostrando la próxima función de toda la cartelera,
+    // que es de otro día y sí tiene precio de estudiante.
+    const tarjeta = within(await screen.findByRole('article'))
+    expect(tarjeta.getByText('MIÉRCOLES ½ PRECIO')).toBeInTheDocument()
+    expect(tarjeta.getByText('₡4 000 general')).toBeInTheDocument()
+    expect(tarjeta.queryByText(/estudiante/)).not.toBeInTheDocument()
+  })
+
+  it('el día elegido queda anunciado, no solo pintado (prioridad 1)', async () => {
+    renderCartelera()
+
+    const dia = await screen.findByRole('button', { name: /14 ago/ })
+    expect(dia).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: /19 ago/ })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('filtrar por una sala sin funciones ese día lo dice, y no deja la pantalla en blanco', async () => {
+    api.obtenerCartelera.mockResolvedValue([VIERNES, { ...VIERNES, funcionId: 8, sala: 'Sala 2' }])
+    renderCartelera()
+
+    await screen.findAllByRole('heading', { level: 3, name: 'La ventana indiscreta' })
+    await userEvent.selectOptions(screen.getByLabelText('Sala'), 'Sala 2')
+
+    const horarios = screen.getAllByRole('link', { name: /Sala 2/ })
+    expect(horarios).toHaveLength(1)
+    expect(screen.queryByRole('link', { name: /Sala 1/ })).not.toBeInTheDocument()
+  })
+
+  it('muestra el póster de la película y su género', async () => {
+    api.obtenerCartelera.mockResolvedValue([{ ...VIERNES, pelicula: 'Tiempos modernos' }])
+    renderCartelera()
+
+    const tarjeta = within(await screen.findByRole('article'))
+    const poster = tarjeta.getByRole('img', { name: 'Póster de Tiempos modernos' })
+    expect(poster).toHaveAttribute('src', '/cartelera/tiempos-modernos-320.webp')
+    // Se carga al acercarse y trae medidas, para que la tarjeta no salte (CLS).
+    expect(poster).toHaveAttribute('loading', 'lazy')
+    expect(poster).toHaveAttribute('width', '320')
+    expect(tarjeta.getByText('Comedia')).toBeInTheDocument()
+  })
+
+  /**
+   * El póster vive en un mapa por título en la interfaz, así que una película
+   * que no esté en ese mapa —una que la dueña cargue mañana— tiene que verse
+   * bien igual. Nunca el icono roto del navegador.
+   */
+  it('una película sin póster muestra el respaldo, no una imagen rota', async () => {
+    api.obtenerCartelera.mockResolvedValue([{ ...VIERNES, pelicula: 'Una película sin cartel' }])
+    renderCartelera()
+
+    const tarjeta = within(await screen.findByRole('article'))
+    expect(tarjeta.getByText('Sin póster')).toBeInTheDocument()
+    expect(tarjeta.queryByRole('img')).not.toBeInTheDocument()
+    // La función sigue siendo comprable: lo que falta es la imagen, no el dato.
+    expect(tarjeta.getByRole('link', { name: /19:00/ })).toHaveAttribute('href', '/funciones/7')
   })
 
   it('si la cartelera no carga, lo dice con el mensaje del servidor y no una pantalla vacía', async () => {
     api.obtenerCartelera.mockRejectedValue({ status: 500, mensaje: 'No hay funciones cargadas todavía' })
 
-    render(
-      <MemoryRouter>
-        <Cartelera />
-      </MemoryRouter>,
-    )
+    renderCartelera()
 
     const aviso = await screen.findByRole('alert')
     expect(aviso).toHaveTextContent('No se pudo cargar')
+  })
+
+  it('sin funciones cargadas lo dice, en vez de mostrar una cartelera vacía (RN-8)', async () => {
+    api.obtenerCartelera.mockResolvedValue([])
+
+    renderCartelera()
+
+    expect(await screen.findByText('No hay funciones en venta por ahora')).toBeInTheDocument()
   })
 })
 
