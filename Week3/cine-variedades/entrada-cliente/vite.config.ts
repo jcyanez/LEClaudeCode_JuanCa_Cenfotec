@@ -24,9 +24,13 @@ export default defineConfig({
         display: 'standalone',
         background_color: FONDO_APP,
         theme_color: COLOR_APP,
+        // El escudo del logo (la «V» con el rollo) recortado del original y
+        // aplanado sobre el fondo de marca. El maskable lleva más margen para
+        // que un recorte circular no toque el arte.
         icons: [
-          { src: '/icono.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          { src: '/icono-mascara.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+          { src: '/icono-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icono-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/icono-mascara-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       // Sin venta offline (RNF-3, decisión de CLAUDE.md §8): el service worker

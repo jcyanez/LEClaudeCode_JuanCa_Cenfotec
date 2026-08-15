@@ -31,7 +31,30 @@ export function Cartelera() {
   return (
     <div className="pagina">
       <header className="pagina__encabezado">
-        <p className="pagina__marca">Cine Variedades</p>
+        {/* La marca aparece una sola vez, acá, que es la puerta de entrada del
+            comprador. El original (1536×1024, 1,6 MB) no se sirve nunca: van
+            derivados WebP y AVIF de 320 y 640 px, y el ancho y el alto
+            declarados evitan el salto de maquetación (prioridad 3 de la skill
+            `ui-ux-pro-max`: image-optimization e image-dimension). */}
+        <picture className="pagina__marca">
+          <source
+            type="image/avif"
+            srcSet="/marca-320.avif 320w, /marca-640.avif 640w"
+            sizes="(min-width: 40rem) 18rem, 62vw"
+          />
+          <source
+            type="image/webp"
+            srcSet="/marca-320.webp 320w, /marca-640.webp 640w"
+            sizes="(min-width: 40rem) 18rem, 62vw"
+          />
+          <img
+            className="pagina__marca-imagen"
+            src="/marca-320.webp"
+            width={320}
+            height={213}
+            alt="Cine Variedades"
+          />
+        </picture>
         <h1 className="pagina__titulo">Cartelera</h1>
       </header>
 

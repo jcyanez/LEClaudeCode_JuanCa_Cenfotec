@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Cine Variedades">
-  <rect width="512" height="512" fill="#0f62fe" />
-  <path d="M186 206c0-6.6 5.4-12 12-12h116c6.6 0 12 5.4 12 12v16.5a18 18 0 0 0 0 36v14a18 18 0 0 0 0 36V326c0 6.6-5.4 12-12 12H198c-6.6 0-12-5.4-12-12v-16.5a18 18 0 0 0 0-36v-14a18 18 0 0 0 0-36V206Z" fill="#f4f4f4" />
-  <rect x="250" y="200" width="12" height="112" fill="#0f62fe" stroke-dasharray="7 6" stroke="#0f62fe" stroke-width="1.5" />
-</svg>

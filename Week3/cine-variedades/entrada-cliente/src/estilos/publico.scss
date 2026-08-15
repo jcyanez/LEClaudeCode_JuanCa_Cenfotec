@@ -22,15 +22,21 @@
   gap: var(--espacio-1);
 }
 
-/* La marca en versalitas y dorado: el «spotlight» de la paleta, usado una vez
-   por pantalla para no gastarlo. */
+/* La marca del cine: el «spotlight» de la paleta, usado una vez por pantalla
+   para no gastarlo. El arte es dorado sobre transparente, así que cae directo
+   sobre el fondo del tema oscuro sin recuadro ni truco de mezcla.
+   Solo va en la web pública: en el tema claro de taquilla y puerta el dorado
+   sobre blanco no llega al 3:1 que la prioridad 1 de la skill exige para un
+   elemento gráfico, y ahí la marca sigue siendo texto. */
 .pagina__marca {
-  margin: 0;
-  font: var(--texto-menor);
-  font-weight: 500;
-  letter-spacing: var(--interletrado-etiqueta);
-  text-transform: uppercase;
-  color: var(--color-acento);
+  display: block;
+  margin-bottom: var(--espacio-1);
+}
+
+.pagina__marca-imagen {
+  display: block;
+  width: min(18rem, 62vw);
+  height: auto;
 }
 
 .pagina__titulo {
