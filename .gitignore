@@ -13,3 +13,8 @@ Desktop.ini
 # Editores / IDE
 .vscode/
 .idea/
+
+# El sistema de Cancha Total F5 (Week5) vive en su propio repositorio: la
+# entrega del Caso 5 exige conservar el commit del proveedor, asi que ese
+# historial no se aplana aca. https://github.com/jcyanez/cancha-total-f5
+Week5/cancha-total/
