@@ -10,14 +10,18 @@ commits propios encima*, conservando el commit del proveedor (`65ce4b4`) — por
 se publica aparte y no se aplana dentro de este repositorio del curso.
 
 Ahí están la especificación reconstruida, la suite, los hallazgos, la puerta de calidad y la
-refactorización, en este orden:
+refactorización, en **21 commits** que se leen como el relato del trabajo:
 
-| Commit | Qué hace |
+| | |
 |---|---|
-| `65ce4b4` | El sistema tal como lo entregó el proveedor. No se toca. |
-| `c3c8b8e` | La red y la puerta: `ESPECIFICACION.md`, 71 pruebas, `HALLAZGOS.md`, `verificar.sh`, hook `Stop`. |
-| `7c54d15` | **Estructura**: la tarifa pasa de calcularse en tres lugares a una sola función. |
-| `efe8a03` | **Comportamiento**: la luz enciende a las 17:00, no a las 18:00 (hallazgo C-1). |
+| **Punto de partida** | `65ce4b4`, el sistema tal como lo entregó el proveedor. No se toca. |
+| **La red** | `ESPECIFICACION.md` con 61 condiciones y su fuente declarada, 71 pruebas, `HALLAZGOS.md`, `verificar.sh` y el hook `Stop`. Todo **antes** de tocar una línea del sistema. |
+| **La refactorización** | 8 commits de estructura y 6 de comportamiento, nunca mezclados. |
+| **Al terminar** | **87 pruebas en verde, ninguna marcada.** Los 6 hallazgos de comportamiento cerrados y las 10 deudas de estructura pagadas. |
+
+Ningún hallazgo se cerró tocando su prueba: en cada cierre, lo único que cambió en el archivo de
+pruebas fue quitarle la marca de fallo esperado. El detalle de cada uno, con la evidencia, está en
+el `HALLAZGOS.md` de ese repositorio.
 
 ## Qué hay en esta carpeta
 
@@ -37,6 +41,11 @@ El bloque de las 17:00 en la grilla de disponibilidad:
 
 Los bloques de las 16:00 y las 18:00 quedaron **idénticos byte a byte** entre las dos tandas de
 capturas: el arreglo movió el borde de la tarifa, y nada más.
+
+De las 13 capturas, **5 cambiaron y 8 quedaron idénticas byte a byte**. Las que cambiaron son las
+que muestran el bloque de las 17:00 y las dos del formulario: registrar sin teléfono ahora se
+rechaza, que es el hallazgo C-2. Las otras ocho no se movieron, y esa es justamente la prueba de
+que la refactorización no rompió lo que ya funcionaba.
 
 ## Regenerar las capturas
 

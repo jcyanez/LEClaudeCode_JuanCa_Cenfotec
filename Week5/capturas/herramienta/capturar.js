@@ -124,7 +124,8 @@ async function main() {
     });
     console.log(`  ${String(numero).padStart(2, '0')}-error-bloque-ocupado.png`);
 
-    // --- Teléfono vacío: hoy pasa (hallazgo C-2) -------------------------
+    // --- Teléfono vacío --------------------------------------------------
+    // En el sistema recibido esto pasaba sin chistar: era el hallazgo C-2.
     await pagina.goto(`${sistema.direccion}/?fecha=2026-09-20`);
     await pagina.selectOption('select[name="hora"]', '12');
     await pagina.fill('input[name="cliente"]', 'Cliente sin teléfono');
