@@ -10,6 +10,13 @@
 //
 // Uso:  node capturar.js antes
 //       node capturar.js despues
+//       node capturar.js interfaz
+//
+// `antes` y `despues` son las dos tandas de la refactorización y no se vuelven
+// a correr: su valor está justamente en que ocho de las trece salieron
+// idénticas byte a byte. `interfaz` es la tanda de la mejora visual, posterior
+// a la entrega, y agrega además un pase a 375 px, que es donde se ve el
+// trabajo responsive.
 
 const path = require('node:path');
 const fs = require('node:fs');
@@ -19,8 +26,8 @@ const RAIZ_PRUEBAS = path.join(__dirname, '..', '..', 'cancha-total', 'pruebas',
 const { levantarSistema, borrarBase, HOY } = require(RAIZ_PRUEBAS);
 
 const etiqueta = process.argv[2];
-if (!etiqueta || !['antes', 'despues'].includes(etiqueta)) {
-  console.error('Uso: node capturar.js antes|despues');
+if (!etiqueta || !['antes', 'despues', 'interfaz'].includes(etiqueta)) {
+  console.error('Uso: node capturar.js antes|despues|interfaz');
   process.exit(1);
 }
 
@@ -146,6 +153,34 @@ async function main() {
       path: path.join(DESTINO, `${String(numero).padStart(2, '0')}-errores-de-validacion.png`),
     });
     console.log(`  ${String(numero).padStart(2, '0')}-errores-de-validacion.png`);
+
+    // --- Pase de teléfono -------------------------------------------------
+    // Solo para la tanda de interfaz: el ancho fijo de 900 px del sistema
+    // recibido no tenía nada que mostrar acá.
+    if (etiqueta === 'interfaz') {
+      await pagina.setViewportSize({ width: 375, height: 812 });
+      const enMovil = [
+        ['inicio', `/?fecha=${HOY}`],
+        ['disponibilidad-cancha1', `/disponibilidad/cancha1?fecha=${HOY}`],
+        ['lista-del-dia', `/dia/${HOY}`],
+      ];
+      for (const [nombre, ruta] of enMovil) {
+        const archivo = path.join(DESTINO, `movil-${nombre}.png`);
+        await pagina.goto(`${sistema.direccion}${ruta}`, { waitUntil: 'networkidle' });
+        await pagina.screenshot({ fullPage: true, path: archivo });
+        console.log(`  ${path.basename(archivo)}`);
+        numero += 1;
+      }
+
+      // El mismo inicio con el tema oscuro que pide el sistema operativo.
+      await pagina.emulateMedia({ colorScheme: 'dark' });
+      await pagina.setViewportSize({ width: 1100, height: 900 });
+      const oscuro = path.join(DESTINO, 'tema-oscuro-inicio.png');
+      await pagina.goto(`${sistema.direccion}/?fecha=${HOY}`, { waitUntil: 'networkidle' });
+      await pagina.screenshot({ fullPage: true, path: oscuro });
+      console.log(`  ${path.basename(oscuro)}`);
+      numero += 1;
+    }
 
     console.log(`\nListo: ${numero} capturas en capturas/${etiqueta}/`);
     if (cancelada) console.log('(reserva de referencia cancelada:', cancelada.id, ')');
