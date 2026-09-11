@@ -1,3 +1,29 @@
+# Caso Práctico 7 — Remediación de Cancha Total F5
+
+La entrega corregida del Caso 7 está en el repositorio del sistema, donde se conserva el historial
+completo desde el código recibido del proveedor:
+
+👉 **https://github.com/jcyanez/cancha-total-f5**
+
+La remediación se presentó mediante el
+[PR #7](https://github.com/jcyanez/cancha-total-f5/pull/7), con la puerta de calidad y el preview
+en verde. Los cuatro entregables solicitados son:
+
+- [`.claude/settings.json`](https://github.com/jcyanez/cancha-total-f5/blob/main/.claude/settings.json) — reglas `deny` para secretos y reglas `ask` para cambios en pruebas y publicación.
+- [`.claude/agents/cerrador-hallazgos.md`](https://github.com/jcyanez/cancha-total-f5/blob/main/.claude/agents/cerrador-hallazgos.md) — subagente propio con herramientas restringidas, invocado en la sesión de remediación.
+- [`HALLAZGOS.md`](https://github.com/jcyanez/cancha-total-f5/blob/main/HALLAZGOS.md) — correspondencia verificable de `H-2` a `H-8`, sin marcas de fallo esperado.
+- [`REGISTRO.md`](https://github.com/jcyanez/cancha-total-f5/blob/main/REGISTRO.md) — ocho líneas sobre agrupación, permisos, detención, revisión y evidencia.
+
+**Verificación final:** 129 pruebas aprobadas, 0 fallos, 0 marcas de fallo esperado; lint y build
+en verde; humo 11/11. Ningún archivo de `pruebas/` ni de producción cambió durante la remediación.
+
+**Sistema publicado:** https://cancha-total-f5.vercel.app
+
+## Antecedente del Caso Práctico 5
+
+El texto siguiente documenta la entrega original del Caso 5, sobre la cual continuaron los casos 6
+y 7.
+
 # Caso Práctico 5 — Cancha Total F5
 
 **El código de la entrega no está en esta carpeta: vive en su propio repositorio.**

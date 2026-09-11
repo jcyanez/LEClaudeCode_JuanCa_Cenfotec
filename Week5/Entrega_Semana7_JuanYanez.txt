@@ -1,0 +1,37 @@
+Juan Carlos Yanez
+jyanezm@ucenfotec.ac.cr
+
+Entrega de proyecto semana 7
+
+
+PROYECTO
+Cancha Total F5 - Sistema de reservas
+
+
+ENLACE PUBLICO
+https://cancha-total-f5.vercel.app
+
+
+ENLACE DE GITHUB
+Week5
+https://github.com/jcyanez/LEClaudeCode_JuanCa_Cenfotec/tree/main/Week5
+
+El codigo de la entrega no esta dentro de esa carpeta: vive en su propio
+repositorio, porque la consigna exige conservar el commit del proveedor y ese
+historial no se aplana dentro del repositorio del curso.
+
+https://github.com/jcyanez/cancha-total-f5
+
+
+REMEDIACION DEL CASO PRACTICO 7
+Propuesta de cambio con CI y preview en verde:
+https://github.com/jcyanez/cancha-total-f5/pull/7
+
+Entregables dentro del repositorio del sistema:
+- .claude/settings.json
+- .claude/agents/cerrador-hallazgos.md
+- HALLAZGOS.md actualizado
+- REGISTRO.md
+
+Verificacion final: 129 pruebas aprobadas, 0 fallos, 0 marcas de fallo esperado,
+lint y build aprobados, y 11 de 11 comprobaciones de humo.
